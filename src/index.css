@@ -1,0 +1,177 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,700&family=Inter:wght@300;400;500;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Dancing+Script:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-brand-blue: #1B3A8C;
+  --color-brand-blue-dark: #0F2460;
+  --color-brand-blue-light: #2B4FA8;
+  --color-brand-cream: #FAF6EE;
+  --color-brand-cream-dark: #EEE4CC;
+  --color-brand-gold: #C8A050;
+  --color-brand-gold-light: #D4B86A;
+  --color-brand-gold-pale: #F0DFA8;
+  --color-brand-dark: #0E0E0E;
+  --color-brand-warm: #7C5E28;
+  --color-brand-chocolate: #2A1205;
+  --color-brand-ruby: #9B2948;
+  --color-brand-ivory: #FDFAF4;
+
+  --font-heading: 'Playfair Display', Georgia, serif;
+  --font-elegant: 'Cormorant Garamond', Georgia, serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --font-script: 'Dancing Script', cursive;
+}
+
+html { scroll-behavior: smooth; }
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  font-family: var(--font-body);
+  color: var(--color-brand-dark);
+  background-color: var(--color-brand-ivory);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── Custom scrollbar ─────────────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #0E0E0E; }
+::-webkit-scrollbar-thumb { background: #C8A050; border-radius: 3px; }
+
+/* ─── Cookie card hover ─────────────────────────── */
+.cookie-card {
+  transition: transform 0.5s cubic-bezier(0.4,0,0.2,1),
+              box-shadow 0.5s cubic-bezier(0.4,0,0.2,1);
+}
+.cookie-card:hover {
+  transform: translateY(-12px) scale(1.01);
+  box-shadow: 0 40px 80px -12px rgba(0,0,0,0.25),
+              0 0 0 1px rgba(200,160,80,0.15);
+}
+
+/* ─── Noise texture overlay ─────────────────────── */
+.noise::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1;
+  mix-blend-mode: overlay;
+  opacity: 0.5;
+}
+
+/* ─── Marquee ───────────────────────────────────── */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.marquee-track { animation: marquee 28s linear infinite; }
+.marquee-track:hover { animation-play-state: paused; }
+
+/* ─── Grain overlay ─────────────────────────────── */
+.grain {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='noise' x='0' y='0'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23noise)' opacity='0.1'/%3E%3C/svg%3E");
+}
+
+/* ─── Glow effects ──────────────────────────────── */
+.gold-glow {
+  box-shadow: 0 0 60px rgba(200,160,80,0.3), 0 0 120px rgba(200,160,80,0.1);
+}
+.blue-glow {
+  box-shadow: 0 0 60px rgba(27,58,140,0.4), 0 0 120px rgba(27,58,140,0.2);
+}
+
+/* ─── Text gradient ─────────────────────────────── */
+.text-gold-gradient {
+  background: linear-gradient(135deg, #C8A050 0%, #F0DFA8 45%, #C8A050 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.text-cream-gradient {
+  background: linear-gradient(135deg, #FAF6EE 0%, #EEE4CC 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ─── Horizontal line accent ────────────────────── */
+.line-accent {
+  display: inline-block;
+  width: 48px;
+  height: 1px;
+  background: linear-gradient(to right, #C8A050, transparent);
+  vertical-align: middle;
+  margin: 0 12px;
+}
+
+/* ─── Button shimmer ────────────────────────────── */
+.btn-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+.btn-shimmer::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+  transform: skewX(-20deg);
+  transition: none;
+}
+.btn-shimmer:hover::after {
+  left: 150%;
+  transition: left 0.6s ease;
+}
+
+/* ─── Ingredient tag pill ───────────────────────── */
+.ingredient-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(200,160,80,0.25);
+  background: rgba(200,160,80,0.06);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #C8A050;
+  backdrop-filter: blur(4px);
+}
+
+/* ─── Section label ─────────────────────────────── */
+.section-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+}
+.section-label::before, .section-label::after {
+  content: '';
+  display: block;
+  width: 32px;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.5;
+}
+
+/* ─── Cursor glow (cosmetic) ────────────────────── */
+.cursor-glow {
+  pointer-events: none;
+  position: fixed;
+  width: 400px;
+  height: 400px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(200,160,80,0.06) 0%, transparent 70%);
+  transform: translate(-50%, -50%);
+  z-index: 9999;
+  transition: opacity 0.3s;
+}

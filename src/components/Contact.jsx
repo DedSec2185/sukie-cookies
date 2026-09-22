@@ -206,117 +206,148 @@ export default function Contact() {
         </div>
 
         {/* Dedicated Customer Care, Complaints & Reviews Guarantee Section */}
-        <div id="care" className="mt-16 pt-12 border-t border-stone-200">
-          <div className="text-center max-w-2xl mx-auto mb-10">
-            <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-emerald-50 border border-emerald-500/30 text-emerald-800 text-[11px] font-bold tracking-wider uppercase mb-2">
-              <span>🛡️</span>
-              <span>100% Quality & Transparency Promise</span>
-            </span>
-            <h3 className="font-heading text-3xl sm:text-4xl font-bold text-brand-dark">
-              Customer Care, Complaints & Reviews
-            </h3>
-            <p className="text-stone-600 text-xs sm:text-sm mt-2 leading-relaxed">
-              We bake in small batches with genuine passion. Whether you have an issue with your delivery or want to share your tasting review, our founder is directly available on WhatsApp.
-            </p>
-          </div>
+        <div id="care" className="mt-20 pt-16 border-t border-stone-200/80">
+          <div className="rounded-3xl sm:rounded-4xl p-6 sm:p-12 bg-gradient-to-br from-[#070D1A] via-[#0C1A38] to-[#050811] text-white shadow-2xl border border-[#C5A059]/30 relative overflow-hidden">
+            {/* Ambient gold / cobalt light effects */}
+            <div className="absolute top-0 right-1/4 w-96 h-96 bg-[#0C419C]/20 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-20 -left-20 w-80 h-80 bg-[#C5A059]/10 rounded-full blur-3xl pointer-events-none" />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Card 1: Order Complaints & Reversals */}
-            <div className="bg-[#FAF6EE] rounded-2xl p-6 sm:p-8 border border-stone-200/80 shadow-xs flex flex-col justify-between hover:border-brand-gold/60 transition-colors">
-              <div>
-                <div className="w-12 h-12 rounded-xl bg-red-100 text-red-600 flex items-center justify-center text-2xl mb-4 shadow-2xs">
-                  💬
-                </div>
-                <span className="text-[10px] font-mono uppercase tracking-widest text-red-700 font-bold block mb-1">
-                  Prompt Resolution
+            {/* Header */}
+            <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-14 relative z-10">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-[#C5A059]/40 backdrop-blur-md mb-3 shadow-inner">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#C5A059] animate-pulse"></span>
+                <span className="text-[10px] sm:text-xs font-mono uppercase tracking-[0.2em] font-semibold text-amber-200">
+                  The Sukié Atelier Assurance
                 </span>
-                <h4 className="font-heading text-xl sm:text-2xl font-bold text-brand-dark mb-2">
-                  Order Complaints & Reversals
-                </h4>
-                <p className="text-stone-600 text-xs sm:text-sm leading-relaxed mb-4">
-                  If an order arrives damaged in transit, under/over-baked, or imperfect in any way, we review every complaint personally. For genuine issues, Chef immediately approves a fresh replacement batch or payment reversal.
-                </p>
-
-                <ul className="space-y-2 text-xs text-stone-700 mb-6">
-                  <li className="flex items-center gap-2">
-                    <span className="text-emerald-600 font-bold">✓</span>
-                    <span>Direct founder review — no automated bots</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="text-emerald-600 font-bold">✓</span>
-                    <span>100% transparent replacement or reversal option</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="text-emerald-600 font-bold">✓</span>
-                    <span>Direct WhatsApp support with fast turn-around</span>
-                  </li>
-                </ul>
               </div>
-
-              <a
-                href="https://wa.me/919136498467?text=Hello%20Suki%C3%A9%20Care!%20%F0%9F%8D%AA%20I%20have%20an%20order%20complaint%20%2F%20issue%20to%20review%20for%20resolution.%20Order%20ID%3A%20"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full py-3 px-4 bg-stone-900 hover:bg-black text-white rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-md"
-              >
-                <span>Report Complaint on WhatsApp</span>
-                <span className="text-base">💬</span>
-              </a>
+              <h3 className="font-heading text-3xl sm:text-5xl font-bold text-white tracking-tight mt-1">
+                Founder Care, Reversals & Reviews
+              </h3>
+              <p className="text-white/70 text-xs sm:text-base font-light leading-relaxed mt-3 max-w-xl mx-auto">
+                Every 6oz cookie is flash-baked in limited drops in Mumbai. Whether an order arrives imperfect or you want to share your tasting notes, our founder connects with you directly.
+              </p>
             </div>
 
-            {/* Card 2: Feedback & Tasting Reviews */}
-            <div className="bg-[#FAF6EE] rounded-2xl p-6 sm:p-8 border border-stone-200/80 shadow-xs flex flex-col justify-between hover:border-brand-gold/60 transition-colors">
-              <div>
-                <div className="w-12 h-12 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-2xl mb-4 shadow-2xs">
-                  ⭐
+            {/* Two Cards Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 relative z-10">
+              {/* Card 1: Order Complaints & Genuine Reversals */}
+              <div className="rounded-2xl sm:rounded-3xl p-6 sm:p-8 bg-white/[0.04] backdrop-blur-xl border border-red-400/20 hover:border-red-400/40 transition-all duration-300 flex flex-col justify-between shadow-xl">
+                <div>
+                  <div className="flex items-center justify-between gap-3 mb-5">
+                    <span className="px-3 py-1 rounded-full bg-red-950/70 border border-red-500/30 text-rose-300 text-[10px] font-mono uppercase tracking-wider font-semibold">
+                      🛡️ Reversal & Quality Guarantee
+                    </span>
+                    <span className="text-[10px] text-white/40 font-mono">100% Transparent</span>
+                  </div>
+
+                  <h4 className="font-heading text-xl sm:text-2xl font-bold text-white mb-2.5">
+                    Damaged in Transit or Imperfect Bake?
+                  </h4>
+                  <p className="text-white/70 text-xs sm:text-sm leading-relaxed mb-6 font-light">
+                    We understand gifting and enjoying gourmet bakes requires absolute perfection. If your box arrives damaged, under/over-baked, or imperfect in any way, message our founder directly on WhatsApp. We don&apos;t use automated chatbots. Chef reviews every issue personally and promptly authorizes a fresh replacement batch or direct payment reversal.
+                  </p>
+
+                  <div className="space-y-2.5 mb-8 p-4 rounded-xl bg-black/30 border border-white/5 text-xs text-white/80">
+                    <div className="flex items-start gap-2.5">
+                      <span className="text-emerald-400 font-bold shrink-0">✦</span>
+                      <span><strong>1-on-1 Founder Review</strong> — Direct assistance without corporate queues</span>
+                    </div>
+                    <div className="flex items-start gap-2.5">
+                      <span className="text-emerald-400 font-bold shrink-0">✦</span>
+                      <span><strong>Zero-Friction Reversal</strong> — Fresh replacement bake or full payment reversal</span>
+                    </div>
+                    <div className="flex items-start gap-2.5">
+                      <span className="text-emerald-400 font-bold shrink-0">✦</span>
+                      <span><strong>Rapid Turnaround</strong> — Prompt response during active daily kitchen hours</span>
+                    </div>
+                  </div>
                 </div>
-                <span className="text-[10px] font-mono uppercase tracking-widest text-[#7C5E28] font-bold block mb-1">
-                  Community Voice
-                </span>
-                <h4 className="font-heading text-xl sm:text-2xl font-bold text-brand-dark mb-2">
-                  Feedback & Tasting Reviews
-                </h4>
-                <p className="text-stone-600 text-xs sm:text-sm leading-relaxed mb-4">
-                  Loved your warm molten cookie experience? Have suggestions for our next limited drop flavour? Your honest reviews help our Mumbai home kitchen grow and delight more cookie lovers.
-                </p>
-
-                <ul className="space-y-2 text-xs text-stone-700 mb-6">
-                  <li className="flex items-center gap-2">
-                    <span className="text-amber-500 font-bold">★</span>
-                    <span>Share your tasting notes & favourite flavour</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="text-amber-500 font-bold">★</span>
-                    <span>Suggest new cookie flavours you&apos;d love to see</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="text-amber-500 font-bold">★</span>
-                    <span>Tag us in your unboxing on Instagram @sukie.mumbai</span>
-                  </li>
-                </ul>
-              </div>
-
-              <div className="space-y-2">
-                <a
-                  href="https://wa.me/919136498467?text=Hello%20Chef!%20%F0%9F%8D%AA%20I%20wanted%20to%20share%20my%20tasting%20review%20and%20feedback%20for%20Suki%C3%A9%20Cookies%3A%20"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full py-3 px-4 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-md"
-                >
-                  <span>Share Review on WhatsApp</span>
-                  <span className="text-base">⭐</span>
-                </a>
 
                 <a
-                  href="https://instagram.com/sukie.mumbai"
+                  href="https://wa.me/919136498467?text=Hello%20Suki%C3%A9%20Care!%20%F0%9F%8D%AA%20I%20have%20an%20order%20complaint%20%2F%20issue%20to%20review%20for%20resolution.%20Order%20ID%3A%20"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full py-2.5 px-4 bg-white hover:bg-stone-100 text-stone-800 rounded-xl font-semibold text-xs transition-colors flex items-center justify-center gap-2 border border-stone-200 cursor-pointer"
+                  className="w-full py-3.5 px-5 bg-gradient-to-r from-stone-900 to-black hover:from-black hover:to-stone-900 text-white rounded-xl font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 border border-white/20 hover:border-red-400/50 shadow-lg active:scale-[0.99] transition-all cursor-pointer"
                 >
-                  <span>Tag Us on Instagram (@sukie.mumbai)</span>
-                  <span>📸</span>
+                  <span>Report Complaint on WhatsApp</span>
+                  <span className="text-base">💬</span>
                 </a>
               </div>
+
+              {/* Card 2: Feedback & Tasting Reviews */}
+              <div className="rounded-2xl sm:rounded-3xl p-6 sm:p-8 bg-white/[0.04] backdrop-blur-xl border border-[#C5A059]/30 hover:border-[#C5A059]/60 transition-all duration-300 flex flex-col justify-between shadow-xl">
+                <div>
+                  <div className="flex items-center justify-between gap-3 mb-5">
+                    <span className="px-3 py-1 rounded-full bg-amber-950/70 border border-amber-500/30 text-amber-300 text-[10px] font-mono uppercase tracking-wider font-semibold">
+                      ⭐ Tasting Room & Community Voice
+                    </span>
+                    <span className="text-[10px] text-amber-200/60 font-mono">Mumbai Atelier</span>
+                  </div>
+
+                  <h4 className="font-heading text-xl sm:text-2xl font-bold text-white mb-2.5">
+                    Your Tasting Notes Guide Our Ovens
+                  </h4>
+                  <p className="text-white/70 text-xs sm:text-sm leading-relaxed mb-6 font-light">
+                    Loved the molten lava center? Want more pistachios or a secret limited drop? As an independent Mumbai home bakery, your honest reviews fuel our passion. Share your tasting feedback directly with the Chef or tag your unboxing ritual on Instagram.
+                  </p>
+
+                  <div className="space-y-2.5 mb-8 p-4 rounded-xl bg-black/30 border border-white/5 text-xs text-white/80">
+                    <div className="flex items-start gap-2.5">
+                      <span className="text-amber-400 font-bold shrink-0">★</span>
+                      <span><strong>Share Your Review</strong> — Rate your cookie texture, molten core, and flavor depth</span>
+                    </div>
+                    <div className="flex items-start gap-2.5">
+                      <span className="text-amber-400 font-bold shrink-0">★</span>
+                      <span><strong>Suggest Dream Flavours</strong> — Vote on upcoming limited drops and recipe tests</span>
+                    </div>
+                    <div className="flex items-start gap-2.5">
+                      <span className="text-amber-400 font-bold shrink-0">★</span>
+                      <span><strong>Instagram Spotlight</strong> — Tag @sukie.mumbai to be featured on our stories</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-2.5">
+                  <a
+                    href="https://wa.me/919136498467?text=Hello%20Chef!%20%F0%9F%8D%AA%20I%20wanted%20to%20share%20my%20tasting%20review%20and%20feedback%20for%20Suki%C3%A9%20Cookies%3A%20"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full py-3.5 px-5 bg-[#C5A059] hover:bg-[#D4B86A] text-stone-950 rounded-xl font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 shadow-lg active:scale-[0.99] transition-all cursor-pointer"
+                  >
+                    <span>Share Review on WhatsApp</span>
+                    <span className="text-base">⭐</span>
+                  </a>
+
+                  <a
+                    href="https://instagram.com/sukie.mumbai"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full py-2.5 px-4 bg-white/10 hover:bg-white/15 text-white rounded-xl font-medium text-xs flex items-center justify-center gap-2 border border-white/15 transition-colors cursor-pointer"
+                  >
+                    <span>Tag Us on Instagram (@sukie.mumbai)</span>
+                    <span>📸</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            {/* Bottom Luxury Micro-Badge Strip */}
+            <div className="mt-10 sm:mt-12 pt-6 border-t border-white/10 flex flex-wrap items-center justify-center gap-6 text-[11px] text-white/50 font-mono uppercase tracking-wider relative z-10">
+              <span className="flex items-center gap-1.5">
+                <span className="text-emerald-400">✓</span> 100% Pure Eggless
+              </span>
+              <span className="text-white/20">•</span>
+              <span className="flex items-center gap-1.5">
+                <span className="text-amber-300">✦</span> Flash-Baked in Mumbai
+              </span>
+              <span className="text-white/20">•</span>
+              <span className="flex items-center gap-1.5">
+                <span className="text-emerald-400">✓</span> Genuine Reversal Guarantee
+              </span>
+              <span className="text-white/20">•</span>
+              <span className="flex items-center gap-1.5">
+                <span className="text-[#C5A059]">💬</span> Direct WhatsApp Concierge
+              </span>
             </div>
           </div>
         </div>

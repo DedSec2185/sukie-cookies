@@ -454,30 +454,34 @@ export default function Cart() {
               {view === 'checkout' && (
                 <>
                   {/* Checkout Header with Back Button */}
-                  <div className="p-4 sm:p-5 bg-[#0C419C] text-white flex items-center justify-between shadow-md border-b border-[#C5A059]/30 shrink-0">
+                  <div className="p-4 sm:p-5 bg-gradient-to-r from-[#071636] via-[#0C419C] to-[#071636] text-white flex items-center justify-between shadow-md border-b border-[#C5A059]/40 shrink-0">
                     <div className="flex items-center gap-3">
                       <button
                         type="button"
                         onClick={handleBackToCart}
                         aria-label="Back to box"
-                        className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-amber-200 flex items-center justify-center text-base font-bold transition-colors cursor-pointer"
+                        className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-amber-200 flex items-center justify-center text-sm font-bold transition-all cursor-pointer active:scale-95 border border-white/10"
                       >
                         ←
                       </button>
                       <div>
-                        <h2 className="font-heading text-lg sm:text-xl font-bold text-white tracking-wide">
-                          Checkout Details
+                        <div className="flex items-center gap-2">
+                          <span className="text-[9px] font-mono uppercase tracking-[0.2em] text-[#C5A059] font-bold">
+                            Atelier Pre-Order
+                          </span>
+                          <span className="w-1 h-1 rounded-full bg-amber-300"></span>
+                          <span className="text-[9px] font-mono text-white/60">Step 2 of 2</span>
+                        </div>
+                        <h2 className="font-heading text-lg sm:text-xl font-bold text-white tracking-wide leading-tight">
+                          Dispatch & Payment
                         </h2>
-                        <p className="text-xs text-amber-200/80 font-mono">
-                          Direct Atelier Order • Step 2 of 2
-                        </p>
                       </div>
                     </div>
 
                     <button
                       onClick={handleClose}
                       aria-label="Close modal"
-                      className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-sm font-semibold transition-colors cursor-pointer"
+                      className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-sm font-semibold transition-colors cursor-pointer border border-white/10"
                     >
                       ✕
                     </button>
@@ -485,26 +489,46 @@ export default function Cart() {
 
                   {/* Form Container */}
                   <form onSubmit={handlePlaceOrder} className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4">
-                    {/* Order summary mini banner */}
-                    <div className="p-3 bg-amber-50/70 border border-amber-200/80 rounded-xl flex items-center justify-between text-xs text-stone-800">
-                      <div>
-                        <span className="font-semibold block text-[#0C419C]">
-                          Ordering {totalItems} Cookies ({includeGiftBox ? 'With Gift Box' : 'Standard Packaging'})
-                        </span>
-                        <span className="text-[11px] text-stone-500">
-                          Freshly prepared in Mumbai for your slot
-                        </span>
+                    {/* Bespoke Kitchen Pass / Order Ticket */}
+                    <div className="p-4 rounded-2xl bg-gradient-to-br from-[#FFFDF9] via-white to-[#F9F5EC] border border-[#C5A059]/50 shadow-[0_4px_20px_rgba(197,160,89,0.12)] relative overflow-hidden">
+                      <div className="flex items-start justify-between gap-3 relative z-10">
+                        <div>
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#0C419C]/10 text-[#0C419C] text-[10px] font-mono uppercase tracking-wider font-bold mb-1.5 border border-[#0C419C]/20">
+                            <span>✦</span>
+                            <span>{totalItems} {totalItems === 1 ? 'Cookie' : 'NYC Cookies'} in Box</span>
+                          </span>
+                          <p className="text-xs font-semibold text-stone-900 leading-snug">
+                            {includeGiftBox ? '🎁 Luxury Keepsake Box & Wax Seal Ribbon' : 'Standard Artisan Bakery Box'}
+                          </p>
+                          <p className="text-[11px] text-stone-500 mt-0.5">
+                            Destined for: <strong className="text-stone-800">{deliveryArea}</strong>
+                          </p>
+                        </div>
+
+                        <div className="text-right shrink-0">
+                          <span className="text-[9px] font-mono uppercase tracking-widest text-stone-400 block font-semibold">
+                            Total Due
+                          </span>
+                          <span className="font-heading text-2xl font-bold text-[#0C419C] tracking-tight block">
+                            ₹{finalTotal.toLocaleString('en-IN')}
+                          </span>
+                        </div>
                       </div>
-                      <span className="font-heading text-base font-bold text-[#0C419C]">
-                        ₹{finalTotal}
-                      </span>
                     </div>
 
                     {/* Section 1: Customer Contact */}
-                    <div className="bg-white p-4 rounded-2xl border border-stone-200 space-y-3 shadow-xs">
-                      <h3 className="text-xs font-bold uppercase tracking-wider text-[#0C419C] flex items-center gap-1.5">
-                        <span>👤</span> 1. Contact Information
-                      </h3>
+                    <div className="bg-white rounded-2xl p-4 sm:p-5 border border-stone-200/90 shadow-[0_2px_12px_rgba(0,0,0,0.03)] space-y-3.5">
+                      <div className="flex items-center gap-2 pb-2 border-b border-stone-100">
+                        <span className="w-5 h-5 rounded-full bg-[#0C419C] text-white flex items-center justify-center text-[10px] font-bold font-mono shadow-xs">
+                          1
+                        </span>
+                        <div>
+                          <h3 className="text-xs font-bold uppercase tracking-wider text-stone-900 leading-none">
+                            Contact Information
+                          </h3>
+                          <span className="text-[10px] text-stone-500 font-mono">For Mumbai courier tracking & updates</span>
+                        </div>
+                      </div>
 
                       <div>
                         <label className="block text-[11px] font-semibold text-stone-700 mb-1">
@@ -515,8 +539,8 @@ export default function Cart() {
                           value={formData.name}
                           onChange={(e) => handleInputChange('name', e.target.value)}
                           placeholder="e.g. Ananya Sharma"
-                          className={`w-full px-3 py-2 text-xs rounded-xl border bg-stone-50 focus:bg-white focus:outline-none transition-all ${
-                            formErrors.name ? 'border-red-500 bg-red-50/30' : 'border-stone-200 focus:border-[#C5A059]'
+                          className={`w-full px-3.5 py-2.5 text-xs rounded-xl border bg-stone-50/60 focus:bg-white focus:outline-none transition-all ${
+                            formErrors.name ? 'border-red-500 bg-red-50/30' : 'border-stone-200 focus:border-[#0C419C] focus:ring-2 focus:ring-[#0C419C]/10'
                           }`}
                         />
                         {formErrors.name && (
@@ -526,18 +550,21 @@ export default function Cart() {
 
                       <div>
                         <label className="block text-[11px] font-semibold text-stone-700 mb-1">
-                          Mobile Number (for delivery updates) <span className="text-red-500">*</span>
+                          Mobile / WhatsApp Number <span className="text-red-500">*</span>
                         </label>
-                        <div className="relative">
-                          <span className="absolute left-3 top-2 text-xs text-stone-400 font-mono">+91</span>
+                        <div className="relative flex items-center">
+                          <span className="absolute left-3 text-xs text-stone-500 font-mono font-medium flex items-center gap-1.5">
+                            <span>🇮🇳</span> +91
+                          </span>
+                          <span className="absolute left-16 h-4 w-[1px] bg-stone-200" />
                           <input
                             type="tel"
                             maxLength={10}
                             value={formData.phone}
                             onChange={(e) => handleInputChange('phone', e.target.value.replace(/\D/g, ''))}
                             placeholder="98765 43210"
-                            className={`w-full pl-11 pr-3 py-2 text-xs rounded-xl border bg-stone-50 focus:bg-white focus:outline-none font-mono transition-all ${
-                              formErrors.phone ? 'border-red-500 bg-red-50/30' : 'border-stone-200 focus:border-[#C5A059]'
+                            className={`w-full pl-20 pr-3.5 py-2.5 text-xs rounded-xl border bg-stone-50/60 focus:bg-white focus:outline-none font-mono transition-all tracking-wider ${
+                              formErrors.phone ? 'border-red-500 bg-red-50/30' : 'border-stone-200 focus:border-[#0C419C] focus:ring-2 focus:ring-[#0C419C]/10'
                             }`}
                           />
                         </div>
@@ -548,10 +575,18 @@ export default function Cart() {
                     </div>
 
                     {/* Section 2: Delivery Destination */}
-                    <div className="bg-white p-4 rounded-2xl border border-stone-200 space-y-3 shadow-xs">
-                      <h3 className="text-xs font-bold uppercase tracking-wider text-[#0C419C] flex items-center gap-1.5">
-                        <span>📍</span> 2. Mumbai Delivery Address
-                      </h3>
+                    <div className="bg-white rounded-2xl p-4 sm:p-5 border border-stone-200/90 shadow-[0_2px_12px_rgba(0,0,0,0.03)] space-y-3.5">
+                      <div className="flex items-center gap-2 pb-2 border-b border-stone-100">
+                        <span className="w-5 h-5 rounded-full bg-[#0C419C] text-white flex items-center justify-center text-[10px] font-bold font-mono shadow-xs">
+                          2
+                        </span>
+                        <div>
+                          <h3 className="text-xs font-bold uppercase tracking-wider text-stone-900 leading-none">
+                            Mumbai Delivery & Schedule
+                          </h3>
+                          <span className="text-[10px] text-stone-500 font-mono">Dispatched warm from our Mumbai kitchen</span>
+                        </div>
+                      </div>
 
                       <div>
                         <label className="block text-[11px] font-semibold text-stone-700 mb-1">
@@ -560,7 +595,7 @@ export default function Cart() {
                         <select
                           value={deliveryArea}
                           onChange={(e) => setDeliveryArea(e.target.value)}
-                          className="w-full px-3 py-2 text-xs rounded-xl border border-stone-200 bg-stone-50 focus:bg-white focus:border-[#C5A059] focus:outline-none font-medium text-stone-800"
+                          className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-stone-200 bg-stone-50/60 focus:bg-white focus:border-[#0C419C] focus:ring-2 focus:ring-[#0C419C]/10 focus:outline-none font-semibold text-stone-800 cursor-pointer"
                         >
                           <option value="Vikhroli">Vikhroli (Direct Atelier)</option>
                           <option value="Powai">Powai</option>
@@ -583,8 +618,8 @@ export default function Cart() {
                           value={formData.address}
                           onChange={(e) => handleInputChange('address', e.target.value)}
                           placeholder="e.g. Flat 1204, Tower B, Hiranandani Gardens..."
-                          className={`w-full px-3 py-2 text-xs rounded-xl border bg-stone-50 focus:bg-white focus:outline-none transition-all ${
-                            formErrors.address ? 'border-red-500 bg-red-50/30' : 'border-stone-200 focus:border-[#C5A059]'
+                          className={`w-full px-3.5 py-2.5 text-xs rounded-xl border bg-stone-50/60 focus:bg-white focus:outline-none transition-all leading-relaxed ${
+                            formErrors.address ? 'border-red-500 bg-red-50/30' : 'border-stone-200 focus:border-[#0C419C] focus:ring-2 focus:ring-[#0C419C]/10'
                           }`}
                         />
                         {formErrors.address && (
@@ -601,51 +636,75 @@ export default function Cart() {
                           value={formData.landmark}
                           onChange={(e) => handleInputChange('landmark', e.target.value)}
                           placeholder="e.g. Near Galleria / Opp. Gate 2"
-                          className="w-full px-3 py-2 text-xs rounded-xl border border-stone-200 bg-stone-50 focus:bg-white focus:border-[#C5A059] focus:outline-none"
+                          className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-stone-200 bg-stone-50/60 focus:bg-white focus:border-[#0C419C] focus:outline-none"
                         />
                       </div>
 
+                      {/* Interactive Delivery Slot Choice Pills */}
                       <div>
-                        <label className="block text-[11px] font-semibold text-stone-700 mb-1">
-                          Preferred Delivery Slot
+                        <label className="block text-[11px] font-semibold text-stone-700 mb-1.5">
+                          Select Delivery Slot <span className="text-stone-400 font-normal">(Baked Fresh for Slot)</span>
                         </label>
-                        <select
-                          value={formData.slot}
-                          onChange={(e) => handleInputChange('slot', e.target.value)}
-                          className="w-full px-3 py-2 text-xs rounded-xl border border-stone-200 bg-stone-50 focus:bg-white focus:border-[#C5A059] focus:outline-none font-medium text-stone-800"
-                        >
-                          <option value="Today Evening (5:00 PM – 8:00 PM)">Today Evening (5:00 PM – 8:00 PM)</option>
-                          <option value="Tomorrow Morning (11:00 AM – 2:00 PM)">Tomorrow Morning (11:00 AM – 2:00 PM)</option>
-                          <option value="Tomorrow Evening (5:00 PM – 8:00 PM)">Tomorrow Evening (5:00 PM – 8:00 PM)</option>
-                          <option value="Weekend Dispatch">Upcoming Weekend Batch</option>
-                        </select>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          {[
+                            'Today Evening (5:00 PM – 8:00 PM)',
+                            'Tomorrow Morning (11:00 AM – 2:00 PM)',
+                            'Tomorrow Evening (5:00 PM – 8:00 PM)',
+                            'Upcoming Weekend Batch',
+                          ].map((slotOption) => {
+                            const isSelected = formData.slot === slotOption;
+                            return (
+                              <button
+                                key={slotOption}
+                                type="button"
+                                onClick={() => handleInputChange('slot', slotOption)}
+                                className={`p-2.5 rounded-xl border text-left text-xs transition-all cursor-pointer flex items-center justify-between ${
+                                  isSelected
+                                    ? 'border-[#0C419C] bg-[#0C419C]/10 text-[#0C419C] font-bold shadow-xs'
+                                    : 'border-stone-200 bg-stone-50/80 hover:bg-stone-100 text-stone-700'
+                                }`}
+                              >
+                                <span className="text-[11px] leading-tight">{slotOption}</span>
+                                {isSelected && <span className="text-xs">✓</span>}
+                              </button>
+                            );
+                          })}
+                        </div>
                       </div>
 
                       <div>
                         <label className="block text-[11px] font-semibold text-stone-700 mb-1">
-                          Gift Message / Kitchen Note (Optional)
+                          Personalised Gifting Message / Kitchen Note <span className="text-stone-400 font-normal">(Optional)</span>
                         </label>
                         <textarea
                           rows={2}
                           value={formData.note}
                           onChange={(e) => handleInputChange('note', e.target.value)}
-                          placeholder="e.g. 'Happy Birthday Kabir!' or 'Leave with security guard'"
-                          className="w-full px-3 py-2 text-xs rounded-xl border border-stone-200 bg-stone-50 focus:bg-white focus:border-[#C5A059] focus:outline-none"
+                          placeholder="e.g. 'Happy Birthday Kabir!' or 'Leave with building security guard'"
+                          className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-stone-200 bg-stone-50/60 focus:bg-white focus:border-[#0C419C] focus:outline-none leading-relaxed"
                         />
                       </div>
                     </div>
 
                     {/* Section 3: Payment Method Selection */}
-                    <div className="bg-white p-4 rounded-2xl border border-stone-200 space-y-2.5 shadow-xs">
-                      <h3 className="text-xs font-bold uppercase tracking-wider text-[#0C419C] flex items-center gap-1.5">
-                        <span>💳</span> 3. Select Payment Preference
-                      </h3>
+                    <div className="bg-white rounded-2xl p-4 sm:p-5 border border-stone-200/90 shadow-[0_2px_12px_rgba(0,0,0,0.03)] space-y-3">
+                      <div className="flex items-center gap-2 pb-2 border-b border-stone-100">
+                        <span className="w-5 h-5 rounded-full bg-[#0C419C] text-white flex items-center justify-center text-[10px] font-bold font-mono shadow-xs">
+                          3
+                        </span>
+                        <div>
+                          <h3 className="text-xs font-bold uppercase tracking-wider text-stone-900 leading-none">
+                            Payment Method
+                          </h3>
+                          <span className="text-[10px] text-stone-500 font-mono">Select your convenient payment mode</span>
+                        </div>
+                      </div>
 
                       {/* Option 1: Instant UPI */}
-                      <label className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
+                      <label className={`flex items-start gap-3 p-3.5 rounded-xl border cursor-pointer transition-all ${
                         formData.paymentMethod === 'upi'
-                          ? 'border-[#0F2460] bg-[#0C419C]/5'
-                          : 'border-stone-200 bg-stone-50 hover:border-stone-300'
+                          ? 'border-[#0C419C] bg-[#0C419C]/5 shadow-xs ring-1 ring-[#0C419C]/30'
+                          : 'border-stone-200 bg-stone-50/70 hover:border-stone-300'
                       }`}>
                         <input
                           type="radio"
@@ -653,21 +712,26 @@ export default function Cart() {
                           value="upi"
                           checked={formData.paymentMethod === 'upi'}
                           onChange={() => handleInputChange('paymentMethod', 'upi')}
-                          className="mt-0.5 accent-[#0F2460]"
+                          className="mt-0.5 accent-[#0C419C]"
                         />
                         <div className="flex-1 text-xs">
-                          <span className="font-bold text-stone-900 block">Instant UPI (GPay / PhonePe / Paytm / QR)</span>
-                          <span className="text-[11px] text-stone-500 block mt-0.5">
-                            Pay directly to Atelier UPI ID: <strong className="font-mono text-[#0C419C]">sukiecookies@upi</strong>
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="font-bold text-stone-900 block">Instant UPI (GPay / PhonePe / Paytm / QR)</span>
+                            <span className="bg-emerald-100 text-emerald-800 text-[9px] font-mono px-2 py-0.5 rounded-full font-bold uppercase tracking-wider shrink-0">
+                              Instant
+                            </span>
+                          </div>
+                          <span className="text-[11px] text-stone-600 block mt-1 leading-relaxed">
+                            Pay directly to Atelier UPI: <strong className="font-mono text-[#0C419C] select-all">sukiecookies@upi</strong>
                           </span>
                         </div>
                       </label>
 
                       {/* Option 2: Pay on Handover / Delivery */}
-                      <label className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
+                      <label className={`flex items-start gap-3 p-3.5 rounded-xl border cursor-pointer transition-all ${
                         formData.paymentMethod === 'cod'
-                          ? 'border-[#0F2460] bg-[#0C419C]/5'
-                          : 'border-stone-200 bg-stone-50 hover:border-stone-300'
+                          ? 'border-[#0C419C] bg-[#0C419C]/5 shadow-xs ring-1 ring-[#0C419C]/30'
+                          : 'border-stone-200 bg-stone-50/70 hover:border-stone-300'
                       }`}>
                         <input
                           type="radio"
@@ -675,21 +739,26 @@ export default function Cart() {
                           value="cod"
                           checked={formData.paymentMethod === 'cod'}
                           onChange={() => handleInputChange('paymentMethod', 'cod')}
-                          className="mt-0.5 accent-[#0F2460]"
+                          className="mt-0.5 accent-[#0C419C]"
                         />
                         <div className="flex-1 text-xs">
-                          <span className="font-bold text-stone-900 block">Pay on Dispatch / Handover</span>
-                          <span className="text-[11px] text-stone-500 block mt-0.5">
-                            UPI scan or Cash upon receiving your freshly baked box
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="font-bold text-stone-900 block">Pay on Delivery / Handover</span>
+                            <span className="bg-stone-200 text-stone-700 text-[9px] font-mono px-2 py-0.5 rounded-full font-bold uppercase tracking-wider shrink-0">
+                              Doorstep
+                            </span>
+                          </div>
+                          <span className="text-[11px] text-stone-600 block mt-1 leading-relaxed">
+                            UPI QR scan or Cash upon receiving your freshly boxed batch
                           </span>
                         </div>
                       </label>
 
                       {/* Option 3: Online Gateway Cards / NetBanking */}
-                      <label className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
+                      <label className={`flex items-start gap-3 p-3.5 rounded-xl border cursor-pointer transition-all ${
                         formData.paymentMethod === 'card'
-                          ? 'border-[#0F2460] bg-[#0C419C]/5'
-                          : 'border-stone-200 bg-stone-50 hover:border-stone-300'
+                          ? 'border-[#0C419C] bg-[#0C419C]/5 shadow-xs ring-1 ring-[#0C419C]/30'
+                          : 'border-stone-200 bg-stone-50/70 hover:border-stone-300'
                       }`}>
                         <input
                           type="radio"
@@ -697,35 +766,36 @@ export default function Cart() {
                           value="card"
                           checked={formData.paymentMethod === 'card'}
                           onChange={() => handleInputChange('paymentMethod', 'card')}
-                          className="mt-0.5 accent-[#0F2460]"
+                          className="mt-0.5 accent-[#0C419C]"
                         />
                         <div className="flex-1 text-xs">
                           <span className="font-bold text-stone-900 block">Credit / Debit Card / NetBanking</span>
-                          <span className="text-[11px] text-stone-500 block mt-0.5">
-                            Secured online payment gateway
+                          <span className="text-[11px] text-stone-600 block mt-1 leading-relaxed">
+                            Secured 256-bit payment gateway
                           </span>
                         </div>
                       </label>
                     </div>
 
-                    {/* Action Button */}
-                    <div className="pt-2 pb-6">
+                    {/* Action Button & Reassurance */}
+                    <div className="pt-2 pb-6 space-y-2.5">
                       <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="w-full py-4 px-4 bg-[#0C419C] hover:bg-[#1B3A8C] text-white rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-xl shadow-blue-950/20 active:scale-[0.99] transition-all cursor-pointer border border-[#C5A059]/40"
+                        className="w-full py-4 px-5 bg-gradient-to-r from-[#0C419C] via-[#1550B8] to-[#0C419C] hover:brightness-110 text-white rounded-xl font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 shadow-xl shadow-blue-950/25 active:scale-[0.99] transition-all cursor-pointer border border-[#C5A059]/40"
                       >
                         {isSubmitting ? (
                           <span>Placing Order...</span>
                         ) : (
                           <>
-                            <span>Place Website Order (₹{finalTotal})</span>
+                            <span>Confirm & Place Order (₹{finalTotal.toLocaleString('en-IN')})</span>
                             <span className="text-amber-200">🔒</span>
                           </>
                         )}
                       </button>
-                      <p className="text-center text-[10px] text-stone-400 mt-2 font-mono">
-                        Direct confirmation from Sukié Mumbai Kitchen
+                      <p className="text-center text-[10px] text-stone-500 font-mono flex items-center justify-center gap-1.5">
+                        <span>🛡️</span>
+                        <span>100% Quality & Reversal Guarantee • Direct Mumbai Kitchen</span>
                       </p>
                     </div>
                   </form>

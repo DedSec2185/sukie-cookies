@@ -11,7 +11,7 @@ export default function Menu() {
   const { addItem } = useCart();
 
   const categories = [
-    { id: 'all', name: 'Full Collection', emoji: '✨' },
+    { id: 'all', name: 'All Drops', emoji: '✨' },
     ...menuData.categories,
   ];
 
@@ -21,51 +21,45 @@ export default function Menu() {
       : menuData.products.filter((product) => product.category === activeCategory);
 
   return (
-    <section id="menu" className="relative bg-[#FAF6EE] py-24 px-4 sm:px-6 lg:px-8 border-t border-brand-warm/15">
+    <section id="menu" className="relative bg-[#FAF6EE] py-12 sm:py-20 px-4 sm:px-6 lg:px-8 border-t border-brand-warm/15">
       <div className="max-w-7xl mx-auto">
         
-        {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <span className="section-label text-brand-warm mb-3">
-            Handcrafted Daily in Limited Batches
+        {/* Section Header with Breathing Room */}
+        <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-14">
+          <span className="section-label text-brand-warm text-[10px] sm:text-xs mb-2">
+            Baked Fresh Daily in Limited Batches
           </span>
-          <h2 className="font-heading text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-brand-dark mt-2">
+          <h2 className="font-heading text-3xl sm:text-5xl font-bold tracking-tight text-brand-dark mt-1">
             The Sukié Collection
           </h2>
-          <p className="text-gray-600 text-base sm:text-lg font-light leading-relaxed mt-4">
-            Each giant cookie is individually hand-portioned to 170g (6oz) and baked fresh. 
-            When a limited drop sells out for the day, our ovens rest until the next morning.
+          <p className="text-stone-600 text-xs sm:text-base font-light leading-relaxed mt-2.5 max-w-lg mx-auto">
+            170g (6oz) oversized molten cookies. When a drop sells out, our ovens rest until the next morning.
           </p>
 
           {/* Freshness Badge */}
-          <div className="inline-flex items-center gap-2 mt-6 px-4 py-1.5 rounded-full bg-brand-gold/15 border border-brand-gold/30 text-brand-dark text-xs font-semibold uppercase tracking-wider">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span>Ovens Fired Today • Next Day Pre-Orders Available</span>
+          <div className="inline-flex items-center gap-2 mt-4 px-3.5 py-1 rounded-full bg-brand-gold/15 border border-brand-gold/30 text-brand-dark text-[10px] sm:text-xs font-semibold uppercase tracking-wider">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span>Ovens Fired Today • Pre-Orders Active</span>
           </div>
         </div>
 
-        {/* Animated Category Tabs */}
-        <div className="flex justify-center mb-14 overflow-x-auto py-2 no-scrollbar">
-          <div className="inline-flex p-1.5 rounded-full bg-white shadow-md border border-brand-warm/10 gap-1 sm:gap-2">
+        {/* Mobile Swipeable Category Pills */}
+        <div className="mb-8 sm:mb-12 -mx-4 px-4 overflow-x-auto no-scrollbar">
+          <div className="flex sm:justify-center items-center gap-2 min-w-max pb-1">
             {categories.map((cat) => {
               const isActive = activeCategory === cat.id;
               return (
                 <button
                   key={cat.id}
                   onClick={() => setActiveCategory(cat.id)}
-                  className={`relative px-5 py-2.5 rounded-full text-xs sm:text-sm font-semibold tracking-wide transition-colors duration-300 cursor-pointer flex items-center gap-2 whitespace-nowrap ${
-                    isActive ? 'text-white' : 'text-gray-600 hover:text-brand-dark'
+                  className={`relative px-4 py-2 rounded-full text-xs sm:text-sm font-semibold tracking-wide transition-all duration-300 cursor-pointer flex items-center gap-1.5 whitespace-nowrap shadow-xs ${
+                    isActive 
+                      ? 'bg-[#1B3A8C] text-white shadow-md' 
+                      : 'bg-white text-stone-600 hover:text-stone-900 border border-stone-200'
                   }`}
                 >
-                  {isActive && (
-                    <motion.div
-                      layoutId="activeMenuTab"
-                      className="absolute inset-0 bg-brand-blue rounded-full shadow-md"
-                      transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                    />
-                  )}
-                  <span className="relative z-10">{cat.emoji}</span>
-                  <span className="relative z-10">{cat.name}</span>
+                  <span>{cat.emoji}</span>
+                  <span>{cat.name}</span>
                 </button>
               );
             })}
@@ -75,17 +69,17 @@ export default function Menu() {
         {/* Product Cards Grid with AnimatePresence */}
         <motion.div 
           layout
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-8"
         >
           <AnimatePresence>
             {filteredProducts.map((product) => (
               <motion.div
                 key={product.id}
                 layout
-                initial={{ opacity: 0, scale: 0.95 }}
+                initial={{ opacity: 0, scale: 0.98 }}
                 animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.35 }}
+                exit={{ opacity: 0, scale: 0.98 }}
+                transition={{ duration: 0.3 }}
               >
                 <CookieCard
                   product={product}
@@ -97,25 +91,29 @@ export default function Menu() {
           </AnimatePresence>
         </motion.div>
 
-        {/* Chef's Custom Assortment Banner */}
-        <div className="mt-20 p-8 sm:p-12 rounded-3xl bg-gradient-to-r from-brand-blue-dark via-brand-blue to-indigo-950 text-white shadow-2xl flex flex-col md:flex-row items-center justify-between gap-8 border border-brand-gold/30">
-          <div className="space-y-3 text-center md:text-left">
-            <span className="text-xs uppercase tracking-[0.3em] font-bold text-brand-gold">
+        {/* Curated Gift Sets Banner */}
+        <div className="mt-12 sm:mt-20 p-6 sm:p-10 rounded-2xl sm:rounded-3xl bg-gradient-to-r from-brand-blue-dark via-brand-blue to-indigo-950 text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 border border-brand-gold/30 text-center md:text-left">
+          <div className="space-y-1.5">
+            <span className="text-[10px] sm:text-xs uppercase tracking-[0.25em] font-bold text-brand-gold font-mono">
               Curated Gift Sets
             </span>
-            <h3 className="font-heading text-3xl sm:text-4xl font-bold">
+            <h3 className="font-heading text-2xl sm:text-3xl font-bold">
               Can&apos;t Decide on One Flavour?
             </h3>
-            <p className="text-white/80 text-sm sm:text-base max-w-xl font-light">
-              Choose our Assorted 4-Pack or 6-Pack Box. Individually wrapped in our bespoke cobalt gift packaging with custom warming instructions.
+            <p className="text-white/80 text-xs sm:text-sm max-w-lg font-light">
+              Choose our Assorted 4-Pack or 6-Pack Box in our signature royal cobalt gift packaging with custom warming guide.
             </p>
           </div>
 
           <button
-            onClick={() => setActiveCategory('combos')}
-            className="shrink-0 bg-brand-gold hover:bg-brand-gold-light text-brand-dark font-bold px-8 py-4 rounded-full text-xs uppercase tracking-widest shadow-xl transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer"
+            onClick={() => {
+              setActiveCategory('combos');
+              const el = document.getElementById('menu');
+              if (el) el.scrollIntoView({ behavior: 'smooth' });
+            }}
+            className="w-full sm:w-auto shrink-0 bg-brand-gold hover:bg-brand-gold-light text-brand-dark font-bold px-7 py-3.5 rounded-full text-xs uppercase tracking-widest shadow-lg transition-transform active:scale-95 cursor-pointer"
           >
-            View Gift Boxes →
+            Explore Gift Boxes →
           </button>
         </div>
 

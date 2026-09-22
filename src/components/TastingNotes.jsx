@@ -8,16 +8,17 @@ export default function TastingNotes() {
   const flavors = [
     {
       name: "Popcorn Praliné Toffee",
+      shortName: "Popcorn Praliné",
       category: "Limited Edition Drop",
       image: "/images/popcorn_praline.jpg",
-      notes: ["French Browned Butter", "Almond Popcorn Praline", "Callebaut Milk Chocolate", "Toffee Shards"],
+      notes: ["Browned Butter", "Almond Praline", "Callebaut Milk", "Toffee"],
       sensory: {
         richness: 95,
         crunch: 88,
         gooeyness: 92,
         sweetness: 80,
       },
-      story: "Inspired by cinema nostalgia elevated through Parisian pastry discipline. French browned butter (beurre noisette) creates deep caramelized aromas that melt into a molten praline cream center.",
+      story: "French browned butter (beurre noisette) creates deep caramelized aromas that melt into a molten praline cream center with toffee crunch.",
       tag: "Limited Drop",
       weight: "170g (6oz)",
       price: 349,
@@ -32,16 +33,17 @@ export default function TastingNotes() {
     },
     {
       name: "Pistachio White Gianduja",
+      shortName: "Pistachio Gianduja",
       category: "Signature Masterpiece",
       image: "/images/pistachio.jpg",
-      notes: ["Sicilian Pistachios", "White Chocolate Gianduja", "European Cultured Butter", "Flaky Sea Salt"],
+      notes: ["Sicilian Pistachios", "White Gianduja", "European Butter", "Sea Salt"],
       sensory: {
         richness: 92,
         crunch: 76,
         gooeyness: 96,
         sweetness: 74,
       },
-      story: "Slow-roasted pistachios ground into a smooth, velvety paste folded into melted Belgian white chocolate. Break the crust to release an emerald molten lava center.",
+      story: "Slow-roasted pistachios ground into velvety gianduja folded into melted Belgian white chocolate. Break the crust to release an emerald molten lava center.",
       tag: "Chef's Pride",
       weight: "170g (6oz)",
       price: 349,
@@ -56,17 +58,18 @@ export default function TastingNotes() {
     },
     {
       name: "Triple Chocolate Overload",
+      shortName: "Triple Chocolate",
       category: "Midnight Dark Cocoa",
       image: "/images/triple_chocolate.jpg",
-      notes: ["Belgian Callebaut Dark 54.5%", "Milk Chocolate Callets", "Dutch Dark Cocoa Shell", "Silky Ganache Lava"],
+      notes: ["Callebaut Dark 54.5%", "Milk Chunks", "Dark Cocoa Shell", "Ganache Lava"],
       sensory: {
         richness: 98,
         crunch: 68,
         gooeyness: 100,
         sweetness: 70,
       },
-      story: "For the uncompromising cocoa purist. A dark Dutch cocoa crumb packed with milk & white Callebaut chunks, hiding an intense, warm molten ganache volcanic center.",
-      tag: "All-Time Bestseller",
+      story: "For the cocoa purist. A dark Dutch cocoa crumb packed with milk & white Callebaut chunks, hiding an intense warm molten ganache volcanic center.",
+      tag: "Bestseller",
       weight: "170g (6oz)",
       price: 299,
       itemData: {
@@ -80,17 +83,18 @@ export default function TastingNotes() {
     },
     {
       name: "Cupid's Ruby Chocolate",
+      shortName: "Cupid's Ruby",
       category: "Seasonal Exclusive",
       image: "/images/ruby_chocolate.jpg",
-      notes: ["Ruby Cacao Beans", "Wild Berry Aromatics", "Ruby Chocolate Ganache", "Crisp Pink Shell"],
+      notes: ["Ruby Cacao", "Wild Berries", "Ruby Ganache", "Pink Shell"],
       sensory: {
         richness: 88,
         crunch: 72,
         gooeyness: 90,
         sweetness: 82,
       },
-      story: "Crafted with the rare 4th type of chocolate in the world — naturally pink without added colorants or fruit flavors, yielding a berry-tart luscious molten finish.",
-      tag: "Rare Ruby Drop",
+      story: "Crafted with rare ruby chocolate — naturally pink without colorants, yielding berry-tart notes and a luscious molten center.",
+      tag: "Rare Ruby",
       weight: "170g (6oz)",
       price: 379,
       itemData: {
@@ -107,189 +111,165 @@ export default function TastingNotes() {
   const current = flavors[selectedIdx];
 
   return (
-    <section className="bg-[#0B0C10] text-white py-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden border-t border-white/5">
+    <section className="bg-[#0B0C10] text-white py-12 sm:py-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden border-t border-white/5">
       <div className="max-w-7xl mx-auto relative z-10">
         
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
-          <div>
-            <span className="section-label text-[#C5A059] mb-3">Sensory Tasting Bar</span>
-            <h2 className="font-heading text-3xl sm:text-5xl font-bold tracking-tight text-white mt-2">
-              The Tasting Room
-            </h2>
-            <p className="text-white/60 text-sm sm:text-base mt-2 max-w-xl font-light">
-              Explore flavor notes, sensory intensity profiles, and ingredients curated like fine European confectionery.
-            </p>
-          </div>
+        {/* Header with Breathing Room */}
+        <div className="text-center sm:text-left max-w-2xl mb-8 sm:mb-12">
+          <span className="section-label text-[#C5A059] text-[10px] sm:text-xs mb-2">Sensory Tasting Bar</span>
+          <h2 className="font-heading text-3xl sm:text-5xl font-bold tracking-tight text-white mt-1">
+            The Tasting Room
+          </h2>
+          <p className="text-white/60 text-xs sm:text-base mt-2 font-light">
+            Explore flavor notes, sensory intensity profiles, and ingredients curated like fine European patisserie.
+          </p>
+        </div>
 
-          {/* Flavor Switcher Tabs with Real Mini Thumbnails */}
-          <div className="flex flex-wrap gap-2">
+        {/* Mobile Smooth Horizontal Swipe Flavor Selector */}
+        <div className="mb-6 -mx-4 px-4 overflow-x-auto no-scrollbar">
+          <div className="flex items-center gap-2 min-w-max pb-1">
             {flavors.map((f, idx) => (
               <button
                 key={f.name}
                 onClick={() => setSelectedIdx(idx)}
-                className={`px-4 py-2 rounded-full text-xs font-semibold tracking-wide uppercase transition-all duration-300 flex items-center gap-2 cursor-pointer ${
+                className={`px-3.5 py-1.5 rounded-full text-xs font-semibold tracking-wide uppercase transition-all duration-300 flex items-center gap-2 cursor-pointer ${
                   selectedIdx === idx
-                    ? 'bg-[#C5A059] text-black shadow-[0_0_25px_rgba(197,160,89,0.4)] scale-105'
-                    : 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white border border-white/10'
+                    ? 'bg-[#C5A059] text-black shadow-md scale-102 font-bold'
+                    : 'bg-white/5 text-white/70 hover:bg-white/10 border border-white/10'
                 }`}
               >
                 <img
                   src={f.image}
-                  alt={f.name}
-                  className="w-5 h-5 rounded-full object-cover border border-white/30"
+                  alt={f.shortName}
+                  className="w-4 h-4 rounded-full object-cover border border-white/30"
                 />
-                <span>{f.name.split(' ')[0]}</span>
+                <span>{f.shortName}</span>
               </button>
             ))}
           </div>
         </div>
 
-        {/* Main Tasting Feature Card */}
-        <div className="rounded-3xl p-8 sm:p-12 border border-[#C5A059]/30 bg-gradient-to-br from-[#161412] to-[#0A0908] shadow-[0_30px_90px_rgba(0,0,0,0.8)] relative overflow-hidden">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+        {/* Tasting Feature Card */}
+        <div className="rounded-2xl sm:rounded-3xl p-5 sm:p-10 border border-[#C5A059]/30 bg-gradient-to-br from-[#161412] to-[#0A0908] shadow-xl relative overflow-hidden">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-10 items-center">
             
-            {/* Left Info Column */}
-            <div className="lg:col-span-7 space-y-6">
-              <div className="flex items-center gap-3">
-                <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest bg-[#C5A059]/20 text-[#C5A059] border border-[#C5A059]/40">
+            {/* Info Column */}
+            <div className="lg:col-span-7 space-y-4 sm:space-y-5">
+              <div className="flex items-center gap-2">
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[#C5A059]/20 text-[#C5A059] border border-[#C5A059]/40">
                   {current.tag}
                 </span>
-                <span className="text-xs text-white/50 uppercase tracking-wider font-mono">
-                  {current.weight} • Serves 1-2
+                <span className="text-[11px] text-white/50 uppercase font-mono">
+                  {current.weight}
                 </span>
               </div>
 
-              <h3 className="font-heading text-3xl sm:text-5xl font-bold text-white leading-tight">
+              <h3 className="font-heading text-2xl sm:text-4xl font-bold text-white leading-tight">
                 {current.name}
               </h3>
 
-              <p className="text-white/80 text-base sm:text-lg font-light leading-relaxed">
+              <p className="text-white/80 text-xs sm:text-base font-light leading-relaxed">
                 {current.story}
               </p>
 
               {/* Flavor Notes Pills */}
               <div>
-                <span className="text-xs font-semibold uppercase tracking-widest text-[#C5A059] block mb-3 font-mono">
+                <span className="text-[10px] font-semibold uppercase tracking-widest text-[#C5A059] block mb-2 font-mono">
                   ✦ Flavor & Texture Profile
                 </span>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1.5">
                   {current.notes.map((note) => (
                     <span
                       key={note}
-                      className="px-3.5 py-1.5 rounded-full text-xs bg-white/10 text-white/90 border border-white/15 backdrop-blur-xs flex items-center gap-1.5"
+                      className="px-2.5 py-1 rounded-full text-[11px] bg-white/10 text-white/90 border border-white/15"
                     >
-                      <span className="text-[#C5A059] text-xs">✦</span>
-                      <span>{note}</span>
+                      {note}
                     </span>
                   ))}
                 </div>
               </div>
 
-              {/* Price & Add to Cart */}
-              <div className="pt-6 border-t border-white/15 flex items-center gap-6">
+              {/* Price & Action */}
+              <div className="pt-4 border-t border-white/15 flex items-center justify-between sm:justify-start sm:gap-6">
                 <div>
-                  <span className="text-xs text-white/50 uppercase tracking-widest block font-mono">Single 170g Unit</span>
-                  <span className="font-heading text-3xl font-bold text-[#C5A059]">₹{current.price}</span>
+                  <span className="text-[9px] text-white/50 uppercase tracking-widest block font-mono">Price</span>
+                  <span className="font-heading text-2xl sm:text-3xl font-bold text-[#C5A059]">₹{current.price}</span>
                 </div>
 
                 <button
                   onClick={() => addItem(current.itemData)}
-                  className="bg-[#C5A059] hover:bg-[#D4B86A] text-black font-bold px-8 py-3.5 rounded-full text-xs uppercase tracking-widest transition-all duration-300 shadow-xl hover:shadow-[#C5A059]/30 hover:-translate-y-0.5 active:translate-y-0 cursor-pointer flex items-center gap-2"
+                  className="bg-[#C5A059] hover:bg-[#D4B86A] active:scale-95 text-black font-bold px-6 py-2.5 sm:py-3 rounded-full text-xs uppercase tracking-wider transition-all shadow-md cursor-pointer flex items-center gap-1.5"
                 >
                   <span>Add To Box</span>
-                  <span className="text-base font-light">+</span>
+                  <span className="text-sm font-light">+</span>
                 </button>
               </div>
             </div>
 
-            {/* Right Photography + Sensory Radar Column */}
-            <div className="lg:col-span-5 space-y-6">
-              
-              {/* High-res Image Preview */}
-              <div className="relative h-60 w-full rounded-2xl overflow-hidden border border-white/15 shadow-2xl">
-                <img
-                  src={current.image}
-                  alt={current.name}
-                  className="w-full h-full object-cover object-center"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-                <span className="absolute bottom-3 left-4 text-xs font-mono text-amber-200 bg-black/60 px-3 py-1 rounded-full backdrop-blur-md">
-                  Gooey Center Preview
+            {/* Sensory Index Radar Column */}
+            <div className="lg:col-span-5 bg-black/50 border border-white/10 rounded-xl p-4 sm:p-6 backdrop-blur-md space-y-3">
+              <div className="flex items-center justify-between pb-2 border-b border-white/10">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-[#C5A059] font-mono">
+                  Sensory Index
+                </span>
+                <span className="text-[10px] text-white/40 font-mono">
+                  Atelier Score
                 </span>
               </div>
 
-              {/* Sliders */}
-              <div className="bg-black/60 border border-white/10 rounded-2xl p-6 backdrop-blur-md space-y-4">
-                <div className="flex items-center justify-between pb-3 border-b border-white/10">
-                  <span className="text-xs font-bold uppercase tracking-widest text-[#C5A059] font-mono">
-                    Sensory Index
-                  </span>
-                  <span className="text-xs text-white/40 font-mono">
-                    Atelier Score
-                  </span>
-                </div>
-
-                <div className="space-y-3.5">
-                  <div>
-                    <div className="flex justify-between text-xs mb-1.5 font-mono">
-                      <span className="text-white/80">Cocoa & Butter Richness</span>
-                      <span className="text-[#C5A059] font-bold">{current.sensory.richness}%</span>
-                    </div>
-                    <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-gradient-to-r from-[#C5A059] to-amber-300 rounded-full transition-all duration-700"
-                        style={{ width: `${current.sensory.richness}%` }}
-                      />
-                    </div>
+              <div className="space-y-2.5">
+                <div>
+                  <div className="flex justify-between text-[11px] mb-1 font-mono">
+                    <span className="text-white/80">Richness</span>
+                    <span className="text-[#C5A059] font-bold">{current.sensory.richness}%</span>
                   </div>
-
-                  <div>
-                    <div className="flex justify-between text-xs mb-1.5 font-mono">
-                      <span className="text-white/80">Molten Core Gooeyness</span>
-                      <span className="text-[#C5A059] font-bold">{current.sensory.gooeyness}%</span>
-                    </div>
-                    <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-gradient-to-r from-amber-500 to-amber-300 rounded-full transition-all duration-700"
-                        style={{ width: `${current.sensory.gooeyness}%` }}
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className="flex justify-between text-xs mb-1.5 font-mono">
-                      <span className="text-white/80">Caramelized Crust Crunch</span>
-                      <span className="text-[#C5A059] font-bold">{current.sensory.crunch}%</span>
-                    </div>
-                    <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-gradient-to-r from-yellow-600 to-[#C5A059] rounded-full transition-all duration-700"
-                        style={{ width: `${current.sensory.crunch}%` }}
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className="flex justify-between text-xs mb-1.5 font-mono">
-                      <span className="text-white/80">Balanced Sweetness</span>
-                      <span className="text-[#C5A059] font-bold">{current.sensory.sweetness}%</span>
-                    </div>
-                    <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-gradient-to-r from-stone-400 to-white rounded-full transition-all duration-700"
-                        style={{ width: `${current.sensory.sweetness}%` }}
-                      />
-                    </div>
+                  <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-[#C5A059] to-amber-300 rounded-full"
+                      style={{ width: `${current.sensory.richness}%` }}
+                    />
                   </div>
                 </div>
 
-                <div className="pt-3 border-t border-white/10 flex items-center gap-2.5 text-xs text-white/50">
-                  <span className="text-[#C5A059]">ℹ</span>
-                  <span>Best enjoyed warm. Reheat at 160°C for 2 minutes.</span>
+                <div>
+                  <div className="flex justify-between text-[11px] mb-1 font-mono">
+                    <span className="text-white/80">Gooeyness</span>
+                    <span className="text-[#C5A059] font-bold">{current.sensory.gooeyness}%</span>
+                  </div>
+                  <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-amber-500 to-amber-300 rounded-full"
+                      style={{ width: `${current.sensory.gooeyness}%` }}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <div className="flex justify-between text-[11px] mb-1 font-mono">
+                    <span className="text-white/80">Crust Crunch</span>
+                    <span className="text-[#C5A059] font-bold">{current.sensory.crunch}%</span>
+                  </div>
+                  <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-yellow-600 to-[#C5A059] rounded-full"
+                      style={{ width: `${current.sensory.crunch}%` }}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <div className="flex justify-between text-[11px] mb-1 font-mono">
+                    <span className="text-white/80">Sweetness Balance</span>
+                    <span className="text-[#C5A059] font-bold">{current.sensory.sweetness}%</span>
+                  </div>
+                  <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-stone-400 to-white rounded-full"
+                      style={{ width: `${current.sensory.sweetness}%` }}
+                    />
+                  </div>
                 </div>
               </div>
-
             </div>
 
           </div>

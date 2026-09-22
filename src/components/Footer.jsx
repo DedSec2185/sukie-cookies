@@ -15,9 +15,11 @@ export default function Footer() {
 
   const quickLinks = [
     { name: 'Home', targetId: 'top' },
-    { name: 'Menu', targetId: 'menu' },
-    { name: 'Our Story', targetId: 'about' },
-    { name: 'Contact', targetId: 'contact' },
+    { name: 'Menu Drops', targetId: 'menu' },
+    { name: 'Our Story', targetId: 'story' },
+    { name: 'Complaints & Reversals', targetId: 'care' },
+    { name: 'Feedback & Reviews', targetId: 'care' },
+    { name: 'Contact Atelier', targetId: 'contact' },
   ];
 
   const connectLinks = [

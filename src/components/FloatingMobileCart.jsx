@@ -19,7 +19,7 @@ export default function FloatingMobileCart() {
       >
         <button
           onClick={toggleCart}
-          className="w-full bg-gradient-to-r from-[#091124] via-[#0F2460] to-[#091124] text-white p-3.5 rounded-2xl shadow-[0_16px_40px_rgba(11,20,48,0.7)] border border-[#C5A059]/50 flex items-center justify-between backdrop-blur-md active:scale-[0.98] transition-transform cursor-pointer"
+          className="w-full bg-gradient-to-r from-[#071738] via-[#0C419C] to-[#071738] text-white p-3.5 rounded-2xl shadow-[0_16px_40px_rgba(11,20,48,0.7)] border border-[#C5A059]/50 flex items-center justify-between backdrop-blur-md active:scale-[0.98] transition-transform cursor-pointer"
         >
           <div className="flex items-center gap-3">
             {/* Thumbnail or Badge */}
@@ -37,7 +37,7 @@ export default function FloatingMobileCart() {
                   🛍️
                 </div>
               )}
-              <span className="absolute -top-1.5 -right-1.5 bg-[#C5A059] text-stone-950 font-bold text-[10px] rounded-full min-w-[18px] h-[18px] px-1 flex items-center justify-center shadow-md ring-2 ring-[#0F2460]">
+              <span className="absolute -top-1.5 -right-1.5 bg-[#C5A059] text-stone-950 font-bold text-[10px] rounded-full min-w-[18px] h-[18px] px-1 flex items-center justify-center shadow-md ring-2 ring-[#0C419C]">
                 {totalItems}
               </span>
             </div>

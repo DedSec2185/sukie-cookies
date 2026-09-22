@@ -34,6 +34,7 @@ export default function Navbar() {
     { name: 'Home', href: '#home' },
     { name: 'Menu', href: '#menu' },
     { name: 'Our Story', href: '#story' },
+    { name: 'Care & Complaints', href: '#care' },
     { name: 'Contact', href: '#contact' },
   ];
 

@@ -133,7 +133,7 @@ export default function CookieCard({ product, onAddToCart, onOpenModal }) {
           <div className="flex items-center justify-between gap-3">
             <div>
               <span className="text-[9px] uppercase tracking-widest text-stone-400 block font-mono">Price</span>
-              <span className="text-xl sm:text-3xl font-bold font-heading text-[#0F2460]">
+              <span className="text-xl sm:text-3xl font-bold font-heading text-[#0C419C]">
                 ₹{product.price}
               </span>
             </div>
@@ -145,7 +145,7 @@ export default function CookieCard({ product, onAddToCart, onOpenModal }) {
             ) : currentQty > 0 ? (
               <div 
                 onClick={(e) => e.stopPropagation()} 
-                className="inline-flex items-center rounded-full bg-[#0F2460] text-white p-1 border border-[#C5A059]/40 shadow-md"
+                className="inline-flex items-center rounded-full bg-[#0C419C] text-white p-1 border border-[#C5A059]/40 shadow-md"
               >
                 <button
                   type="button"
@@ -188,7 +188,7 @@ export default function CookieCard({ product, onAddToCart, onOpenModal }) {
               <button
                 type="button"
                 onClick={handleAddToCart}
-                className="bg-[#1B3A8C] hover:bg-[#0F2460] active:scale-95 text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 flex items-center gap-1.5 shadow-md hover:shadow-indigo-900/30 cursor-pointer"
+                className="bg-[#0C419C] hover:bg-[#072561] active:scale-95 text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 flex items-center gap-1.5 shadow-md hover:shadow-indigo-900/30 cursor-pointer"
               >
                 <span>Add To Box</span>
                 <span className="text-sm font-light">+</span>

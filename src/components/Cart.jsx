@@ -235,7 +235,7 @@ export default function Cart() {
               {view === 'cart' && (
                 <>
                   {/* Cart Header */}
-                  <div className="p-4 sm:p-5 bg-[#0F2460] text-white flex items-center justify-between shadow-md border-b border-[#C5A059]/30 shrink-0">
+                  <div className="p-4 sm:p-5 bg-[#0C419C] text-white flex items-center justify-between shadow-md border-b border-[#C5A059]/30 shrink-0">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-[#C5A059]/20 border border-[#C5A059]/40 flex items-center justify-center text-lg shadow-inner">
                         🛍️
@@ -270,7 +270,7 @@ export default function Cart() {
                         </p>
                         <button
                           onClick={handleClose}
-                          className="mt-6 bg-[#0F2460] text-white px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider hover:bg-[#1B3A8C] border border-[#C5A059]/40 transition-colors shadow-md cursor-pointer"
+                          className="mt-6 bg-[#0C419C] text-white px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider hover:bg-[#1B3A8C] border border-[#C5A059]/40 transition-colors shadow-md cursor-pointer"
                         >
                           Explore Menu
                         </button>
@@ -291,7 +291,7 @@ export default function Cart() {
                                 onError={(e) => {
                                   e.target.style.display = 'none';
                                   if (e.target.parentElement) {
-                                    e.target.parentElement.innerHTML = `<div class="w-full h-full flex items-center justify-center bg-[#0F2460] text-xl text-white">🍪</div>`;
+                                    e.target.parentElement.innerHTML = `<div class="w-full h-full flex items-center justify-center bg-[#0C419C] text-xl text-white">🍪</div>`;
                                   }
                                 }}
                               />
@@ -338,7 +338,7 @@ export default function Cart() {
 
                             {/* Subtotal for item */}
                             <div className="text-right shrink-0 pr-1">
-                              <span className="font-heading text-base font-bold text-[#0F2460]">
+                              <span className="font-heading text-base font-bold text-[#0C419C]">
                                 ₹{item.price * item.quantity}
                               </span>
                             </div>
@@ -381,7 +381,7 @@ export default function Cart() {
                         <select
                           value={deliveryArea}
                           onChange={(e) => setDeliveryArea(e.target.value)}
-                          className="bg-white border border-stone-200 rounded-lg px-2.5 py-1 text-xs font-bold text-[#0F2460] outline-none cursor-pointer focus:border-[#C5A059]"
+                          className="bg-white border border-stone-200 rounded-lg px-2.5 py-1 text-xs font-bold text-[#0C419C] outline-none cursor-pointer focus:border-[#C5A059]"
                         >
                           <option value="Vikhroli">Vikhroli (Direct Atelier)</option>
                           <option value="Powai">Powai</option>
@@ -413,7 +413,7 @@ export default function Cart() {
                         </div>
                         <div className="flex justify-between items-baseline pt-2 border-t border-stone-200">
                           <span className="font-heading text-base font-bold text-stone-900">Total Amount</span>
-                          <span className="font-heading text-2xl font-bold text-[#0F2460]">
+                          <span className="font-heading text-2xl font-bold text-[#0C419C]">
                             ₹{finalTotal}
                           </span>
                         </div>
@@ -424,7 +424,7 @@ export default function Cart() {
                         <button
                           type="button"
                           onClick={handleGoToCheckout}
-                          className="w-full py-3.5 px-4 bg-[#0F2460] hover:bg-[#1B3A8C] text-white rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-blue-950/20 active:scale-[0.99] transition-all cursor-pointer border border-[#C5A059]/40"
+                          className="w-full py-3.5 px-4 bg-[#0C419C] hover:bg-[#1B3A8C] text-white rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-blue-950/20 active:scale-[0.99] transition-all cursor-pointer border border-[#C5A059]/40"
                         >
                           <span>Proceed to Checkout</span>
                           <span className="text-base">→</span>
@@ -454,7 +454,7 @@ export default function Cart() {
               {view === 'checkout' && (
                 <>
                   {/* Checkout Header with Back Button */}
-                  <div className="p-4 sm:p-5 bg-[#0F2460] text-white flex items-center justify-between shadow-md border-b border-[#C5A059]/30 shrink-0">
+                  <div className="p-4 sm:p-5 bg-[#0C419C] text-white flex items-center justify-between shadow-md border-b border-[#C5A059]/30 shrink-0">
                     <div className="flex items-center gap-3">
                       <button
                         type="button"
@@ -488,21 +488,21 @@ export default function Cart() {
                     {/* Order summary mini banner */}
                     <div className="p-3 bg-amber-50/70 border border-amber-200/80 rounded-xl flex items-center justify-between text-xs text-stone-800">
                       <div>
-                        <span className="font-semibold block text-[#0F2460]">
+                        <span className="font-semibold block text-[#0C419C]">
                           Ordering {totalItems} Cookies ({includeGiftBox ? 'With Gift Box' : 'Standard Packaging'})
                         </span>
                         <span className="text-[11px] text-stone-500">
                           Freshly prepared in Mumbai for your slot
                         </span>
                       </div>
-                      <span className="font-heading text-base font-bold text-[#0F2460]">
+                      <span className="font-heading text-base font-bold text-[#0C419C]">
                         ₹{finalTotal}
                       </span>
                     </div>
 
                     {/* Section 1: Customer Contact */}
                     <div className="bg-white p-4 rounded-2xl border border-stone-200 space-y-3 shadow-xs">
-                      <h3 className="text-xs font-bold uppercase tracking-wider text-[#0F2460] flex items-center gap-1.5">
+                      <h3 className="text-xs font-bold uppercase tracking-wider text-[#0C419C] flex items-center gap-1.5">
                         <span>👤</span> 1. Contact Information
                       </h3>
 
@@ -549,7 +549,7 @@ export default function Cart() {
 
                     {/* Section 2: Delivery Destination */}
                     <div className="bg-white p-4 rounded-2xl border border-stone-200 space-y-3 shadow-xs">
-                      <h3 className="text-xs font-bold uppercase tracking-wider text-[#0F2460] flex items-center gap-1.5">
+                      <h3 className="text-xs font-bold uppercase tracking-wider text-[#0C419C] flex items-center gap-1.5">
                         <span>📍</span> 2. Mumbai Delivery Address
                       </h3>
 
@@ -637,14 +637,14 @@ export default function Cart() {
 
                     {/* Section 3: Payment Method Selection */}
                     <div className="bg-white p-4 rounded-2xl border border-stone-200 space-y-2.5 shadow-xs">
-                      <h3 className="text-xs font-bold uppercase tracking-wider text-[#0F2460] flex items-center gap-1.5">
+                      <h3 className="text-xs font-bold uppercase tracking-wider text-[#0C419C] flex items-center gap-1.5">
                         <span>💳</span> 3. Select Payment Preference
                       </h3>
 
                       {/* Option 1: Instant UPI */}
                       <label className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
                         formData.paymentMethod === 'upi'
-                          ? 'border-[#0F2460] bg-[#0F2460]/5'
+                          ? 'border-[#0F2460] bg-[#0C419C]/5'
                           : 'border-stone-200 bg-stone-50 hover:border-stone-300'
                       }`}>
                         <input
@@ -658,7 +658,7 @@ export default function Cart() {
                         <div className="flex-1 text-xs">
                           <span className="font-bold text-stone-900 block">Instant UPI (GPay / PhonePe / Paytm / QR)</span>
                           <span className="text-[11px] text-stone-500 block mt-0.5">
-                            Pay directly to Atelier UPI ID: <strong className="font-mono text-[#0F2460]">sukiecookies@upi</strong>
+                            Pay directly to Atelier UPI ID: <strong className="font-mono text-[#0C419C]">sukiecookies@upi</strong>
                           </span>
                         </div>
                       </label>
@@ -666,7 +666,7 @@ export default function Cart() {
                       {/* Option 2: Pay on Handover / Delivery */}
                       <label className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
                         formData.paymentMethod === 'cod'
-                          ? 'border-[#0F2460] bg-[#0F2460]/5'
+                          ? 'border-[#0F2460] bg-[#0C419C]/5'
                           : 'border-stone-200 bg-stone-50 hover:border-stone-300'
                       }`}>
                         <input
@@ -688,7 +688,7 @@ export default function Cart() {
                       {/* Option 3: Online Gateway Cards / NetBanking */}
                       <label className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
                         formData.paymentMethod === 'card'
-                          ? 'border-[#0F2460] bg-[#0F2460]/5'
+                          ? 'border-[#0F2460] bg-[#0C419C]/5'
                           : 'border-stone-200 bg-stone-50 hover:border-stone-300'
                       }`}>
                         <input
@@ -713,7 +713,7 @@ export default function Cart() {
                       <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="w-full py-4 px-4 bg-[#0F2460] hover:bg-[#1B3A8C] text-white rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-xl shadow-blue-950/20 active:scale-[0.99] transition-all cursor-pointer border border-[#C5A059]/40"
+                        className="w-full py-4 px-4 bg-[#0C419C] hover:bg-[#1B3A8C] text-white rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-xl shadow-blue-950/20 active:scale-[0.99] transition-all cursor-pointer border border-[#C5A059]/40"
                       >
                         {isSubmitting ? (
                           <span>Placing Order...</span>
@@ -738,7 +738,7 @@ export default function Cart() {
               {view === 'confirmation' && placedOrder && (
                 <div className="flex-1 flex flex-col justify-between overflow-y-auto">
                   {/* Top Success Header */}
-                  <div className="p-6 sm:p-8 bg-[#0F2460] text-white text-center shadow-md border-b border-[#C5A059]/30 shrink-0">
+                  <div className="p-6 sm:p-8 bg-[#0C419C] text-white text-center shadow-md border-b border-[#C5A059]/30 shrink-0">
                     <div className="w-16 h-16 mx-auto rounded-full bg-emerald-500/20 border-2 border-emerald-400 flex items-center justify-center text-3xl mb-3 shadow-lg">
                       ✨
                     </div>
@@ -780,7 +780,7 @@ export default function Cart() {
                         </div>
                         <div className="flex justify-between">
                           <span className="text-stone-500">Payment:</span>
-                          <span className="font-semibold text-[#0F2460]">
+                          <span className="font-semibold text-[#0C419C]">
                             {placedOrder.customer.paymentMethod === 'upi'
                               ? 'Instant UPI'
                               : placedOrder.customer.paymentMethod === 'cod'
@@ -813,11 +813,31 @@ export default function Cart() {
 
                         <div className="flex justify-between items-baseline pt-2 border-t border-stone-200 text-stone-900 font-bold">
                           <span className="font-heading text-sm">Total Paid / Due</span>
-                          <span className="font-heading text-xl text-[#0F2460]">
+                          <span className="font-heading text-xl text-[#0C419C]">
                             ₹{placedOrder.finalTotal}
                           </span>
                         </div>
                       </div>
+                    </div>
+
+                    {/* Quality & Reversal Guarantee */}
+                    <div className="bg-[#FAF6EE] rounded-2xl p-4 border border-[#C5A059]/40 space-y-2 text-left">
+                      <div className="flex items-center gap-2 text-stone-900 font-bold text-xs">
+                        <span>🛡️</span>
+                        <span>Our Quality & Order Reversal Guarantee</span>
+                      </div>
+                      <p className="text-[11px] text-stone-600 leading-relaxed">
+                        If anything with your order arrives damaged or imperfect, message our Chef directly on WhatsApp. We personally review all complaints. If genuine, we immediately approve a fresh replacement batch or payment reversal.
+                      </p>
+                      <a
+                        href={`https://wa.me/919136498467?text=Hello%20Suki%C3%A9%20Care!%20%F0%9F%8D%AA%20I%20have%20an%20issue%20with%20Order%20%23${placedOrder.id}%20for%20review.`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 text-xs font-bold text-[#0C419C] hover:underline pt-0.5"
+                      >
+                        <span>Need Support or Have a Complaint? Chat on WhatsApp</span>
+                        <span>→</span>
+                      </a>
                     </div>
 
                     {/* Notification message */}

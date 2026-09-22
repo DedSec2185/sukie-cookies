@@ -2,9 +2,10 @@
 @import "tailwindcss";
 
 @theme {
-  --color-brand-blue: #1B3A8C;
-  --color-brand-blue-dark: #0F2460;
-  --color-brand-blue-light: #2B4FA8;
+  --color-brand-blue: #0C419C;
+  --color-brand-vividblue: #0C419C;
+  --color-brand-blue-dark: #072561;
+  --color-brand-blue-light: #1653B8;
   --color-brand-cream: #FAF6EE;
   --color-brand-cream-dark: #EEE4CC;
   --color-brand-gold: #C8A050;

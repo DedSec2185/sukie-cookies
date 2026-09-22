@@ -204,6 +204,122 @@ export default function Contact() {
             </div>
           </div>
         </div>
+
+        {/* Dedicated Customer Care, Complaints & Reviews Guarantee Section */}
+        <div id="care" className="mt-16 pt-12 border-t border-stone-200">
+          <div className="text-center max-w-2xl mx-auto mb-10">
+            <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-emerald-50 border border-emerald-500/30 text-emerald-800 text-[11px] font-bold tracking-wider uppercase mb-2">
+              <span>🛡️</span>
+              <span>100% Quality & Transparency Promise</span>
+            </span>
+            <h3 className="font-heading text-3xl sm:text-4xl font-bold text-brand-dark">
+              Customer Care, Complaints & Reviews
+            </h3>
+            <p className="text-stone-600 text-xs sm:text-sm mt-2 leading-relaxed">
+              We bake in small batches with genuine passion. Whether you have an issue with your delivery or want to share your tasting review, our founder is directly available on WhatsApp.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Card 1: Order Complaints & Reversals */}
+            <div className="bg-[#FAF6EE] rounded-2xl p-6 sm:p-8 border border-stone-200/80 shadow-xs flex flex-col justify-between hover:border-brand-gold/60 transition-colors">
+              <div>
+                <div className="w-12 h-12 rounded-xl bg-red-100 text-red-600 flex items-center justify-center text-2xl mb-4 shadow-2xs">
+                  💬
+                </div>
+                <span className="text-[10px] font-mono uppercase tracking-widest text-red-700 font-bold block mb-1">
+                  Prompt Resolution
+                </span>
+                <h4 className="font-heading text-xl sm:text-2xl font-bold text-brand-dark mb-2">
+                  Order Complaints & Reversals
+                </h4>
+                <p className="text-stone-600 text-xs sm:text-sm leading-relaxed mb-4">
+                  If an order arrives damaged in transit, under/over-baked, or imperfect in any way, we review every complaint personally. For genuine issues, Chef immediately approves a fresh replacement batch or payment reversal.
+                </p>
+
+                <ul className="space-y-2 text-xs text-stone-700 mb-6">
+                  <li className="flex items-center gap-2">
+                    <span className="text-emerald-600 font-bold">✓</span>
+                    <span>Direct founder review — no automated bots</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="text-emerald-600 font-bold">✓</span>
+                    <span>100% transparent replacement or reversal option</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="text-emerald-600 font-bold">✓</span>
+                    <span>Direct WhatsApp support with fast turn-around</span>
+                  </li>
+                </ul>
+              </div>
+
+              <a
+                href="https://wa.me/919136498467?text=Hello%20Suki%C3%A9%20Care!%20%F0%9F%8D%AA%20I%20have%20an%20order%20complaint%20%2F%20issue%20to%20review%20for%20resolution.%20Order%20ID%3A%20"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full py-3 px-4 bg-stone-900 hover:bg-black text-white rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-md"
+              >
+                <span>Report Complaint on WhatsApp</span>
+                <span className="text-base">💬</span>
+              </a>
+            </div>
+
+            {/* Card 2: Feedback & Tasting Reviews */}
+            <div className="bg-[#FAF6EE] rounded-2xl p-6 sm:p-8 border border-stone-200/80 shadow-xs flex flex-col justify-between hover:border-brand-gold/60 transition-colors">
+              <div>
+                <div className="w-12 h-12 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-2xl mb-4 shadow-2xs">
+                  ⭐
+                </div>
+                <span className="text-[10px] font-mono uppercase tracking-widest text-[#7C5E28] font-bold block mb-1">
+                  Community Voice
+                </span>
+                <h4 className="font-heading text-xl sm:text-2xl font-bold text-brand-dark mb-2">
+                  Feedback & Tasting Reviews
+                </h4>
+                <p className="text-stone-600 text-xs sm:text-sm leading-relaxed mb-4">
+                  Loved your warm molten cookie experience? Have suggestions for our next limited drop flavour? Your honest reviews help our Mumbai home kitchen grow and delight more cookie lovers.
+                </p>
+
+                <ul className="space-y-2 text-xs text-stone-700 mb-6">
+                  <li className="flex items-center gap-2">
+                    <span className="text-amber-500 font-bold">★</span>
+                    <span>Share your tasting notes & favourite flavour</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="text-amber-500 font-bold">★</span>
+                    <span>Suggest new cookie flavours you&apos;d love to see</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="text-amber-500 font-bold">★</span>
+                    <span>Tag us in your unboxing on Instagram @sukie.mumbai</span>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="space-y-2">
+                <a
+                  href="https://wa.me/919136498467?text=Hello%20Chef!%20%F0%9F%8D%AA%20I%20wanted%20to%20share%20my%20tasting%20review%20and%20feedback%20for%20Suki%C3%A9%20Cookies%3A%20"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-3 px-4 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-md"
+                >
+                  <span>Share Review on WhatsApp</span>
+                  <span className="text-base">⭐</span>
+                </a>
+
+                <a
+                  href="https://instagram.com/sukie.mumbai"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-2.5 px-4 bg-white hover:bg-stone-100 text-stone-800 rounded-xl font-semibold text-xs transition-colors flex items-center justify-center gap-2 border border-stone-200 cursor-pointer"
+                >
+                  <span>Tag Us on Instagram (@sukie.mumbai)</span>
+                  <span>📸</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );

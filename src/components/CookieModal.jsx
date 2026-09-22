@@ -59,26 +59,28 @@ export default function CookieModal({ product, isOpen, onClose }) {
           transition={{ duration: 0.3, ease: 'easeOut' }}
           className="relative w-full max-w-2xl bg-gradient-to-b from-[#161311] via-[#110E0C] to-[#0A0807] text-white rounded-3xl border border-[#C5A059]/30 shadow-[0_30px_90px_rgba(0,0,0,0.9)] overflow-hidden z-10 my-4 sm:my-8"
         >
-          {/* Top Back & Close navigation bar */}
-          <button
-            onClick={onClose}
-            aria-label="Back to menu"
-            className="absolute top-4 left-4 z-20 px-3.5 py-1.5 rounded-full bg-black/70 hover:bg-black/90 text-white flex items-center gap-1.5 text-xs font-medium border border-white/20 backdrop-blur-md cursor-pointer transition-all active:scale-95 shadow-md"
-          >
-            <span>←</span>
-            <span>Back to Menu</span>
-          </button>
+          {/* Pinned Sticky Navigation Bar - Stays permanently visible while scrolling */}
+          <div className="sticky top-0 inset-x-0 z-30 p-3 sm:p-4 flex items-center justify-between pointer-events-none bg-gradient-to-b from-black/80 via-black/30 to-transparent">
+            <button
+              onClick={onClose}
+              aria-label="Back to menu"
+              className="pointer-events-auto px-3.5 py-1.5 rounded-full bg-black/80 hover:bg-black text-white flex items-center gap-1.5 text-xs font-semibold border border-white/25 backdrop-blur-md cursor-pointer transition-all active:scale-95 shadow-lg"
+            >
+              <span>←</span>
+              <span>Back to Menu</span>
+            </button>
 
-          <button
-            onClick={onClose}
-            aria-label="Close details"
-            className="absolute top-4 right-4 z-20 w-9 h-9 rounded-full bg-black/70 hover:bg-black/90 text-white flex items-center justify-center transition-colors border border-white/20 backdrop-blur-md cursor-pointer"
-          >
-            ✕
-          </button>
+            <button
+              onClick={onClose}
+              aria-label="Close details"
+              className="pointer-events-auto w-9 h-9 rounded-full bg-black/80 hover:bg-black text-white flex items-center justify-center transition-colors border border-white/25 backdrop-blur-md cursor-pointer active:scale-95 shadow-lg text-sm font-bold"
+            >
+              ✕
+            </button>
+          </div>
 
-          {/* Modal Header Realistic Visual */}
-          <div className="relative h-64 sm:h-80 w-full overflow-hidden bg-stone-900">
+          {/* Modal Header Realistic Visual - Margin pulled up slightly behind sticky header */}
+          <div className="relative -mt-16 sm:-mt-20 h-64 sm:h-80 w-full overflow-hidden bg-stone-900">
             <img
               src={product.image}
               alt={product.name}
@@ -213,6 +215,18 @@ export default function CookieModal({ product, isOpen, onClose }) {
                   {isAdded ? 'Added to Box! ✓' : 'Add To Box +'}
                 </button>
               </div>
+            </div>
+
+            {/* Smooth Exit & Back to Menu Row */}
+            <div className="pt-2 text-center">
+              <button
+                type="button"
+                onClick={onClose}
+                className="text-stone-400 hover:text-amber-200 text-xs font-medium py-2 px-5 rounded-full border border-white/10 hover:border-white/25 transition-all inline-flex items-center gap-1.5 cursor-pointer active:scale-95 bg-white/[0.02]"
+              >
+                <span>←</span>
+                <span>Back to Menu</span>
+              </button>
             </div>
 
           </div>

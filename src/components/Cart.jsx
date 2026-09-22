@@ -11,22 +11,66 @@ export default function Cart() {
     totalPrice,
     updateQuantity,
     removeItem,
+    clearCart,
     setCartOpen,
   } = useCart();
 
+  // Navigation views: 'cart' | 'checkout' | 'confirmation'
+  const [view, setView] = useState('cart');
   const [deliveryArea, setDeliveryArea] = useState('Powai');
   const [includeGiftBox, setIncludeGiftBox] = useState(false);
-  const [checkoutModalOpen, setCheckoutModalOpen] = useState(false);
+
+  // Direct Website Checkout form state
+  const [formData, setFormData] = useState({
+    name: '',
+    phone: '',
+    address: '',
+    landmark: '',
+    slot: 'Today Evening (5:00 PM – 8:00 PM)',
+    note: '',
+    paymentMethod: 'upi', // 'upi' | 'cod' | 'card'
+  });
+  const [formErrors, setFormErrors] = useState({});
+  const [placedOrder, setPlacedOrder] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Close on Escape key press
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape' && isOpen) {
-        setCartOpen(false);
+        if (view === 'checkout') {
+          setView('cart');
+        } else {
+          setCartOpen(false);
+        }
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, view, setCartOpen]);
+
+  // Handle Mobile Browser Back Gesture (popstate)
+  useEffect(() => {
+    if (!isOpen) {
+      setView('cart');
+      return;
+    }
+
+    // Push state when cart opens so back gesture doesn't leave the site
+    window.history.pushState({ sukieModal: 'cart' }, '');
+
+    const handlePopState = () => {
+      setView((currentView) => {
+        if (currentView === 'checkout') {
+          return 'cart';
+        }
+        setCartOpen(false);
+        return 'cart';
+      });
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
   }, [isOpen, setCartOpen]);
 
   // Lock body scroll when cart is open
@@ -44,19 +88,120 @@ export default function Cart() {
   const packagingFee = includeGiftBox ? 49 : 0;
   const finalTotal = totalPrice + packagingFee;
 
-  // Generate WhatsApp Order Link
-  const generateWhatsAppLink = () => {
-    const orderLines = items
+  const handleInputChange = (field, value) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    if (formErrors[field]) {
+      setFormErrors((prev) => {
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      });
+    }
+  };
+
+  const handleGoToCheckout = () => {
+    window.history.pushState({ sukieModal: 'checkout' }, '');
+    setView('checkout');
+  };
+
+  const handleBackToCart = () => {
+    setView('cart');
+  };
+
+  const handleClose = () => {
+    setCartOpen(false);
+    setTimeout(() => {
+      setView('cart');
+    }, 300);
+  };
+
+  const validateForm = () => {
+    const errors = {};
+    if (!formData.name.trim()) errors.name = 'Please enter your full name';
+    
+    const cleanPhone = formData.phone.replace(/[\s-+]/g, '');
+    if (!formData.phone.trim()) {
+      errors.phone = 'Please enter your phone number';
+    } else if (cleanPhone.length < 10) {
+      errors.phone = 'Please enter a valid 10-digit mobile number';
+    }
+
+    if (!formData.address.trim()) {
+      errors.address = 'Please enter your delivery address';
+    }
+    return errors;
+  };
+
+  const handlePlaceOrder = (e) => {
+    e.preventDefault();
+    const errors = validateForm();
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      return;
+    }
+
+    setIsSubmitting(true);
+    const orderNumber = `SUK-${Math.floor(1000 + Math.random() * 9000)}`;
+
+    const newOrder = {
+      id: orderNumber,
+      items: [...items],
+      totalItems,
+      totalPrice,
+      packagingFee,
+      finalTotal,
+      deliveryArea,
+      customer: { ...formData },
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }),
+      date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
+    };
+
+    setPlacedOrder(newOrder);
+
+    // Save to localStorage for customer reference
+    try {
+      const prev = JSON.parse(localStorage.getItem('sukie_orders') || '[]');
+      localStorage.setItem('sukie_orders', JSON.stringify([newOrder, ...prev]));
+    } catch {
+      // Storage unavailable, continue
+    }
+
+    // Clear cart items
+    clearCart();
+    setIsSubmitting(false);
+    setView('confirmation');
+  };
+
+  // WhatsApp Order Confirmation Helper (Optional user-facing copy)
+  const generateOrderWhatsAppLink = (order) => {
+    if (!order) return 'https://wa.me/919136498467';
+    const lines = order.items
       .map((item) => `• ${item.name} (${item.weight}) x${item.quantity} = ₹${item.price * item.quantity}`)
       .join('%0A');
 
-    const message = `Hello Sukié Team! 🍪%0A%0AI would like to place an order:%0A${orderLines}%0A%0A` +
-      `${includeGiftBox ? '🎁 Luxury Cobalt Gift Box: Yes (+₹49)%0A' : ''}` +
-      `📍 Delivery Area: ${deliveryArea}%0A` +
-      `💰 Total: ₹${finalTotal}%0A%0A` +
-      `Please let me know your payment details and delivery schedule!`;
+    const paymentMethodText =
+      order.customer.paymentMethod === 'upi'
+        ? 'Instant UPI Transfer'
+        : order.customer.paymentMethod === 'cod'
+        ? 'Pay on Delivery / Handover'
+        : 'Online Cards / NetBanking';
 
-    return `https://wa.me/919136498467?text=${message}`;
+    const msg =
+      `Hello Sukié Team! 🍪%0A%0A` +
+      `*Order Placed on Website:* #${order.id}%0A` +
+      `*Name:* ${order.customer.name}%0A` +
+      `*Phone:* ${order.customer.phone}%0A` +
+      `*Delivery Address:* ${order.customer.address}${order.customer.landmark ? ', ' + order.customer.landmark : ''}%0A` +
+      `*Mumbai Area:* ${order.deliveryArea}%0A` +
+      `*Slot:* ${order.customer.slot}%0A` +
+      (order.customer.note ? `*Gift Note / Instructions:* ${order.customer.note}%0A` : '') +
+      `%0A*Items:*%0A${lines}%0A` +
+      (order.packagingFee > 0 ? `🎁 Luxury Ribbon Gift Box: Yes (+₹49)%0A` : '') +
+      `%0A*Total Amount:* ₹${order.finalTotal}%0A` +
+      `*Payment Choice:* ${paymentMethodText}%0A%0A` +
+      `Please let me know when the batch is heading out!`;
+
+    return `https://wa.me/919136498467?text=${msg}`;
   };
 
   const cartContent = (
@@ -69,13 +214,13 @@ export default function Cart() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.25 }}
-            onClick={() => setCartOpen(false)}
+            onClick={handleClose}
             className="fixed inset-0 bg-black/75 backdrop-blur-sm transition-opacity"
             aria-hidden="true"
           />
 
-          {/* Sliding Panel - Clean container without pl-10 to prevent mobile overflow */}
-          <div className="fixed inset-y-0 right-0 w-full max-w-md flex pointer-events-auto">
+          {/* Sliding Drawer Container */}
+          <div className="fixed inset-y-0 right-0 w-full max-w-lg flex pointer-events-auto">
             <motion.div
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
@@ -84,209 +229,623 @@ export default function Cart() {
               className="w-full h-full bg-[#FAF6EE] shadow-2xl flex flex-col justify-between overflow-hidden border-l border-[#C5A059]/30"
               style={{ backgroundColor: '#FAF6EE' }}
             >
-              {/* Cart Header */}
-              <div className="p-4 sm:p-5 bg-[#0F2460] text-white flex items-center justify-between shadow-md border-b border-[#C5A059]/30 shrink-0">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-[#C5A059]/20 border border-[#C5A059]/40 flex items-center justify-center text-lg shadow-inner">
-                    🛍️
-                  </div>
-                  <div>
-                    <h2 className="font-heading text-lg sm:text-xl font-bold text-white tracking-wide">
-                      Your Sukié Box
-                    </h2>
-                    <p className="text-xs text-amber-200/80 font-mono">
-                      {totalItems} {totalItems === 1 ? 'artisan bake' : 'artisan bakes'} selected
-                    </p>
-                  </div>
-                </div>
+              {/* ========================================================================= */}
+              {/* VIEW 1: CART VIEW                                                        */}
+              {/* ========================================================================= */}
+              {view === 'cart' && (
+                <>
+                  {/* Cart Header */}
+                  <div className="p-4 sm:p-5 bg-[#0F2460] text-white flex items-center justify-between shadow-md border-b border-[#C5A059]/30 shrink-0">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-[#C5A059]/20 border border-[#C5A059]/40 flex items-center justify-center text-lg shadow-inner">
+                        🛍️
+                      </div>
+                      <div>
+                        <h2 className="font-heading text-lg sm:text-xl font-bold text-white tracking-wide">
+                          Your Sukié Box
+                        </h2>
+                        <p className="text-xs text-amber-200/80 font-mono">
+                          {totalItems} {totalItems === 1 ? 'artisan bake' : 'artisan bakes'} selected
+                        </p>
+                      </div>
+                    </div>
 
-                <button
-                  onClick={() => setCartOpen(false)}
-                  aria-label="Close cart"
-                  className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-sm font-semibold transition-colors cursor-pointer"
-                >
-                  ✕
-                </button>
-              </div>
-
-              {/* Cart Items List */}
-              <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3">
-                {items.length === 0 ? (
-                  <div className="h-full min-h-[300px] flex flex-col items-center justify-center text-center p-6 text-stone-500">
-                    <span className="text-5xl sm:text-6xl mb-3 animate-bounce select-none">🍪</span>
-                    <h3 className="font-heading text-xl font-bold text-stone-800">Your box is empty</h3>
-                    <p className="text-xs text-stone-500 mt-2 max-w-xs leading-relaxed">
-                      Our freshly baked 6oz NYC-style cookies are ready to be boxed. Explore today&apos;s limited drops!
-                    </p>
                     <button
-                      onClick={() => setCartOpen(false)}
-                      className="mt-6 bg-[#0F2460] text-white px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider hover:bg-[#1B3A8C] border border-[#C5A059]/40 transition-colors shadow-md cursor-pointer"
+                      onClick={handleClose}
+                      aria-label="Close cart"
+                      className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-sm font-semibold transition-colors cursor-pointer"
                     >
-                      Explore Menu
+                      ✕
                     </button>
                   </div>
-                ) : (
-                  <div className="space-y-3">
-                    {items.map((item) => (
-                      <div
-                        key={item.id}
-                        className="p-3 bg-white rounded-2xl border border-stone-200 shadow-xs flex items-center gap-3 hover:border-[#C5A059]/50 transition-colors"
-                      >
-                        {/* Real Cookie Photography Thumbnail */}
-                        <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0 border border-[#C5A059]/30 bg-stone-900 shadow-xs">
-                          <img
-                            src={item.image}
-                            alt={item.name}
-                            className="w-full h-full object-cover"
-                            onError={(e) => {
-                              e.target.style.display = 'none';
-                              if (e.target.parentElement) {
-                                e.target.parentElement.innerHTML = `<div class="w-full h-full flex items-center justify-center bg-[#0F2460] text-xl text-white">🍪</div>`;
-                              }
-                            }}
-                          />
-                        </div>
 
-                        {/* Title, Weight & Quantity Controls */}
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-heading text-sm font-bold text-stone-900 truncate leading-snug">
-                            {item.name}
-                          </h4>
-                          <p className="text-[11px] text-stone-500 font-mono mt-0.5">
-                            ₹{item.price} each • {item.weight}
-                          </p>
-
-                          {/* Quantity Controls */}
-                          <div className="flex items-center gap-2 mt-2">
-                            <div className="inline-flex items-center rounded-lg border border-stone-200 bg-stone-50 shadow-xs">
-                              <button
-                                onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                                className="w-7 h-7 rounded-l-lg hover:bg-stone-200 text-stone-700 flex items-center justify-center text-xs font-bold transition-colors cursor-pointer"
-                                aria-label="Decrease quantity"
-                              >
-                                −
-                              </button>
-                              <span className="text-xs font-bold font-mono px-2 text-stone-900">
-                                {item.quantity}
-                              </span>
-                              <button
-                                onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                                className="w-7 h-7 rounded-r-lg hover:bg-stone-200 text-stone-700 flex items-center justify-center text-xs font-bold transition-colors cursor-pointer"
-                                aria-label="Increase quantity"
-                              >
-                                +
-                              </button>
+                  {/* Cart Items List */}
+                  <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3">
+                    {items.length === 0 ? (
+                      <div className="h-full min-h-[300px] flex flex-col items-center justify-center text-center p-6 text-stone-500">
+                        <span className="text-5xl sm:text-6xl mb-3 animate-bounce select-none">🍪</span>
+                        <h3 className="font-heading text-xl font-bold text-stone-800">Your box is empty</h3>
+                        <p className="text-xs text-stone-500 mt-2 max-w-xs leading-relaxed">
+                          Our freshly baked 6oz NYC-style cookies are ready to be boxed. Explore today&apos;s limited drops!
+                        </p>
+                        <button
+                          onClick={handleClose}
+                          className="mt-6 bg-[#0F2460] text-white px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider hover:bg-[#1B3A8C] border border-[#C5A059]/40 transition-colors shadow-md cursor-pointer"
+                        >
+                          Explore Menu
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {items.map((item) => (
+                          <div
+                            key={item.id}
+                            className="p-3 bg-white rounded-2xl border border-stone-200 shadow-xs flex items-center gap-3 hover:border-[#C5A059]/50 transition-colors"
+                          >
+                            {/* Real Cookie Photography Thumbnail */}
+                            <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0 border border-[#C5A059]/30 bg-stone-900 shadow-xs">
+                              <img
+                                src={item.image}
+                                alt={item.name}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  e.target.style.display = 'none';
+                                  if (e.target.parentElement) {
+                                    e.target.parentElement.innerHTML = `<div class="w-full h-full flex items-center justify-center bg-[#0F2460] text-xl text-white">🍪</div>`;
+                                  }
+                                }}
+                              />
                             </div>
-                            <button
-                              onClick={() => removeItem(item.id)}
-                              className="text-[11px] text-stone-400 hover:text-red-600 font-medium ml-2 transition-colors cursor-pointer"
-                            >
-                              Remove
-                            </button>
+
+                            {/* Title, Weight & Quantity Controls */}
+                            <div className="flex-1 min-w-0">
+                              <h4 className="font-heading text-sm font-bold text-stone-900 truncate leading-snug">
+                                {item.name}
+                              </h4>
+                              <p className="text-[11px] text-stone-500 font-mono mt-0.5">
+                                ₹{item.price} each • {item.weight}
+                              </p>
+
+                              {/* Quantity Controls */}
+                              <div className="flex items-center gap-2 mt-2">
+                                <div className="inline-flex items-center rounded-lg border border-stone-200 bg-stone-50 shadow-xs">
+                                  <button
+                                    onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                                    className="w-7 h-7 rounded-l-lg hover:bg-stone-200 text-stone-700 flex items-center justify-center text-xs font-bold transition-colors cursor-pointer"
+                                    aria-label="Decrease quantity"
+                                  >
+                                    −
+                                  </button>
+                                  <span className="text-xs font-bold font-mono px-2 text-stone-900">
+                                    {item.quantity}
+                                  </span>
+                                  <button
+                                    onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                    className="w-7 h-7 rounded-r-lg hover:bg-stone-200 text-stone-700 flex items-center justify-center text-xs font-bold transition-colors cursor-pointer"
+                                    aria-label="Increase quantity"
+                                  >
+                                    +
+                                  </button>
+                                </div>
+                                <button
+                                  onClick={() => removeItem(item.id)}
+                                  className="text-[11px] text-stone-400 hover:text-red-600 font-medium ml-2 transition-colors cursor-pointer"
+                                >
+                                  Remove
+                                </button>
+                              </div>
+                            </div>
+
+                            {/* Subtotal for item */}
+                            <div className="text-right shrink-0 pr-1">
+                              <span className="font-heading text-base font-bold text-[#0F2460]">
+                                ₹{item.price * item.quantity}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Cart Footer / Checkout CTA */}
+                  {items.length > 0 && (
+                    <div className="p-4 sm:p-5 bg-white border-t border-stone-200 space-y-3.5 shadow-[0_-10px_30px_rgba(0,0,0,0.04)] shrink-0">
+                      {/* Luxury Gift Packaging Option */}
+                      <label className="flex items-center justify-between p-3 rounded-xl bg-stone-50 border border-stone-200 cursor-pointer hover:border-[#C5A059]/60 transition-colors">
+                        <div className="flex items-center gap-2.5 min-w-0 pr-2">
+                          <span className="text-base shrink-0">🎁</span>
+                          <div className="min-w-0">
+                            <p className="text-xs font-semibold text-stone-900 truncate">
+                              Signature Cobalt Ribbon & Keepsake Box
+                            </p>
+                            <p className="text-[10px] text-stone-500">
+                              Embossed card, luxury box & wax seal (+₹49)
+                            </p>
                           </div>
                         </div>
+                        <input
+                          type="checkbox"
+                          checked={includeGiftBox}
+                          onChange={(e) => setIncludeGiftBox(e.target.checked)}
+                          className="accent-[#0F2460] w-4 h-4 cursor-pointer shrink-0"
+                        />
+                      </label>
 
-                        {/* Subtotal for item */}
-                        <div className="text-right shrink-0 pr-1">
-                          <span className="font-heading text-base font-bold text-[#0F2460]">
-                            ₹{item.price * item.quantity}
+                      {/* Delivery Hub Selector */}
+                      <div className="flex items-center justify-between text-xs bg-stone-50 p-3 rounded-xl border border-stone-200">
+                        <div className="flex items-center gap-1.5 text-stone-600 font-medium">
+                          <span>📍</span>
+                          <span>Delivery Area:</span>
+                        </div>
+                        <select
+                          value={deliveryArea}
+                          onChange={(e) => setDeliveryArea(e.target.value)}
+                          className="bg-white border border-stone-200 rounded-lg px-2.5 py-1 text-xs font-bold text-[#0F2460] outline-none cursor-pointer focus:border-[#C5A059]"
+                        >
+                          <option value="Vikhroli">Vikhroli (Direct Atelier)</option>
+                          <option value="Powai">Powai</option>
+                          <option value="Andheri East & West">Andheri East & West</option>
+                          <option value="Chandivali">Chandivali</option>
+                          <option value="Ghatkopar">Ghatkopar</option>
+                          <option value="Bandra / BKC">Bandra / BKC</option>
+                          <option value="Lower Parel / Worli">Lower Parel / Worli</option>
+                          <option value="Navi Mumbai">Navi Mumbai</option>
+                          <option value="Other Mumbai">Other Mumbai</option>
+                        </select>
+                      </div>
+
+                      {/* Calculations Breakdown */}
+                      <div className="space-y-1.5 pt-1 text-xs">
+                        <div className="flex justify-between text-stone-600">
+                          <span>Cookies Subtotal</span>
+                          <span className="font-mono font-medium text-stone-900">₹{totalPrice}</span>
+                        </div>
+                        {includeGiftBox && (
+                          <div className="flex justify-between text-stone-600">
+                            <span>Luxury Gift Packaging</span>
+                            <span className="font-mono font-medium text-[#C5A059]">₹49</span>
+                          </div>
+                        )}
+                        <div className="flex justify-between text-stone-500 text-[11px]">
+                          <span>Mumbai Delivery Fee</span>
+                          <span className="text-emerald-700 font-semibold">Calculated at Dispatch</span>
+                        </div>
+                        <div className="flex justify-between items-baseline pt-2 border-t border-stone-200">
+                          <span className="font-heading text-base font-bold text-stone-900">Total Amount</span>
+                          <span className="font-heading text-2xl font-bold text-[#0F2460]">
+                            ₹{finalTotal}
                           </span>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                )}
-              </div>
 
-              {/* Cart Footer / Checkout Options */}
-              {items.length > 0 && (
-                <div className="p-4 sm:p-5 bg-white border-t border-stone-200 space-y-3.5 shadow-[0_-10px_30px_rgba(0,0,0,0.04)] shrink-0">
-                  {/* Luxury Gift Packaging Option */}
-                  <label className="flex items-center justify-between p-3 rounded-xl bg-stone-50 border border-stone-200 cursor-pointer hover:border-[#C5A059]/60 transition-colors">
-                    <div className="flex items-center gap-2.5 min-w-0 pr-2">
-                      <span className="text-base shrink-0">🎁</span>
-                      <div className="min-w-0">
-                        <p className="text-xs font-semibold text-stone-900 truncate">
-                          Signature Cobalt Gift Ribbon
-                        </p>
-                        <p className="text-[10px] text-stone-500">
-                          Includes luxury box & wax seal (+₹49)
+                      {/* Primary Direct Website Checkout Button */}
+                      <div className="space-y-2 pt-1">
+                        <button
+                          type="button"
+                          onClick={handleGoToCheckout}
+                          className="w-full py-3.5 px-4 bg-[#0F2460] hover:bg-[#1B3A8C] text-white rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-blue-950/20 active:scale-[0.99] transition-all cursor-pointer border border-[#C5A059]/40"
+                        >
+                          <span>Proceed to Checkout</span>
+                          <span className="text-base">→</span>
+                        </button>
+
+                        {/* Subtle WhatsApp Support Link at Bottom */}
+                        <div className="text-center pt-1">
+                          <a
+                            href="https://wa.me/919136498467?text=Hello%20Suki%C3%A9%20Team!%20%F0%9F%8D%AA%20I%20have%20a%20question%20regarding%20flavours%20or%20bulk%20gifting."
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[11px] text-stone-500 hover:text-emerald-700 transition-colors inline-flex items-center gap-1 font-medium"
+                          >
+                            <span>Questions or custom gifting?</span>
+                            <span className="underline font-semibold text-emerald-800">Chat with Chef on WhatsApp 💬</span>
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {/* ========================================================================= */}
+              {/* VIEW 2: DIRECT WEBSITE CHECKOUT FORM                                      */}
+              {/* ========================================================================= */}
+              {view === 'checkout' && (
+                <>
+                  {/* Checkout Header with Back Button */}
+                  <div className="p-4 sm:p-5 bg-[#0F2460] text-white flex items-center justify-between shadow-md border-b border-[#C5A059]/30 shrink-0">
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={handleBackToCart}
+                        aria-label="Back to box"
+                        className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-amber-200 flex items-center justify-center text-base font-bold transition-colors cursor-pointer"
+                      >
+                        ←
+                      </button>
+                      <div>
+                        <h2 className="font-heading text-lg sm:text-xl font-bold text-white tracking-wide">
+                          Checkout Details
+                        </h2>
+                        <p className="text-xs text-amber-200/80 font-mono">
+                          Direct Atelier Order • Step 2 of 2
                         </p>
                       </div>
                     </div>
-                    <input
-                      type="checkbox"
-                      checked={includeGiftBox}
-                      onChange={(e) => setIncludeGiftBox(e.target.checked)}
-                      className="accent-[#0F2460] w-4 h-4 cursor-pointer shrink-0"
-                    />
-                  </label>
 
-                  {/* Delivery Location Selector */}
-                  <div className="flex items-center justify-between text-xs bg-stone-50 p-3 rounded-xl border border-stone-200">
-                    <div className="flex items-center gap-1.5 text-stone-600 font-medium">
-                      <span>📍</span>
-                      <span>Delivery Area:</span>
-                    </div>
-                    <select
-                      value={deliveryArea}
-                      onChange={(e) => setDeliveryArea(e.target.value)}
-                      className="bg-white border border-stone-200 rounded-lg px-2.5 py-1 text-xs font-bold text-[#0F2460] outline-none cursor-pointer focus:border-[#C5A059]"
+                    <button
+                      onClick={handleClose}
+                      aria-label="Close modal"
+                      className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-sm font-semibold transition-colors cursor-pointer"
                     >
-                      <option value="Vikhroli">Vikhroli (Local Hub)</option>
-                      <option value="Powai">Powai</option>
-                      <option value="Andheri">Andheri</option>
-                      <option value="Chandivali">Chandivali</option>
-                      <option value="Ghatkopar">Ghatkopar</option>
-                      <option value="Bandra / BKC">Bandra / BKC</option>
-                      <option value="Navi Mumbai">Navi Mumbai</option>
-                      <option value="Other Mumbai">Other Mumbai</option>
-                    </select>
+                      ✕
+                    </button>
                   </div>
 
-                  {/* Price Calculations */}
-                  <div className="space-y-1.5 pt-1 text-xs">
-                    <div className="flex justify-between text-stone-600">
-                      <span>Cookies Subtotal</span>
-                      <span className="font-mono font-medium text-stone-900">₹{totalPrice}</span>
-                    </div>
-                    {includeGiftBox && (
-                      <div className="flex justify-between text-stone-600">
-                        <span>Luxury Gift Packaging</span>
-                        <span className="font-mono font-medium text-[#C5A059]">₹49</span>
+                  {/* Form Container */}
+                  <form onSubmit={handlePlaceOrder} className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4">
+                    {/* Order summary mini banner */}
+                    <div className="p-3 bg-amber-50/70 border border-amber-200/80 rounded-xl flex items-center justify-between text-xs text-stone-800">
+                      <div>
+                        <span className="font-semibold block text-[#0F2460]">
+                          Ordering {totalItems} Cookies ({includeGiftBox ? 'With Gift Box' : 'Standard Packaging'})
+                        </span>
+                        <span className="text-[11px] text-stone-500">
+                          Freshly prepared in Mumbai for your slot
+                        </span>
                       </div>
-                    )}
-                    <div className="flex justify-between text-stone-500 text-[11px]">
-                      <span>Mumbai Express Delivery</span>
-                      <span className="text-emerald-700 font-semibold">Calculated at Dispatch</span>
-                    </div>
-                    <div className="flex justify-between items-baseline pt-2 border-t border-stone-200">
-                      <span className="font-heading text-base font-bold text-stone-900">Total Amount</span>
-                      <span className="font-heading text-2xl font-bold text-[#0F2460]">
+                      <span className="font-heading text-base font-bold text-[#0F2460]">
                         ₹{finalTotal}
                       </span>
                     </div>
+
+                    {/* Section 1: Customer Contact */}
+                    <div className="bg-white p-4 rounded-2xl border border-stone-200 space-y-3 shadow-xs">
+                      <h3 className="text-xs font-bold uppercase tracking-wider text-[#0F2460] flex items-center gap-1.5">
+                        <span>👤</span> 1. Contact Information
+                      </h3>
+
+                      <div>
+                        <label className="block text-[11px] font-semibold text-stone-700 mb-1">
+                          Full Name <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          value={formData.name}
+                          onChange={(e) => handleInputChange('name', e.target.value)}
+                          placeholder="e.g. Ananya Sharma"
+                          className={`w-full px-3 py-2 text-xs rounded-xl border bg-stone-50 focus:bg-white focus:outline-none transition-all ${
+                            formErrors.name ? 'border-red-500 bg-red-50/30' : 'border-stone-200 focus:border-[#C5A059]'
+                          }`}
+                        />
+                        {formErrors.name && (
+                          <p className="text-[10px] text-red-600 mt-1 font-medium">{formErrors.name}</p>
+                        )}
+                      </div>
+
+                      <div>
+                        <label className="block text-[11px] font-semibold text-stone-700 mb-1">
+                          Mobile Number (for delivery updates) <span className="text-red-500">*</span>
+                        </label>
+                        <div className="relative">
+                          <span className="absolute left-3 top-2 text-xs text-stone-400 font-mono">+91</span>
+                          <input
+                            type="tel"
+                            maxLength={10}
+                            value={formData.phone}
+                            onChange={(e) => handleInputChange('phone', e.target.value.replace(/\D/g, ''))}
+                            placeholder="98765 43210"
+                            className={`w-full pl-11 pr-3 py-2 text-xs rounded-xl border bg-stone-50 focus:bg-white focus:outline-none font-mono transition-all ${
+                              formErrors.phone ? 'border-red-500 bg-red-50/30' : 'border-stone-200 focus:border-[#C5A059]'
+                            }`}
+                          />
+                        </div>
+                        {formErrors.phone && (
+                          <p className="text-[10px] text-red-600 mt-1 font-medium">{formErrors.phone}</p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Section 2: Delivery Destination */}
+                    <div className="bg-white p-4 rounded-2xl border border-stone-200 space-y-3 shadow-xs">
+                      <h3 className="text-xs font-bold uppercase tracking-wider text-[#0F2460] flex items-center gap-1.5">
+                        <span>📍</span> 2. Mumbai Delivery Address
+                      </h3>
+
+                      <div>
+                        <label className="block text-[11px] font-semibold text-stone-700 mb-1">
+                          Delivery Area / Hub <span className="text-red-500">*</span>
+                        </label>
+                        <select
+                          value={deliveryArea}
+                          onChange={(e) => setDeliveryArea(e.target.value)}
+                          className="w-full px-3 py-2 text-xs rounded-xl border border-stone-200 bg-stone-50 focus:bg-white focus:border-[#C5A059] focus:outline-none font-medium text-stone-800"
+                        >
+                          <option value="Vikhroli">Vikhroli (Direct Atelier)</option>
+                          <option value="Powai">Powai</option>
+                          <option value="Andheri East & West">Andheri East & West</option>
+                          <option value="Chandivali">Chandivali</option>
+                          <option value="Ghatkopar">Ghatkopar</option>
+                          <option value="Bandra / BKC">Bandra / BKC</option>
+                          <option value="Lower Parel / Worli">Lower Parel / Worli</option>
+                          <option value="Navi Mumbai">Navi Mumbai</option>
+                          <option value="Other Mumbai">Other Mumbai</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-[11px] font-semibold text-stone-700 mb-1">
+                          Flat / Building & Street Address <span className="text-red-500">*</span>
+                        </label>
+                        <textarea
+                          rows={2}
+                          value={formData.address}
+                          onChange={(e) => handleInputChange('address', e.target.value)}
+                          placeholder="e.g. Flat 1204, Tower B, Hiranandani Gardens..."
+                          className={`w-full px-3 py-2 text-xs rounded-xl border bg-stone-50 focus:bg-white focus:outline-none transition-all ${
+                            formErrors.address ? 'border-red-500 bg-red-50/30' : 'border-stone-200 focus:border-[#C5A059]'
+                          }`}
+                        />
+                        {formErrors.address && (
+                          <p className="text-[10px] text-red-600 mt-1 font-medium">{formErrors.address}</p>
+                        )}
+                      </div>
+
+                      <div>
+                        <label className="block text-[11px] font-semibold text-stone-700 mb-1">
+                          Nearby Landmark (Optional)
+                        </label>
+                        <input
+                          type="text"
+                          value={formData.landmark}
+                          onChange={(e) => handleInputChange('landmark', e.target.value)}
+                          placeholder="e.g. Near Galleria / Opp. Gate 2"
+                          className="w-full px-3 py-2 text-xs rounded-xl border border-stone-200 bg-stone-50 focus:bg-white focus:border-[#C5A059] focus:outline-none"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-[11px] font-semibold text-stone-700 mb-1">
+                          Preferred Delivery Slot
+                        </label>
+                        <select
+                          value={formData.slot}
+                          onChange={(e) => handleInputChange('slot', e.target.value)}
+                          className="w-full px-3 py-2 text-xs rounded-xl border border-stone-200 bg-stone-50 focus:bg-white focus:border-[#C5A059] focus:outline-none font-medium text-stone-800"
+                        >
+                          <option value="Today Evening (5:00 PM – 8:00 PM)">Today Evening (5:00 PM – 8:00 PM)</option>
+                          <option value="Tomorrow Morning (11:00 AM – 2:00 PM)">Tomorrow Morning (11:00 AM – 2:00 PM)</option>
+                          <option value="Tomorrow Evening (5:00 PM – 8:00 PM)">Tomorrow Evening (5:00 PM – 8:00 PM)</option>
+                          <option value="Weekend Dispatch">Upcoming Weekend Batch</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-[11px] font-semibold text-stone-700 mb-1">
+                          Gift Message / Kitchen Note (Optional)
+                        </label>
+                        <textarea
+                          rows={2}
+                          value={formData.note}
+                          onChange={(e) => handleInputChange('note', e.target.value)}
+                          placeholder="e.g. 'Happy Birthday Kabir!' or 'Leave with security guard'"
+                          className="w-full px-3 py-2 text-xs rounded-xl border border-stone-200 bg-stone-50 focus:bg-white focus:border-[#C5A059] focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Section 3: Payment Method Selection */}
+                    <div className="bg-white p-4 rounded-2xl border border-stone-200 space-y-2.5 shadow-xs">
+                      <h3 className="text-xs font-bold uppercase tracking-wider text-[#0F2460] flex items-center gap-1.5">
+                        <span>💳</span> 3. Select Payment Preference
+                      </h3>
+
+                      {/* Option 1: Instant UPI */}
+                      <label className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
+                        formData.paymentMethod === 'upi'
+                          ? 'border-[#0F2460] bg-[#0F2460]/5'
+                          : 'border-stone-200 bg-stone-50 hover:border-stone-300'
+                      }`}>
+                        <input
+                          type="radio"
+                          name="payment"
+                          value="upi"
+                          checked={formData.paymentMethod === 'upi'}
+                          onChange={() => handleInputChange('paymentMethod', 'upi')}
+                          className="mt-0.5 accent-[#0F2460]"
+                        />
+                        <div className="flex-1 text-xs">
+                          <span className="font-bold text-stone-900 block">Instant UPI (GPay / PhonePe / Paytm / QR)</span>
+                          <span className="text-[11px] text-stone-500 block mt-0.5">
+                            Pay directly to Atelier UPI ID: <strong className="font-mono text-[#0F2460]">sukiecookies@upi</strong>
+                          </span>
+                        </div>
+                      </label>
+
+                      {/* Option 2: Pay on Handover / Delivery */}
+                      <label className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
+                        formData.paymentMethod === 'cod'
+                          ? 'border-[#0F2460] bg-[#0F2460]/5'
+                          : 'border-stone-200 bg-stone-50 hover:border-stone-300'
+                      }`}>
+                        <input
+                          type="radio"
+                          name="payment"
+                          value="cod"
+                          checked={formData.paymentMethod === 'cod'}
+                          onChange={() => handleInputChange('paymentMethod', 'cod')}
+                          className="mt-0.5 accent-[#0F2460]"
+                        />
+                        <div className="flex-1 text-xs">
+                          <span className="font-bold text-stone-900 block">Pay on Dispatch / Handover</span>
+                          <span className="text-[11px] text-stone-500 block mt-0.5">
+                            UPI scan or Cash upon receiving your freshly baked box
+                          </span>
+                        </div>
+                      </label>
+
+                      {/* Option 3: Online Gateway Cards / NetBanking */}
+                      <label className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
+                        formData.paymentMethod === 'card'
+                          ? 'border-[#0F2460] bg-[#0F2460]/5'
+                          : 'border-stone-200 bg-stone-50 hover:border-stone-300'
+                      }`}>
+                        <input
+                          type="radio"
+                          name="payment"
+                          value="card"
+                          checked={formData.paymentMethod === 'card'}
+                          onChange={() => handleInputChange('paymentMethod', 'card')}
+                          className="mt-0.5 accent-[#0F2460]"
+                        />
+                        <div className="flex-1 text-xs">
+                          <span className="font-bold text-stone-900 block">Credit / Debit Card / NetBanking</span>
+                          <span className="text-[11px] text-stone-500 block mt-0.5">
+                            Secured online payment gateway
+                          </span>
+                        </div>
+                      </label>
+                    </div>
+
+                    {/* Action Button */}
+                    <div className="pt-2 pb-6">
+                      <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="w-full py-4 px-4 bg-[#0F2460] hover:bg-[#1B3A8C] text-white rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-xl shadow-blue-950/20 active:scale-[0.99] transition-all cursor-pointer border border-[#C5A059]/40"
+                      >
+                        {isSubmitting ? (
+                          <span>Placing Order...</span>
+                        ) : (
+                          <>
+                            <span>Place Website Order (₹{finalTotal})</span>
+                            <span className="text-amber-200">🔒</span>
+                          </>
+                        )}
+                      </button>
+                      <p className="text-center text-[10px] text-stone-400 mt-2 font-mono">
+                        Direct confirmation from Sukié Mumbai Kitchen
+                      </p>
+                    </div>
+                  </form>
+                </>
+              )}
+
+              {/* ========================================================================= */}
+              {/* VIEW 3: ORDER CONFIRMATION SCREEN                                         */}
+              {/* ========================================================================= */}
+              {view === 'confirmation' && placedOrder && (
+                <div className="flex-1 flex flex-col justify-between overflow-y-auto">
+                  {/* Top Success Header */}
+                  <div className="p-6 sm:p-8 bg-[#0F2460] text-white text-center shadow-md border-b border-[#C5A059]/30 shrink-0">
+                    <div className="w-16 h-16 mx-auto rounded-full bg-emerald-500/20 border-2 border-emerald-400 flex items-center justify-center text-3xl mb-3 shadow-lg">
+                      ✨
+                    </div>
+                    <span className="text-[10px] uppercase font-mono tracking-widest text-[#C5A059] block font-bold">
+                      Order Confirmed
+                    </span>
+                    <h2 className="font-heading text-2xl sm:text-3xl font-bold text-white mt-1">
+                      Thank You, {placedOrder.customer.name.split(' ')[0]}!
+                    </h2>
+                    <p className="text-xs text-amber-200/90 font-mono mt-1">
+                      Order ID: <span className="font-bold underline">{placedOrder.id}</span>
+                    </p>
                   </div>
 
-                  {/* Dual Action Buttons */}
-                  <div className="space-y-2 pt-1">
-                    {/* Direct WhatsApp Ordering */}
+                  {/* Order Receipt Body */}
+                  <div className="p-4 sm:p-6 space-y-4 flex-1">
+                    <div className="bg-white rounded-2xl p-4 sm:p-5 border border-stone-200 shadow-sm space-y-3.5">
+                      <div className="flex justify-between items-center pb-3 border-b border-stone-200/70 text-xs">
+                        <span className="text-stone-500 font-medium">Order Status</span>
+                        <span className="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                          Ovens Preparing
+                        </span>
+                      </div>
+
+                      <div className="space-y-1.5 text-xs text-stone-600">
+                        <div className="flex justify-between">
+                          <span className="text-stone-500">Delivery Area:</span>
+                          <span className="font-semibold text-stone-900">{placedOrder.deliveryArea}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-stone-500">Scheduled Slot:</span>
+                          <span className="font-semibold text-stone-900">{placedOrder.customer.slot}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-stone-500">Delivery Address:</span>
+                          <span className="font-semibold text-stone-900 text-right max-w-[65%] truncate">
+                            {placedOrder.customer.address}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-stone-500">Payment:</span>
+                          <span className="font-semibold text-[#0F2460]">
+                            {placedOrder.customer.paymentMethod === 'upi'
+                              ? 'Instant UPI'
+                              : placedOrder.customer.paymentMethod === 'cod'
+                              ? 'Pay on Dispatch'
+                              : 'Online Payment'}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Items List */}
+                      <div className="pt-3 border-t border-stone-200/70 space-y-2">
+                        <span className="text-[11px] font-bold text-stone-700 uppercase tracking-wider block">
+                          Bakes Included:
+                        </span>
+                        {placedOrder.items.map((item, idx) => (
+                          <div key={idx} className="flex justify-between text-xs text-stone-800">
+                            <span>
+                              {item.name} <span className="text-stone-400 font-mono">x{item.quantity}</span>
+                            </span>
+                            <span className="font-mono font-medium">₹{item.price * item.quantity}</span>
+                          </div>
+                        ))}
+
+                        {placedOrder.packagingFee > 0 && (
+                          <div className="flex justify-between text-xs text-[#C5A059]">
+                            <span>🎁 Luxury Cobalt Gift Ribbon & Box</span>
+                            <span className="font-mono font-medium">₹49</span>
+                          </div>
+                        )}
+
+                        <div className="flex justify-between items-baseline pt-2 border-t border-stone-200 text-stone-900 font-bold">
+                          <span className="font-heading text-sm">Total Paid / Due</span>
+                          <span className="font-heading text-xl text-[#0F2460]">
+                            ₹{placedOrder.finalTotal}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Notification message */}
+                    <p className="text-center text-xs text-stone-500 leading-relaxed px-2">
+                      Our pastry team has received your order. We will bake your 6oz cookies fresh before your selected slot.
+                    </p>
+                  </div>
+
+                  {/* Actions Footer */}
+                  <div className="p-4 sm:p-6 bg-white border-t border-stone-200 space-y-2.5 shrink-0">
+                    {/* Optional Send to WhatsApp */}
                     <a
-                      href={generateWhatsAppLink()}
+                      href={generateOrderWhatsAppLink(placedOrder)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="w-full py-3.5 px-4 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-md hover:shadow-lg active:scale-[0.99] transition-all cursor-pointer"
                     >
-                      <span>Order Directly on WhatsApp</span>
+                      <span>Send Order Copy to WhatsApp</span>
                       <span className="text-base">💬</span>
                     </a>
 
-                    {/* Online Gateway Option */}
+                    {/* Return to Menu Button */}
                     <button
-                      onClick={() => setCheckoutModalOpen(true)}
-                      className="w-full py-3 px-4 bg-[#0F2460] hover:bg-[#1B3A8C] text-white rounded-xl font-bold text-xs uppercase tracking-wider border border-[#C5A059]/40 active:scale-[0.99] transition-all cursor-pointer"
+                      type="button"
+                      onClick={handleClose}
+                      className="w-full py-3 px-4 bg-stone-100 hover:bg-stone-200 text-stone-800 rounded-xl font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer"
                     >
-                      Pay Online (UPI / Cards / NetBanking)
+                      Return to Menu
                     </button>
                   </div>
                 </div>
@@ -295,34 +854,10 @@ export default function Cart() {
           </div>
         </div>
       )}
-
-      {/* Online Gateway Demo Modal */}
-      {checkoutModalOpen && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs">
-          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-sm w-full text-center space-y-4 shadow-2xl border border-[#C5A059]/30">
-            <div className="w-14 h-14 mx-auto rounded-full bg-[#0F2460]/10 text-[#0F2460] flex items-center justify-center text-2xl">
-              💳
-            </div>
-            <h3 className="font-heading text-xl font-bold text-stone-900">Razorpay Payment Ready</h3>
-            <p className="text-xs text-stone-600 leading-relaxed">
-              When integrated with the live client account, this triggers the direct Razorpay checkout popup supporting GPay, PhonePe, Paytm, UPI, and all Credit/Debit cards.
-            </p>
-            <div className="p-3 bg-stone-100 rounded-xl text-xs text-stone-900 font-medium">
-              Order Total: <strong className="text-[#0F2460]">₹{finalTotal}</strong>
-            </div>
-            <button
-              onClick={() => setCheckoutModalOpen(false)}
-              className="w-full bg-[#0F2460] text-white py-2.5 rounded-full text-xs font-bold uppercase tracking-wider hover:bg-[#1B3A8C] transition-colors cursor-pointer"
-            >
-              Got it
-            </button>
-          </div>
-        </div>
-      )}
     </AnimatePresence>
   );
 
-  // Use createPortal to mount directly on document.body, avoiding any stacking context bugs
+  // Mount directly via portal to document body
   if (typeof document === 'undefined') return null;
   return createPortal(cartContent, document.body);
 }

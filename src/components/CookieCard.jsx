@@ -1,9 +1,14 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useCart } from '../context/CartContext';
 
 export default function CookieCard({ product, onAddToCart, onOpenModal }) {
+  const { items, addItem, updateQuantity } = useCart();
   const [isAdded, setIsAdded] = useState(false);
   const timerRef = useRef(null);
+
+  const currentItem = items?.find((item) => item.id === product?.id);
+  const currentQty = currentItem ? currentItem.quantity : 0;
 
   useEffect(() => {
     return () => {
@@ -21,6 +26,8 @@ export default function CookieCard({ product, onAddToCart, onOpenModal }) {
 
     if (onAddToCart) {
       onAddToCart(product);
+    } else {
+      addItem(product);
     }
 
     setIsAdded(true);
@@ -63,12 +70,18 @@ export default function CookieCard({ product, onAddToCart, onOpenModal }) {
         {/* Ambient Gradient Vignette */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent pointer-events-none" />
 
-        {/* Eggless Pure Badge */}
-        <div className="absolute top-3 left-3 z-10">
+        {/* Eggless Pure Badge & Selection Tracker */}
+        <div className="absolute top-3 left-3 z-10 flex flex-col items-start gap-1.5">
           <span className="bg-black/75 backdrop-blur-md text-emerald-300 text-[9px] sm:text-[10px] font-bold px-2.5 py-1 rounded-full border border-emerald-500/30 uppercase tracking-wider flex items-center gap-1.5 shadow-sm">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-            100% Eggless
+            100% Pure Eggless
           </span>
+          {currentQty > 0 && (
+            <span className="bg-[#C5A059] text-stone-950 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-amber-200 shadow-md flex items-center gap-1 uppercase tracking-wider">
+              <span>✓</span>
+              <span>{currentQty} in Box</span>
+            </span>
+          )}
         </div>
 
         {/* Distinct Tags Overlay (Non-Redundant) */}
@@ -129,6 +142,39 @@ export default function CookieCard({ product, onAddToCart, onOpenModal }) {
               <span className="bg-stone-100 text-stone-400 px-4 py-2 rounded-full text-[11px] font-bold uppercase tracking-wider cursor-not-allowed">
                 Sold Out
               </span>
+            ) : currentQty > 0 ? (
+              <div 
+                onClick={(e) => e.stopPropagation()} 
+                className="inline-flex items-center rounded-full bg-[#0F2460] text-white p-1 border border-[#C5A059]/40 shadow-md"
+              >
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    updateQuantity(product.id, currentQty - 1);
+                  }}
+                  aria-label="Decrease quantity"
+                  className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/10 hover:bg-white/20 active:scale-90 text-white flex items-center justify-center text-sm font-bold transition-all cursor-pointer"
+                >
+                  −
+                </button>
+                <div className="px-2.5 sm:px-3 text-center min-w-[65px] sm:min-w-[70px]">
+                  <span className="text-xs font-bold font-mono text-[#C5A059] block leading-tight">
+                    {currentQty} in Box
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    updateQuantity(product.id, currentQty + 1);
+                  }}
+                  aria-label="Increase quantity"
+                  className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#C5A059] hover:bg-amber-300 text-stone-950 active:scale-90 flex items-center justify-center text-sm font-bold transition-all cursor-pointer shadow-sm"
+                >
+                  +
+                </button>
+              </div>
             ) : isAdded ? (
               <button
                 type="button"

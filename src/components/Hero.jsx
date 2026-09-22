@@ -56,7 +56,7 @@ export default function Hero() {
           {/* Editorial Subtitle */}
           <p className="text-white/80 max-w-lg mx-auto lg:mx-0 text-xs sm:text-base lg:text-lg font-light leading-relaxed">
             170g (6oz) molten-centered giant cookies crafted with Belgian Callebaut couverture, 
-            French browned butter & 100% pure eggless recipe. Baked fresh in Vikhroli.
+            French browned butter & 100% pure eggless recipe. Baked fresh in Mumbai.
           </p>
 
           {/* CTAs */}

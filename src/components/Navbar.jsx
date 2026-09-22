@@ -361,7 +361,7 @@ export default function Navbar() {
                 <p className="font-semibold text-amber-800 uppercase tracking-wider text-[11px]">
                   NYC Style Cookies • Mumbai
                 </p>
-                <p className="mt-1 text-[11px] text-stone-500">Baked fresh daily in Vikhroli</p>
+                <p className="mt-1 text-[11px] text-stone-500">Baked fresh in Mumbai</p>
               </div>
             </div>
           </aside>

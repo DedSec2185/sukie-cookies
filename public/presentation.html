@@ -1,0 +1,1282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sukié NYC Cookies — Digital Flagship Presentation | Asvex Technologies</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400&family=Inter:wght@300;400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --navy-deep: #070B18;
+      --navy-card: #0F172E;
+      --navy-brand: #0F2460;
+      --gold: #C5A059;
+      --gold-light: #E3C582;
+      --cream: #FAF6EE;
+      --stone-card: #18223B;
+      --font-heading: 'Playfair Display', Georgia, serif;
+      --font-serif: 'Cormorant Garamond', Georgia, serif;
+      --font-body: 'Inter', system-ui, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--navy-deep);
+      color: #FFFFFF;
+      font-family: var(--font-body);
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+      user-select: none;
+    }
+
+    /* Ambient luxury gradient glow */
+    .glow-bg {
+      position: absolute;
+      top: -20%;
+      left: 20%;
+      width: 60vw;
+      height: 60vh;
+      background: radial-gradient(circle, rgba(197,160,89,0.12) 0%, rgba(15,36,96,0.3) 50%, transparent 75%);
+      filter: blur(80px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .glow-bg-2 {
+      position: absolute;
+      bottom: -20%;
+      right: 10%;
+      width: 50vw;
+      height: 50vh;
+      background: radial-gradient(circle, rgba(15,36,96,0.4) 0%, rgba(197,160,89,0.08) 60%, transparent 80%);
+      filter: blur(90px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Top Presentation Bar */
+    header.deck-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      background: rgba(7, 11, 24, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(197, 160, 89, 0.2);
+      z-index: 50;
+    }
+
+    .brand-cluster {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-logo {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 1.5px solid var(--gold);
+      object-cover: cover;
+    }
+
+    .brand-title {
+      font-family: var(--font-heading);
+      font-size: 20px;
+      font-weight: 700;
+      color: #FFFFFF;
+      letter-spacing: 0.5px;
+    }
+
+    .agency-tag {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--gold);
+      font-weight: 600;
+      background: rgba(197, 160, 89, 0.12);
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: 1px solid rgba(197, 160, 89, 0.25);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .live-link-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--navy-brand);
+      color: #FFFFFF;
+      font-size: 12px;
+      font-weight: 600;
+      text-decoration: none;
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1px solid rgba(197, 160, 89, 0.4);
+      transition: all 0.2s ease;
+    }
+
+    .live-link-btn:hover {
+      background: var(--gold);
+      color: #000;
+    }
+
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10B981;
+      box-shadow: 0 0 8px #10B981;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.3); opacity: 0.7; }
+    }
+
+    /* Main Deck Stage */
+    main.deck-stage {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 48px 88px;
+      z-index: 10;
+    }
+
+    /* Slides */
+    .slide {
+      position: absolute;
+      width: 90vw;
+      max-width: 1280px;
+      height: calc(100vh - 170px);
+      max-height: 720px;
+      background: rgba(15, 23, 46, 0.85);
+      backdrop-filter: blur(20px);
+      border-radius: 24px;
+      border: 1px solid rgba(197, 160, 89, 0.25);
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
+      padding: 40px 48px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(0.96) translateY(15px);
+      transition: all 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+      overflow-y: auto;
+    }
+
+    .slide.active {
+      opacity: 1;
+      pointer-events: auto;
+      transform: scale(1) translateY(0);
+    }
+
+    /* Slide Header */
+    .slide-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-family: var(--font-body);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--gold);
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .slide-title {
+      font-family: var(--font-heading);
+      font-size: 34px;
+      font-weight: 700;
+      color: #FFFFFF;
+      line-height: 1.2;
+      margin-bottom: 8px;
+    }
+
+    .slide-subtitle {
+      font-size: 15px;
+      color: rgba(255, 255, 255, 0.7);
+      line-height: 1.5;
+      font-weight: 300;
+      max-width: 800px;
+      margin-bottom: 24px;
+    }
+
+    /* Slide Content Grids */
+    .content-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+      flex: 1;
+      align-items: center;
+    }
+
+    .content-grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 20px;
+      flex: 1;
+      align-items: stretch;
+    }
+
+    .content-grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      flex: 1;
+    }
+
+    .luxury-card {
+      background: rgba(24, 34, 59, 0.7);
+      border: 1px solid rgba(197, 160, 89, 0.2);
+      border-radius: 16px;
+      padding: 20px;
+      transition: all 0.3s ease;
+    }
+
+    .luxury-card:hover {
+      border-color: rgba(197, 160, 89, 0.6);
+      transform: translateY(-3px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    }
+
+    .card-icon {
+      font-size: 26px;
+      margin-bottom: 12px;
+      display: inline-block;
+    }
+
+    .card-heading {
+      font-family: var(--font-heading);
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--gold-light);
+      margin-bottom: 6px;
+    }
+
+    .card-desc {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.75);
+      line-height: 1.55;
+    }
+
+    /* Product Showcase Cards */
+    .cookie-showcase-card {
+      background: rgba(15, 23, 46, 0.9);
+      border: 1px solid rgba(197, 160, 89, 0.25);
+      border-radius: 16px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .cookie-img-box {
+      width: 100%;
+      height: 130px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cookie-img-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+    }
+
+    .cookie-showcase-card:hover .cookie-img-box img {
+      transform: scale(1.08);
+    }
+
+    .cookie-meta-tag {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      background: rgba(0, 0, 0, 0.75);
+      color: #34D399;
+      font-size: 9px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 10px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      border: 1px solid rgba(52, 211, 153, 0.3);
+    }
+
+    .cookie-details {
+      padding: 14px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .cookie-name {
+      font-family: var(--font-heading);
+      font-size: 15px;
+      font-weight: 700;
+      color: #FFF;
+      margin-bottom: 4px;
+    }
+
+    .cookie-price-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-top: 10px;
+      padding-top: 8px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .cookie-price {
+      font-family: var(--font-heading);
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--gold-light);
+    }
+
+    .cookie-weight {
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.5);
+      font-family: monospace;
+    }
+
+    /* Comparison Table */
+    .compare-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .compare-table th {
+      text-align: left;
+      padding: 12px 16px;
+      background: rgba(15, 36, 96, 0.6);
+      color: var(--gold-light);
+      font-family: var(--font-heading);
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid rgba(197, 160, 89, 0.3);
+    }
+
+    .compare-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      color: rgba(255, 255, 255, 0.85);
+    }
+
+    .compare-table tr:hover td {
+      background: rgba(197, 160, 89, 0.05);
+    }
+
+    .badge-win {
+      background: rgba(16, 185, 129, 0.2);
+      color: #34D399;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      border: 1px solid rgba(52, 211, 153, 0.3);
+    }
+
+    .badge-loss {
+      background: rgba(239, 68, 68, 0.15);
+      color: #F87171;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+    }
+
+    /* Bottom Control Bar */
+    footer.deck-footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      background: rgba(7, 11, 24, 0.9);
+      backdrop-filter: blur(12px);
+      border-top: 1px solid rgba(197, 160, 89, 0.2);
+      z-index: 50;
+    }
+
+    .nav-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .nav-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      background: rgba(24, 34, 59, 0.8);
+      color: #FFFFFF;
+      border: 1px solid rgba(197, 160, 89, 0.3);
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .nav-btn:hover {
+      background: var(--gold);
+      color: #070B18;
+      border-color: var(--gold);
+    }
+
+    .slide-dots {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .dot.active {
+      background: var(--gold);
+      width: 24px;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(197, 160, 89, 0.6);
+    }
+
+    .slide-counter {
+      font-family: monospace;
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .footer-tools {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .tool-btn {
+      background: transparent;
+      color: rgba(255, 255, 255, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tool-btn:hover, .tool-btn.active {
+      color: var(--gold);
+      border-color: var(--gold);
+      background: rgba(197, 160, 89, 0.1);
+    }
+
+    /* Speaker Notes Drawer */
+    #speaker-notes-panel {
+      position: fixed;
+      bottom: 72px;
+      left: 50%;
+      transform: translateX(-50%) translateY(120%);
+      width: 80vw;
+      max-width: 900px;
+      background: #0B1020;
+      border: 1px solid var(--gold);
+      border-radius: 16px 16px 0 0;
+      padding: 20px 28px;
+      box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.8);
+      z-index: 60;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    #speaker-notes-panel.open {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .notes-title {
+      font-family: var(--font-heading);
+      font-size: 14px;
+      color: var(--gold);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .notes-content {
+      font-size: 13px;
+      line-height: 1.6;
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    /* Checklist formatting */
+    .checklist-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      background: rgba(24, 34, 59, 0.5);
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+
+    .check-box {
+      width: 20px;
+      height: 20px;
+      border-radius: 6px;
+      border: 1.5px solid var(--gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gold);
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    /* Phone Mockup Frame */
+    .phone-mockup {
+      width: 260px;
+      height: 480px;
+      background: #000;
+      border: 6px solid #2B344B;
+      border-radius: 36px;
+      overflow: hidden;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+      position: relative;
+      margin: 0 auto;
+    }
+
+    .phone-mockup-inner {
+      width: 100%;
+      height: 100%;
+      background: var(--cream);
+      overflow-y: auto;
+      padding-top: 24px;
+      color: #0E0E0E;
+    }
+
+    .phone-notch {
+      position: absolute;
+      top: 6px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90px;
+      height: 14px;
+      background: #2B344B;
+      border-radius: 10px;
+      z-index: 10;
+    }
+
+    @media (max-width: 900px) {
+      .content-grid-2, .content-grid-3, .content-grid-4 {
+        grid-template-columns: 1fr;
+      }
+      .slide {
+        padding: 24px;
+        height: calc(100vh - 160px);
+      }
+      .slide-title {
+        font-size: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="glow-bg"></div>
+  <div class="glow-bg-2"></div>
+
+  <!-- Header -->
+  <header class="deck-header">
+    <div class="brand-cluster">
+      <img src="/images/logo.png" alt="Sukié Logo" class="brand-logo">
+      <span class="brand-title">Sukié NYC Cookies</span>
+      <span class="agency-tag">By Asvex Technologies</span>
+    </div>
+
+    <div class="header-actions">
+      <a href="https://www.sukiecookies.com" target="_blank" class="live-link-btn" title="Open live website in new tab">
+        <span class="live-dot"></span>
+        <span>sukiecookies.com (LIVE)</span>
+        <span>↗</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- Presentation Stage -->
+  <main class="deck-stage">
+
+    <!-- SLIDE 1: Title & Welcome -->
+    <div class="slide active" data-slide="1" data-notes="Welcome the client warmly. Congratulate her on taking her brand live with an official .com domain. Emphasize that she now has a world-class digital flagship tailored specifically for NYC-style cookies.">
+      <div>
+        <span class="slide-badge">Client Handover & Launch Review • 22 Sept 2026</span>
+        <h1 class="slide-title" style="font-size: 46px; margin-top: 8px;">The Sukié Digital Flagship Atelier</h1>
+        <p class="slide-subtitle" style="font-size: 18px;">
+          A bespoke, ultra-fast luxury e-commerce experience crafted for Mumbai's premier 6oz NYC-style home bakery.
+        </p>
+      </div>
+
+      <div class="content-grid-3" style="margin-top: 10px;">
+        <div class="luxury-card">
+          <span class="card-icon">👑</span>
+          <h3 class="card-heading">Bespoke NYC Luxury</h3>
+          <p class="card-desc">Designed around 6oz gourmet cookies, European browned butter, and molten Belgian Callebaut chocolate.</p>
+        </div>
+
+        <div class="luxury-card">
+          <span class="card-icon">📱</span>
+          <h3 class="card-heading">Mobile-First Commerce</h3>
+          <p class="card-desc">85%+ of Mumbai dessert gifting happens on mobile. Built for 1-hand tapping and lightning fast ordering.</p>
+        </div>
+
+        <div class="luxury-card">
+          <span class="card-icon">💬</span>
+          <h3 class="card-heading">1-Tap WhatsApp Invoice</h3>
+          <p class="card-desc">Eliminates back-and-forth messaging by instantly sending itemized, calculated orders to your WhatsApp.</p>
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: center; justify-content: space-between; border-top: 1px solid rgba(197,160,89,0.25); padding-top: 16px; margin-top: 20px;">
+        <div style="font-size: 13px; color: var(--gold);">
+          🌐 Domain: <strong>sukiecookies.com</strong> (Secured & Active)
+        </div>
+        <div style="font-size: 12px; color: rgba(255,255,255,0.6);">
+          Press <strong>→</strong> or Spacebar to proceed • Press <strong>N</strong> for speaker notes
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 2: Brand Positioning & Identity -->
+    <div class="slide" data-slide="2" data-notes="Explain why we didn't use a cheap generic Shopify or WordPress template. NYC-style cookies are thick, dense, high-ticket bakes ($4-5 equivalent). Standard templates make them look like ordinary 20-rupee biscuits. Our aesthetic elevates the perceived value so she can command ₹279–₹379 per cookie without friction.">
+      <div>
+        <span class="slide-badge">Brand Positioning & Design Philosophy</span>
+        <h2 class="slide-title">Crafting an Atelier Experience, Not a Template</h2>
+        <p class="slide-subtitle">
+          Standard bakery templates diminish brand value. We created an immersive digital atelier that justifies premium artisanal pricing.
+        </p>
+      </div>
+
+      <div class="content-grid-2">
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+          <div class="luxury-card">
+            <h3 class="card-heading" style="color: #FFF;">🍪 The 6-Ounce NYC Heritage</h3>
+            <p class="card-desc">Inspired by famous New York bakeries (Levain-style). Thick, 170g colossal cookies that crisp on the outside and stay molten at the center.</p>
+          </div>
+
+          <div class="luxury-card">
+            <h3 class="card-heading" style="color: #FFF;">🌱 100% Eggless Purity</h3>
+            <p class="card-desc">Mumbai's highest-converting luxury gifting demographic demands eggless integrity. Featured prominently across cards, badges, and filters.</p>
+          </div>
+
+          <div class="luxury-card">
+            <h3 class="card-heading" style="color: #FFF;">🧈 European Ingredients First</h3>
+            <p class="card-desc">Belgian Callebaut Dark 54.5%, French Beurre Noisette, Sicilian Pistachios, and Maldon Flaky Sea Salt clearly highlighted.</p>
+          </div>
+        </div>
+
+        <div style="border-radius: 18px; overflow: hidden; border: 1px solid rgba(197,160,89,0.3); height: 100%; max-height: 380px;">
+          <img src="/images/real_hero_cookie.jpg" alt="Artisan Cookie" style="width: 100%; height: 100%; object-fit: cover;">
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3: Visual Identity & Color System -->
+    <div class="slide" data-slide="3" data-notes="Walk through the color palette choices: Royal Cobalt (#0F2460) reflects luxury confectionery gifting like Fortnum & Mason or Harrods; Atelier Gold brings warmth and quality; Heritage Cream evokes pastry parchment paper.">
+      <div>
+        <span class="slide-badge">Visual Identity System</span>
+        <h2 class="slide-title">Colors & Typography of Haute Pâtisserie</h2>
+        <p class="slide-subtitle">
+          Every shade and typeface was selected to communicate understated luxury, warmth, and culinary authority.
+        </p>
+      </div>
+
+      <div class="content-grid-4">
+        <div class="luxury-card" style="border-top: 4px solid #0F2460;">
+          <div style="height: 48px; background: #0F2460; border-radius: 8px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.2);"></div>
+          <h4 style="font-family: var(--font-heading); color: #FFF; font-size: 16px;">Royal Cobalt Navy</h4>
+          <p style="font-family: monospace; font-size: 11px; color: var(--gold); margin: 4px 0 8px;">#0F2460</p>
+          <p class="card-desc">Conveys trust, high society gifting, and the iconic Sukié ribbon identity.</p>
+        </div>
+
+        <div class="luxury-card" style="border-top: 4px solid #C5A059;">
+          <div style="height: 48px; background: #C5A059; border-radius: 8px; margin-bottom: 12px;"></div>
+          <h4 style="font-family: var(--font-heading); color: #FFF; font-size: 16px;">Atelier Warm Gold</h4>
+          <p style="font-family: monospace; font-size: 11px; color: var(--gold); margin: 4px 0 8px;">#C5A059</p>
+          <p class="card-desc">Represents browned butter caramelization, gold foil packaging seals, and luxury craft.</p>
+        </div>
+
+        <div class="luxury-card" style="border-top: 4px solid #FAF6EE;">
+          <div style="height: 48px; background: #FAF6EE; border-radius: 8px; margin-bottom: 12px;"></div>
+          <h4 style="font-family: var(--font-heading); color: #FFF; font-size: 16px;">Heritage Cream</h4>
+          <p style="font-family: monospace; font-size: 11px; color: var(--gold); margin: 4px 0 8px;">#FAF6EE</p>
+          <p class="card-desc">Soft, warm parchment canvas that makes deep chocolate photography pop with high appetite appeal.</p>
+        </div>
+
+        <div class="luxury-card" style="border-top: 4px solid #9B2948;">
+          <div style="height: 48px; background: #9B2948; border-radius: 8px; margin-bottom: 12px;"></div>
+          <h4 style="font-family: var(--font-heading); color: #FFF; font-size: 16px;">Ruby Ganache</h4>
+          <p style="font-family: monospace; font-size: 11px; color: var(--gold); margin: 4px 0 8px;">#9B2948</p>
+          <p class="card-desc">Used selectively for limited drops, Valentine's creations, and rare seasonal highlights.</p>
+        </div>
+      </div>
+
+      <div class="luxury-card" style="margin-top: 16px; display: flex; align-items: center; justify-content: space-between;">
+        <div>
+          <span style="font-size: 11px; color: var(--gold); text-transform: uppercase; letter-spacing: 1px;">Primary Editorial Typography</span>
+          <h3 style="font-family: var(--font-heading); font-size: 22px; color: #FFF; margin-top: 2px;">Playfair Display + Cormorant Garamond</h3>
+        </div>
+        <div style="text-align: right; max-width: 400px; font-size: 12px; color: rgba(255,255,255,0.7);">
+          Editorial high-contrast serifs reminiscent of Vogue & Michelin guides, paired with ultra-clean modern Inter for easy mobile legibility.
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 4: The Core Menu Collection -->
+    <div class="slide" data-slide="4" data-notes="Show the live product photography. Mention that every cookie has its weight (170g / 6oz), serving size (1-2), ingredients, and price clearly displayed. Customers can tap 'Tasting Notes' to see the molten center description.">
+      <div>
+        <span class="slide-badge">The Core Collection Showcase</span>
+        <h2 class="slide-title">Artisan Drops & Real Macro Photography</h2>
+        <p class="slide-subtitle">
+          Crisp, appetizing product presentation highlighting molten cores, Belgian chocolates, and luxury gifting boxes.
+        </p>
+      </div>
+
+      <div class="content-grid-4">
+        <!-- Cookie 1 -->
+        <div class="cookie-showcase-card">
+          <div class="cookie-img-box">
+            <img src="/images/triple_chocolate.jpg" alt="Triple Chocolate">
+            <span class="cookie-meta-tag">100% Eggless</span>
+          </div>
+          <div class="cookie-details">
+            <div>
+              <h4 class="cookie-name">Triple Chocolate Overload</h4>
+              <p style="font-size: 11px; color: rgba(255,255,255,0.6);">Molten Belgian Callebaut core</p>
+            </div>
+            <div class="cookie-price-row">
+              <span class="cookie-price">₹299</span>
+              <span class="cookie-weight">170g (6oz)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cookie 2 -->
+        <div class="cookie-showcase-card">
+          <div class="cookie-img-box">
+            <img src="/images/two_chip.jpg" alt="Gooey Two-Chip">
+            <span class="cookie-meta-tag">100% Eggless</span>
+          </div>
+          <div class="cookie-details">
+            <div>
+              <h4 class="cookie-name">Gooey Two-Chip</h4>
+              <p style="font-size: 11px; color: rgba(255,255,255,0.6);">European browned butter crumb</p>
+            </div>
+            <div class="cookie-price-row">
+              <span class="cookie-price">₹279</span>
+              <span class="cookie-weight">170g (6oz)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cookie 3 -->
+        <div class="cookie-showcase-card">
+          <div class="cookie-img-box">
+            <img src="/images/pistachio.jpg" alt="Pistachio Gianduja">
+            <span class="cookie-meta-tag">100% Eggless</span>
+          </div>
+          <div class="cookie-details">
+            <div>
+              <h4 class="cookie-name">Pistachio Gianduja</h4>
+              <p style="font-size: 11px; color: rgba(255,255,255,0.6);">Emerald roasted pistachio lava</p>
+            </div>
+            <div class="cookie-price-row">
+              <span class="cookie-price">₹349</span>
+              <span class="cookie-weight">170g (6oz)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cookie 4: Cake -->
+        <div class="cookie-showcase-card">
+          <div class="cookie-img-box">
+            <img src="/images/salted_caramel_cake.jpg" alt="Caramel Cake">
+            <span class="cookie-meta-tag">100% Eggless</span>
+          </div>
+          <div class="cookie-details">
+            <div>
+              <h4 class="cookie-name">London Salted Caramel</h4>
+              <p style="font-size: 11px; color: rgba(255,255,255,0.6);">Whipped sea salt caramel ribbons</p>
+            </div>
+            <div class="cookie-price-row">
+              <span class="cookie-price">₹1,299</span>
+              <span class="cookie-weight">750g • 4-6 Serves</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="font-size: 12px; color: rgba(255,255,255,0.6); margin-top: 14px; text-align: center;">
+        Also featured: <em>Cupid's Ruby Chocolate (₹379)</em>, <em>Popcorn Praliné Toffee (₹349)</em>, and <em>Curated Luxury Gift Hampers (₹1,199–₹1,699)</em>.
+      </div>
+    </div>
+
+    <!-- SLIDE 5: The "Sukié Box" & Cart Experience -->
+    <div class="slide" data-slide="5" data-notes="Demonstrate the Sukié Box cart drawer. Emphasize that we fixed all mobile alignment issues: no text cuts off on small screens, prices are crisp, and real macro thumbnails replace generic emojis. Show the Cobalt Gift Ribbon toggle (+₹49) and Mumbai delivery hub selector.">
+      <div>
+        <span class="slide-badge">Checkout & Cart Architecture</span>
+        <h2 class="slide-title">The "Sukié Box" Interactive Cart Drawer</h2>
+        <p class="slide-subtitle">
+          Engineered for mobile perfection with zero screen cutoff, real photography thumbnails, and luxury add-ons.
+        </p>
+      </div>
+
+      <div class="content-grid-2">
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+          <div class="luxury-card">
+            <h4 class="card-heading" style="color: var(--gold);">✨ Real Photography Thumbnails</h4>
+            <p class="card-desc">No generic emoji cookies. Customers see the rich, dark chocolate photography of each item they add.</p>
+          </div>
+
+          <div class="luxury-card">
+            <h4 class="card-heading" style="color: var(--gold);">🎁 Signature Cobalt Ribbon (+₹49)</h4>
+            <p class="card-desc">One-tap upsell for luxury gift packaging, handwritten note card, and gold wax seal.</p>
+          </div>
+
+          <div class="luxury-card">
+            <h4 class="card-heading" style="color: var(--gold);">📍 Mumbai Delivery Hub Selector</h4>
+            <p class="card-desc">Customer selects their location (Vikhroli, Powai, Andheri, BKC, Navi Mumbai, etc.) right inside the box.</p>
+          </div>
+
+          <div class="luxury-card">
+            <h4 class="card-heading" style="color: var(--gold);">📱 Zero Screen Clipping Guarantee</h4>
+            <p class="card-desc">Tested across all iPhone & Android resolutions. Prices, quantities, and totals stay 100% visible with clean breathing room.</p>
+          </div>
+        </div>
+
+        <div style="border-radius: 18px; overflow: hidden; border: 1px solid rgba(197,160,89,0.3); height: 100%; max-height: 380px;">
+          <img src="/images/packaging_box.jpg" alt="Sukié Luxury Box" style="width: 100%; height: 100%; object-fit: cover;">
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 6: WhatsApp 1-Tap Checkout Engine -->
+    <div class="slide" data-slide="6" data-notes="This is the most powerful slide. Explain why WhatsApp ordering is king for luxury home bakeries in Mumbai: 85% of repeat orders happen here. Show the exact pre-formatted message that lands in her WhatsApp (+91 91364 98467). She gets the customer's items, packaging preference, delivery area, and calculated total with zero typing needed by the customer.">
+      <div>
+        <span class="slide-badge">Conversational Commerce</span>
+        <h2 class="slide-title">1-Tap WhatsApp Invoice Automation</h2>
+        <p class="slide-subtitle">
+          Turn website visitors into closed sales with zero friction, eliminating repetitive manual texting.
+        </p>
+      </div>
+
+      <div class="content-grid-2">
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+          <div class="luxury-card">
+            <h4 class="card-heading" style="color: #34D399;">💬 Direct to +91 91364 98467</h4>
+            <p class="card-desc">Customer taps one button. WhatsApp opens immediately with your number and a ready-to-send structured order.</p>
+          </div>
+
+          <div class="luxury-card">
+            <h4 class="card-heading" style="color: #FFF;">⚡ 10 Minutes Saved Per Order</h4>
+            <p class="card-desc">No more asking 'Which cookies do you want?', 'What quantity?', 'Is it for a gift?'. Everything arrives pre-formatted.</p>
+          </div>
+
+          <div class="luxury-card">
+            <h4 class="card-heading" style="color: #FFF;">💳 Razorpay Payment Gateway Ready</h4>
+            <p class="card-desc">We also included the 'Pay Online' gateway option. When ready, instant UPI / Credit Card checkout can be activated.</p>
+          </div>
+        </div>
+
+        <!-- WhatsApp Mockup Card -->
+        <div style="background: #0B141A; border: 1px solid rgba(52, 211, 153, 0.3); border-radius: 18px; padding: 24px; font-family: monospace; font-size: 13px; line-height: 1.6; color: #E9EDEF; box-shadow: 0 15px 35px rgba(0,0,0,0.5);">
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+            <span style="font-size: 18px;">📱</span>
+            <span style="font-weight: bold; color: #25D366;">WhatsApp Order Preview</span>
+          </div>
+          <div style="background: #1F2C34; padding: 14px; border-radius: 12px; border-left: 4px solid #25D366;">
+            <p style="color: #FFF; font-weight: bold;">Hello Sukié Team! 🍪</p>
+            <p style="margin-top: 6px; color: #D1D7DB;">I would like to place an order:</p>
+            <p style="color: #AECBFA; margin-top: 4px;">• Triple Chocolate Overload (170g) x2 = ₹598</p>
+            <p style="color: #AECBFA;">• Gooey Two-Chip (170g) x1 = ₹279</p>
+            <p style="color: #FBBF24; margin-top: 6px;">🎁 Luxury Cobalt Gift Box: Yes (+₹49)</p>
+            <p style="color: #D1D7DB;">📍 Delivery Area: Powai</p>
+            <p style="color: #34D399; font-weight: bold; font-size: 14px; margin-top: 6px;">💰 Total: ₹926</p>
+            <p style="margin-top: 8px; font-size: 11px; color: #8696A0;">Please let me know payment details & delivery schedule!</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 7: Mobile-First Engineering & Fixes -->
+    <div class="slide" data-slide="7" data-notes="Highlight the recent mobile optimizations: Hamburger drawer now opens with a 100% solid, opaque cream background even after scrolling (no transparency overlap). Cart prices never get clipped. Desktop hover reveals a bespoke mini-cart popover.">
+      <div>
+        <span class="slide-badge">Technical Excellence</span>
+        <h2 class="slide-title">Mobile-First Polish & Recent Enhancements</h2>
+        <p class="slide-subtitle">
+          Every micro-interaction rigorously calibrated for seamless performance across modern devices.
+        </p>
+      </div>
+
+      <div class="content-grid-3">
+        <div class="luxury-card">
+          <div style="font-size: 24px; margin-bottom: 8px;">🎨</div>
+          <h4 class="card-heading" style="color: #FFF;">Opaque Mobile Nav Drawer</h4>
+          <p class="card-desc">Portaled directly to document root. 100% solid cream background prevents page text from bleeding through when scrolled down.</p>
+        </div>
+
+        <div class="luxury-card">
+          <div style="font-size: 24px; margin-bottom: 8px;">📐</div>
+          <h4 class="card-heading" style="color: #FFF;">Zero-Overflow Cart Drawer</h4>
+          <p class="card-desc">Removed mobile container padding limits so prices (₹299, ₹279) and total amount (₹578) have comfortable breathing space.</p>
+        </div>
+
+        <div class="luxury-card">
+          <div style="font-size: 24px; margin-bottom: 8px;">🛍️</div>
+          <h4 class="card-heading" style="color: #FFF;">Desktop Hover Mini-Cart</h4>
+          <p class="card-desc">Hovering over the bag icon on desktop reveals an elegant dark navy popover with real cookie thumbnails and running total.</p>
+        </div>
+      </div>
+
+      <div class="luxury-card" style="margin-top: 16px; background: rgba(16, 185, 129, 0.08); border-color: rgba(52, 211, 153, 0.3); display: flex; align-items: center; justify-content: space-between;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <span style="font-size: 24px;">⚡</span>
+          <div>
+            <h4 style="font-size: 15px; color: #FFF; font-weight: 600;">Lightning Load Performance</h4>
+            <p style="font-size: 12px; color: rgba(255,255,255,0.7);">Sub-second load speed on 4G/5G mobile networks across Mumbai with edge server caching in Mumbai (BOM1).</p>
+          </div>
+        </div>
+        <span class="badge-win">0.7s Avg Load</span>
+      </div>
+    </div>
+
+    <!-- SLIDE 8: Infrastructure & Cost Advantage -->
+    <div class="slide" data-slide="8" data-notes="Show the cost comparison table. The client paid ₹1,099 for the domain, which cost ₹1,081.40 on Hostinger (valid for 1 full year). For hosting, other agencies charge ₹5,000–₹8,000/yr or Shopify charges ₹2,500/mo. With Asvex Technologies, her hosting is ₹0/month on Vercel Edge Cloud.">
+      <div>
+        <span class="slide-badge">Cloud Architecture & Economics</span>
+        <h2 class="slide-title">Enterprise Infrastructure at ₹0 Monthly Cost</h2>
+        <p class="slide-subtitle">
+          How Asvex Technologies engineered a modern serverless deployment that eliminates costly monthly software bills.
+        </p>
+      </div>
+
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th>Platform Component</th>
+            <th>Traditional Setup (Shopify/Wix)</th>
+            <th>Asvex Technologies + Sukié Setup</th>
+            <th>Your Annual Saving</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Custom Domain (.com)</strong></td>
+            <td>₹1,400 – ₹1,800 / year</td>
+            <td><strong>₹1,081.40 / year</strong> (Hostinger)</td>
+            <td><span class="badge-win">Saved ₹500+</span></td>
+          </tr>
+          <tr>
+            <td><strong>Cloud Hosting & Servers</strong></td>
+            <td>₹4,500 – ₹8,000 / year</td>
+            <td><strong>₹0 / month (100% Free)</strong></td>
+            <td><span class="badge-win">Saved ₹8,000/yr</span></td>
+          </tr>
+          <tr>
+            <td><strong>SSL Security Certificate</strong></td>
+            <td>₹1,200 / year or add-on</td>
+            <td><strong>Included Free (Lifetime SSL)</strong></td>
+            <td><span class="badge-win">Included</span></td>
+          </tr>
+          <tr>
+            <td><strong>Transaction Surcharges</strong></td>
+            <td>2% – 3% per order</td>
+            <td><strong>0% Platform Surcharge</strong></td>
+            <td><span class="badge-win">Zero Deductions</span></td>
+          </tr>
+          <tr>
+            <td><strong>Total Annual Cost</strong></td>
+            <td>₹7,500 – ₹25,000+</td>
+            <td><strong style="color: var(--gold-light);">Just ₹1,081.40 for domain</strong></td>
+            <td><span class="badge-win">Save ₹20,000+ / yr</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div style="margin-top: 18px; font-size: 12px; color: rgba(255,255,255,0.6); display: flex; justify-content: space-between;">
+        <span>Client Payment Received: <strong>₹1,099.00</strong></span>
+        <span>Domain Invoice (Hostinger): <strong>₹1,081.40</strong> (Credit: ₹17.60)</span>
+        <span>Next Renewal: <strong>September 2027</strong></span>
+      </div>
+    </div>
+
+    <!-- SLIDE 9: Launch Confirmation Checklist -->
+    <div class="slide" data-slide="9" data-notes="Go through this slide with the client interactively to verify her exact prices, cutoff timings, and Instagram handle. Take notes directly.">
+      <div>
+        <span class="slide-badge">Meeting Action Items</span>
+        <h2 class="slide-title">The "Every Detail" Launch Checklist</h2>
+        <p class="slide-subtitle">
+          Confirming operational details together so your digital flagship matches your daily kitchen schedule.
+        </p>
+      </div>
+
+      <div class="content-grid-2">
+        <div>
+          <h4 style="font-family: var(--font-heading); color: var(--gold); font-size: 16px; margin-bottom: 10px;">1. Product Pricing & Weights</h4>
+          <div class="checklist-row">
+            <span class="check-box">✓</span>
+            <span>Triple Choc: ₹299 • Two-Chip: ₹279 (170g / 6oz)</span>
+          </div>
+          <div class="checklist-row">
+            <span class="check-box">✓</span>
+            <span>Pistachio: ₹349 • Ruby: ₹379 • Popcorn Toffee: ₹349</span>
+          </div>
+          <div class="checklist-row">
+            <span class="check-box">✓</span>
+            <span>London Caramel Cake: ₹1,299 (750g • 4-6 Serves)</span>
+          </div>
+          <div class="checklist-row">
+            <span class="check-box">✓</span>
+            <span>Royal Boxes: Set of 4 (₹1,199) • Set of 6 (₹1,699)</span>
+          </div>
+        </div>
+
+        <div>
+          <h4 style="font-family: var(--font-heading); color: var(--gold); font-size: 16px; margin-bottom: 10px;">2. Logistics & Contact Setup</h4>
+          <div class="checklist-row">
+            <span class="check-box">✓</span>
+            <span>WhatsApp Ordering: <strong>+91 91364 98467</strong></span>
+          </div>
+          <div class="checklist-row">
+            <span class="check-box">✓</span>
+            <span>Baking Hub: <strong>Vikhroli, Mumbai</strong> (Pickup Address)</span>
+          </div>
+          <div class="checklist-row">
+            <span class="check-box">?</span>
+            <span>Baking Cut-Off: Same-day before 2 PM or 24h pre-order?</span>
+          </div>
+          <div class="checklist-row">
+            <span class="check-box">?</span>
+            <span>Official Instagram Handle for Bio link & footer icon</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="font-size: 12px; color: var(--gold-light); margin-top: 14px; text-align: center;">
+        Any updates discussed in this meeting will be deployed within 1 hour after the call!
+      </div>
+    </div>
+
+    <!-- SLIDE 10: Next Steps & Handover -->
+    <div class="slide" data-slide="10" data-notes="Wrap up on a high note. Outline the 3 immediate steps after this call: 1. Apply any text/price edits, 2. Add sukiecookies.com to her Instagram Bio, 3. Announce the official website on her Instagram stories!">
+      <div>
+        <span class="slide-badge">Launch Activation & Partnership</span>
+        <h2 class="slide-title">Ready for Takeoff: Immediate Next Steps</h2>
+        <p class="slide-subtitle">
+          Your digital atelier is live. Here is how we transition from build to your first batch of orders.
+        </p>
+      </div>
+
+      <div class="content-grid-3">
+        <div class="luxury-card" style="border-top: 3px solid var(--gold);">
+          <span style="font-size: 28px; color: var(--gold);">1</span>
+          <h4 class="card-heading" style="margin-top: 8px;">Final Minor Tweaks</h4>
+          <p class="card-desc">We immediately apply any price updates, flavor tweaks, or Instagram handle confirmations from this call.</p>
+        </div>
+
+        <div class="luxury-card" style="border-top: 3px solid var(--gold);">
+          <span style="font-size: 28px; color: var(--gold);">2</span>
+          <h4 class="card-heading" style="margin-top: 8px;">Bio & Profile Linking</h4>
+          <p class="card-desc">Add <strong>sukiecookies.com</strong> to your Instagram Bio, WhatsApp Business catalog, and Google Business profile.</p>
+        </div>
+
+        <div class="luxury-card" style="border-top: 3px solid var(--gold);">
+          <span style="font-size: 28px; color: var(--gold);">3</span>
+          <h4 class="card-heading" style="margin-top: 8px;">Launch Announcement</h4>
+          <p class="card-desc">Post your official website launch story. All traffic will arrive at your fast, beautiful mobile experience.</p>
+        </div>
+      </div>
+
+      <div class="luxury-card" style="margin-top: 20px; text-align: center; padding: 24px; background: rgba(15, 36, 96, 0.4); border-color: var(--gold);">
+        <h3 style="font-family: var(--font-heading); font-size: 24px; color: #FFF;">Thank you for partnering with Asvex Technologies!</h3>
+        <p style="font-size: 14px; color: var(--gold-light); margin-top: 6px;">
+          Here's to thousands of Sukié boxes delivered across Mumbai. 🍪✨
+        </p>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Speaker Notes Panel -->
+  <div id="speaker-notes-panel">
+    <div class="notes-title">
+      <span>🎙️ Speaker Notes (What to say to client)</span>
+      <span style="cursor: pointer;" onclick="toggleNotes()">✕ Close [N]</span>
+    </div>
+    <div class="notes-content" id="notes-text">
+      Select a slide to see talking points.
+    </div>
+  </div>
+
+  <!-- Bottom Navigation Bar -->
+  <footer class="deck-footer">
+    <div class="nav-controls">
+      <button class="nav-btn" onclick="prevSlide()" title="Previous slide (Left Arrow)">← Prev</button>
+      <button class="nav-btn" onclick="nextSlide()" title="Next slide (Right Arrow or Space)">Next →</button>
+    </div>
+
+    <div class="slide-dots" id="dots-container">
+      <!-- Dots injected dynamically -->
+    </div>
+
+    <div class="footer-tools">
+      <span class="slide-counter" id="slide-counter">1 / 10</span>
+      <button class="tool-btn" id="notes-btn" onclick="toggleNotes()" title="Toggle speaker notes (Press N)">Notes [N]</button>
+      <button class="tool-btn" onclick="toggleFullscreen()" title="Toggle Fullscreen (Press F)">Fullscreen [F]</button>
+    </div>
+  </footer>
+
+  <script>
+    const slides = document.querySelectorAll('.slide');
+    const dotsContainer = document.getElementById('dots-container');
+    const counter = document.getElementById('slide-counter');
+    const notesPanel = document.getElementById('speaker-notes-panel');
+    const notesText = document.getElementById('notes-text');
+    const notesBtn = document.getElementById('notes-btn');
+    let currentSlide = 0;
+
+    // Create dots
+    slides.forEach((slide, idx) => {
+      const dot = document.createElement('div');
+      dot.className = `dot ${idx === 0 ? 'active' : ''}`;
+      dot.onclick = () => goToSlide(idx);
+      dotsContainer.appendChild(dot);
+    });
+
+    const dots = document.querySelectorAll('.dot');
+
+    function updateSlide() {
+      slides.forEach((s, idx) => {
+        s.classList.toggle('active', idx === currentSlide);
+      });
+
+      dots.forEach((d, idx) => {
+        d.classList.toggle('active', idx === currentSlide);
+      });
+
+      counter.textContent = `${currentSlide + 1} / ${slides.length}`;
+
+      // Update speaker notes
+      const activeSlide = slides[currentSlide];
+      const notes = activeSlide.getAttribute('data-notes') || 'No specific notes for this slide.';
+      notesText.innerHTML = `<strong>Talking Points:</strong><br>${notes}`;
+    }
+
+    function nextSlide() {
+      if (currentSlide < slides.length - 1) {
+        currentSlide++;
+        updateSlide();
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 0) {
+        currentSlide--;
+        updateSlide();
+      }
+    }
+
+    function goToSlide(idx) {
+      currentSlide = idx;
+      updateSlide();
+    }
+
+    function toggleNotes() {
+      notesPanel.classList.toggle('open');
+      notesBtn.classList.toggle('active');
+    }
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        }
+      }
+    }
+
+    // Keyboard navigation
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        e.preventDefault();
+        nextSlide();
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        e.preventDefault();
+        prevSlide();
+      } else if (e.key === 'n' || e.key === 'N') {
+        toggleNotes();
+      } else if (e.key === 'f' || e.key === 'F') {
+        toggleFullscreen();
+      } else if (e.key >= '1' && e.key <= '9') {
+        const target = parseInt(e.key) - 1;
+        if (target < slides.length) goToSlide(target);
+      } else if (e.key === '0') {
+        goToSlide(9);
+      }
+    });
+
+    // Touch Swipe support
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    window.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    window.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      if (touchStartX - touchEndX > 50) nextSlide();
+      if (touchEndX - touchStartX > 50) prevSlide();
+    }, { passive: true });
+
+    // Initial setup
+    updateSlide();
+  </script>
+</body>
+</html>

@@ -49,39 +49,71 @@ export default function PackagingExperience() {
         {/* Packaging Showcase Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-10 items-center mb-12 sm:mb-16">
           
-          {/* Packaging Photo */}
+          {/* Authentic Sukié Keepsake Box Presentation */}
           <div className="lg:col-span-6 flex justify-center">
-            <div className="relative w-full max-w-lg rounded-2xl sm:rounded-3xl overflow-hidden border border-[#C5A059]/30 shadow-xl group">
-              <div className="relative h-64 sm:h-96 w-full overflow-hidden bg-stone-900">
-                <img
-                  src="/images/packaging_box.jpg"
-                  alt="Sukié Bespoke Luxury Cookie Box"
-                  className="w-full h-full object-cover group-hover:scale-104 transition-transform duration-700 ease-out"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20" />
-
-                <div className="absolute top-3 left-3 z-10">
-                  <span className="bg-black/70 backdrop-blur-md text-[#C5A059] text-[9px] sm:text-[10px] font-bold px-2.5 py-1 rounded-full border border-[#C5A059]/40 uppercase tracking-widest">
-                    Hot-Stamped Gold Foil
-                  </span>
+            <div className="relative w-full max-w-lg rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-[#C5A059]/60 shadow-[0_20px_50px_rgba(12,65,156,0.35)] bg-gradient-to-br from-[#0B2558] via-[#0C419C] to-[#06183B] p-6 sm:p-8">
+              
+              {/* Box Lid & Gold Foil Header */}
+              <div className="flex items-center justify-between pb-4 border-b border-[#C5A059]/30">
+                <div className="flex items-center gap-3">
+                  <img
+                    src="/images/logo.png"
+                    alt="Sukié Logo"
+                    className="w-10 h-10 rounded-full object-cover ring-2 ring-[#C5A059]"
+                  />
+                  <div>
+                    <span className="font-heading text-lg font-bold text-white tracking-wide block">
+                      Sukié Royal Keepsake Box
+                    </span>
+                    <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#F3E5AB]">
+                      Hot-Stamped Gold Foil • Mumbai
+                    </span>
+                  </div>
                 </div>
-
-                <div className="absolute bottom-4 inset-x-4 text-white z-10">
-                  <span className="text-[10px] uppercase font-mono tracking-widest text-[#C5A059] block">
-                    Printed Domain: sukiecookies.com
-                  </span>
-                  <h3 className="font-heading text-lg sm:text-2xl font-bold mt-0.5">
-                    The Royal Blue Keepsake Box
-                  </h3>
-                  <p className="text-[11px] sm:text-xs text-white/70 mt-1 font-light line-clamp-2">
-                    Individually parchment-wrapped 170g cookies with silk ribbon and personal calligraphy note.
-                  </p>
-                </div>
+                <span className="text-xs font-mono text-[#F3E5AB] bg-[#C5A059]/20 px-2.5 py-1 rounded-full border border-[#C5A059]/40">
+                  Signature 4-Pack
+                </span>
               </div>
 
-              <div className="p-3.5 bg-[#0A0F1D] border-t border-white/10 flex items-center justify-between text-[11px]">
-                <span className="text-[#C5A059] font-mono">✦ Designed for Diwali, Weddings & VIP Gifts</span>
-                <span className="text-white/40">4 or 6 Pack</span>
+              {/* 4 Authentic Cookies Nested in Parchment & Gold */}
+              <div className="grid grid-cols-2 gap-3.5 my-5">
+                {[
+                  { name: 'Triple Chocolate Overload', img: '/images/triple_chocolate.jpg' },
+                  { name: 'Gooey Two-Chip', img: '/images/two_chip.jpg' },
+                  { name: 'Pistachio Gianduja', img: '/images/pistachio.jpg' },
+                  { name: "Cupid's Ruby Chocolate", img: '/images/ruby_chocolate.jpg' },
+                ].map((item, idx) => (
+                  <div
+                    key={idx}
+                    className="relative rounded-2xl overflow-hidden border border-[#C5A059]/40 bg-[#06183B] shadow-md group"
+                  >
+                    <div className="h-28 sm:h-32 w-full overflow-hidden">
+                      <img
+                        src={item.img}
+                        alt={item.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    </div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-transparent pointer-events-none" />
+                    <div className="absolute bottom-2 left-2 right-2 text-white">
+                      <span className="text-[9px] font-mono text-[#F3E5AB] block font-semibold">
+                        170g • Batch #{idx + 1}
+                      </span>
+                      <p className="text-[11px] font-heading font-bold truncate">
+                        {item.name}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Box Footer Specs */}
+              <div className="pt-3 border-t border-[#C5A059]/25 flex items-center justify-between text-[11px] text-white/80">
+                <span className="text-[#F3E5AB] font-mono flex items-center gap-1.5">
+                  <span>✦</span>
+                  <span>Hand-tied Gold Satin Ribbon Included</span>
+                </span>
+                <span className="font-mono text-[#F3E5AB]/90 font-bold">100% Eggless</span>
               </div>
             </div>
           </div>

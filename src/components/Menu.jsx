@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import CookieCard from './CookieCard';
 import CookieModal from './CookieModal';
+import BoxBuilderProgress from './BoxBuilderProgress';
 import { menuData } from '../data/menuData';
 import { useCart } from '../context/CartContext';
 
@@ -25,7 +26,7 @@ export default function Menu() {
       <div className="max-w-7xl mx-auto">
         
         {/* Section Header with Breathing Room */}
-        <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-14">
+        <div className="text-center max-w-2xl mx-auto mb-6 sm:mb-10">
           <span className="section-label text-brand-warm text-[10px] sm:text-xs mb-2">
             Baked Fresh Daily in Limited Batches
           </span>
@@ -43,24 +44,35 @@ export default function Menu() {
           </div>
         </div>
 
+        {/* Interactive Box Builder Progress Bar */}
+        <BoxBuilderProgress />
+
         {/* Mobile Swipeable Category Pills */}
         <div className="mb-8 sm:mb-12 -mx-4 px-4 overflow-x-auto no-scrollbar">
           <div className="flex sm:justify-center items-center gap-2 min-w-max pb-1">
             {categories.map((cat) => {
               const isActive = activeCategory === cat.id;
               return (
-                <button
+                <motion.button
                   key={cat.id}
+                  whileTap={{ scale: 0.94 }}
                   onClick={() => setActiveCategory(cat.id)}
-                  className={`relative px-4 py-2 rounded-full text-xs sm:text-sm font-semibold tracking-wide transition-all duration-300 cursor-pointer flex items-center gap-1.5 whitespace-nowrap shadow-xs ${
+                  className={`relative px-4 py-2 rounded-full text-xs sm:text-sm font-semibold tracking-wide transition-colors duration-200 cursor-pointer flex items-center gap-1.5 whitespace-nowrap shadow-xs ${
                     isActive 
-                      ? 'bg-[#1B3A8C] text-white shadow-md' 
+                      ? 'text-white' 
                       : 'bg-white text-stone-600 hover:text-stone-900 border border-stone-200'
                   }`}
                 >
+                  {isActive && (
+                    <motion.div
+                      layoutId="menuCatPill"
+                      className="absolute inset-0 bg-[#0C419C] rounded-full shadow-md -z-10"
+                      transition={{ type: 'spring', damping: 22, stiffness: 280 }}
+                    />
+                  )}
                   <span>{cat.emoji}</span>
                   <span>{cat.name}</span>
-                </button>
+                </motion.button>
               );
             })}
           </div>

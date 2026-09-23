@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { motion } from 'framer-motion';
 import { useCart } from '../context/CartContext';
 
-export default function Navbar() {
+export default function Navbar({ activeView = 'menu', onViewChange }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { items, totalItems, totalPrice, toggleCart } = useCart();
@@ -31,27 +32,30 @@ export default function Navbar() {
   }, [isMobileMenuOpen]);
 
   const navLinks = [
-    { name: 'Home', href: '#home' },
-    { name: 'Menu', href: '#menu' },
-    { name: 'Our Story', href: '#story' },
-    { name: 'Care & Complaints', href: '#care' },
-    { name: 'Contact', href: '#contact' },
+    { name: 'Drops', view: 'menu', href: '#menu' },
+    { name: 'Atelier Story', view: 'story', href: '#story' },
+    { name: 'Warming & Tasting', view: 'ritual', href: '#ritual' },
+    { name: 'Care & Reviews', view: 'care', href: '#care' },
   ];
 
-  const handleLinkClick = (e, href) => {
+  const handleLinkClick = (e, link) => {
     e.preventDefault();
     setIsMobileMenuOpen(false);
 
-    if (href === '#home') {
+    if (onViewChange) {
+      onViewChange(link.view);
       window.scrollTo({ top: 0, behavior: 'smooth' });
-      return;
-    }
-
-    const targetElement = document.querySelector(href);
-    if (targetElement) {
-      targetElement.scrollIntoView({ behavior: 'smooth' });
     } else {
-      window.location.hash = href;
+      if (link.href === '#home') {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+      const targetElement = document.querySelector(link.href);
+      if (targetElement) {
+        targetElement.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        window.location.hash = link.href;
+      }
     }
   };
 
@@ -69,7 +73,7 @@ export default function Navbar() {
           {/* Left: Brand Logo & Name */}
           <a
             href="#home"
-            onClick={(e) => handleLinkClick(e, '#home')}
+            onClick={(e) => handleLinkClick(e, { view: 'menu', href: '#home' })}
             className="flex items-center space-x-3 group cursor-pointer focus:outline-none"
             aria-label="Sukié Cookies Home"
           >
@@ -90,27 +94,38 @@ export default function Navbar() {
           </a>
 
           {/* Right: Desktop Navigation Links & Cart Button */}
-          <div className="hidden md:flex items-center space-x-8">
-            <nav className="flex items-center space-x-8" aria-label="Main Navigation">
-              {navLinks.map((link) => (
-                <a
-                  key={link.name}
-                  href={link.href}
-                  onClick={(e) => handleLinkClick(e, link.href)}
-                  className={`text-sm font-medium tracking-wider uppercase transition-colors duration-300 relative group py-1 ${
-                    isScrolled
-                      ? 'text-brand-dark hover:text-brand-blue'
-                      : 'text-white/90 hover:text-brand-gold'
-                  }`}
-                >
-                  {link.name}
-                  <span
-                    className={`absolute bottom-0 left-0 w-0 h-0.5 transition-all duration-300 group-hover:w-full ${
-                      isScrolled ? 'bg-brand-blue' : 'bg-brand-gold'
+          <div className="hidden md:flex items-center space-x-6">
+            <nav className="flex items-center space-x-2" aria-label="Main Navigation">
+              {navLinks.map((link) => {
+                const isActive = activeView === link.view;
+                return (
+                  <a
+                    key={link.name}
+                    href={link.href}
+                    onClick={(e) => handleLinkClick(e, link)}
+                    className={`text-xs font-semibold tracking-wider uppercase transition-colors duration-200 relative group py-1.5 px-3.5 rounded-full cursor-pointer ${
+                      isActive
+                        ? isScrolled
+                          ? 'text-white'
+                          : 'text-stone-950 font-bold'
+                        : isScrolled
+                        ? 'text-brand-dark hover:text-brand-blue'
+                        : 'text-white/80 hover:text-white'
                     }`}
-                  />
-                </a>
-              ))}
+                  >
+                    {isActive && (
+                      <motion.div
+                        layoutId="navbarActivePill"
+                        className={`absolute inset-0 rounded-full shadow-sm -z-10 ${
+                          isScrolled ? 'bg-[#0C419C]' : 'bg-[#C5A059]'
+                        }`}
+                        transition={{ type: 'spring', damping: 22, stiffness: 280 }}
+                      />
+                    )}
+                    {link.name}
+                  </a>
+                );
+              })}
             </nav>
 
             {/* Desktop Cart Icon with Luxury Hover Popover */}
@@ -319,16 +334,28 @@ export default function Navbar() {
 
               {/* Drawer Nav Links */}
               <nav className="mt-8 flex flex-col space-y-2">
-                {navLinks.map((link) => (
-                  <a
-                    key={link.name}
-                    href={link.href}
-                    onClick={(e) => handleLinkClick(e, link.href)}
-                    className="font-heading text-xl font-medium text-stone-900 hover:text-[#0F2460] hover:translate-x-1.5 transition-all duration-200 py-3 px-2 rounded-lg hover:bg-white/80 border-b border-stone-200/60"
-                  >
-                    {link.name}
-                  </a>
-                ))}
+                {navLinks.map((link) => {
+                  const isActive = activeView === link.view;
+                  return (
+                    <a
+                      key={link.name}
+                      href={link.href}
+                      onClick={(e) => handleLinkClick(e, link)}
+                      className={`font-heading text-lg font-medium transition-all duration-200 py-3 px-3 rounded-xl flex items-center justify-between border-b border-stone-200/60 ${
+                        isActive
+                          ? 'bg-[#0C419C] text-white font-bold shadow-sm'
+                          : 'text-stone-900 hover:text-[#0C419C] hover:bg-white/80'
+                      }`}
+                    >
+                      <span>{link.name}</span>
+                      {isActive && (
+                        <span className="text-xs bg-[#C5A059] text-stone-950 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider font-mono">
+                          Active
+                        </span>
+                      )}
+                    </a>
+                  );
+                })}
               </nav>
             </div>
 

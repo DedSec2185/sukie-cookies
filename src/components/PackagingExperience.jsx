@@ -86,11 +86,16 @@ export default function PackagingExperience() {
             </div>
           </div>
 
-          {/* 3 Step Details - Compact Cards */}
+          {/* 3 Step Details - Compact Cards with Viewport Animations */}
           <div className="lg:col-span-6 space-y-3 sm:space-y-4">
-            {steps.map((item) => (
-              <div
+            {steps.map((item, idx) => (
+              <motion.div
                 key={item.step}
+                initial={{ opacity: 0, x: 20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.45, delay: idx * 0.1 }}
+                whileHover={{ x: 4, transition: { duration: 0.2 } }}
                 className="p-4 sm:p-5 rounded-xl sm:rounded-2xl bg-white/[0.03] border border-white/10 hover:border-[#C5A059]/40 transition-colors"
               >
                 <div className="flex items-start gap-3.5">
@@ -114,7 +119,7 @@ export default function PackagingExperience() {
                     </p>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
 

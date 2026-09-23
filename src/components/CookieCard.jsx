@@ -58,12 +58,15 @@ export default function CookieCard({ product, onAddToCart, onOpenModal }) {
       onClick={() => onOpenModal && onOpenModal(product)}
       className="group rounded-2xl sm:rounded-3xl overflow-hidden bg-white shadow-[0_8px_25px_rgba(0,0,0,0.06)] hover:shadow-[0_20px_50px_rgba(15,36,96,0.18)] flex flex-col justify-between border border-stone-200/80 transition-all duration-300 cursor-pointer relative"
     >
-      {/* Top Image Section - Compact on Mobile */}
-      <div className="relative h-56 sm:h-72 lg:h-80 w-full overflow-hidden bg-stone-900">
+      {/* Top Image Section - Compact on Mobile with Custom Cursor trigger */}
+      <div 
+        className="relative h-56 sm:h-72 lg:h-80 w-full overflow-hidden bg-stone-900 cookie-card-visual"
+        data-cursor="cookie"
+      >
         <img
           src={product.image}
           alt={product.name}
-          className="w-full h-full object-cover object-center group-hover:scale-106 transition-transform duration-700 ease-out"
+          className="w-full h-full object-cover object-center group-hover:scale-108 transition-transform duration-700 ease-out"
           loading="lazy"
         />
 
@@ -176,23 +179,27 @@ export default function CookieCard({ product, onAddToCart, onOpenModal }) {
                 </button>
               </div>
             ) : isAdded ? (
-              <button
+              <motion.button
                 type="button"
+                initial={{ scale: 0.95 }}
+                animate={{ scale: 1.03 }}
                 disabled
-                className="bg-emerald-600 text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1 shadow-md scale-102 transition-all"
+                className="bg-emerald-600 text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-md"
               >
                 <span>Added</span>
                 <span>✓</span>
-              </button>
+              </motion.button>
             ) : (
-              <button
+              <motion.button
                 type="button"
+                whileHover={{ scale: 1.04 }}
+                whileTap={{ scale: 0.94 }}
                 onClick={handleAddToCart}
-                className="bg-[#0C419C] hover:bg-[#072561] active:scale-95 text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 flex items-center gap-1.5 shadow-md hover:shadow-indigo-900/30 cursor-pointer"
+                className="bg-[#0C419C] hover:bg-[#072561] text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-full text-xs font-bold uppercase tracking-wider transition-colors duration-200 flex items-center gap-1.5 shadow-md hover:shadow-indigo-900/40 cursor-pointer"
               >
                 <span>Add To Box</span>
                 <span className="text-sm font-light">+</span>
-              </button>
+              </motion.button>
             )}
           </div>
         </div>

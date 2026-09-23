@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion';
 import { useScrollReveal } from '../hooks/useScrollReveal';
 
 export default function Contact() {
@@ -231,7 +232,14 @@ export default function Contact() {
             {/* Two Cards Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 relative z-10">
               {/* Card 1: Order Complaints & Genuine Reversals */}
-              <div className="rounded-2xl sm:rounded-3xl p-6 sm:p-8 bg-white/[0.04] backdrop-blur-xl border border-red-400/20 hover:border-red-400/40 transition-all duration-300 flex flex-col justify-between shadow-xl">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5 }}
+                whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                className="rounded-2xl sm:rounded-3xl p-6 sm:p-8 bg-white/[0.04] backdrop-blur-xl border border-red-400/20 hover:border-red-400/40 transition-all duration-300 flex flex-col justify-between shadow-xl"
+              >
                 <div>
                   <div className="flex items-center justify-between gap-3 mb-5">
                     <span className="px-3 py-1 rounded-full bg-red-950/70 border border-red-500/30 text-rose-300 text-[10px] font-mono uppercase tracking-wider font-semibold">
@@ -263,19 +271,28 @@ export default function Contact() {
                   </div>
                 </div>
 
-                <a
+                <motion.a
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.97 }}
                   href="https://wa.me/919136498467?text=Hello%20Suki%C3%A9%20Care!%20%F0%9F%8D%AA%20I%20have%20an%20order%20complaint%20%2F%20issue%20to%20review%20for%20resolution.%20Order%20ID%3A%20"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full py-3.5 px-5 bg-gradient-to-r from-stone-900 to-black hover:from-black hover:to-stone-900 text-white rounded-xl font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 border border-white/20 hover:border-red-400/50 shadow-lg active:scale-[0.99] transition-all cursor-pointer"
+                  className="w-full py-3.5 px-5 bg-gradient-to-r from-stone-900 to-black hover:from-black hover:to-stone-900 text-white rounded-xl font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 border border-white/20 hover:border-red-400/50 shadow-lg cursor-pointer"
                 >
                   <span>Report Complaint on WhatsApp</span>
                   <span className="text-base">💬</span>
-                </a>
-              </div>
+                </motion.a>
+              </motion.div>
 
               {/* Card 2: Feedback & Tasting Reviews */}
-              <div className="rounded-2xl sm:rounded-3xl p-6 sm:p-8 bg-white/[0.04] backdrop-blur-xl border border-[#C5A059]/30 hover:border-[#C5A059]/60 transition-all duration-300 flex flex-col justify-between shadow-xl">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.12 }}
+                whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                className="rounded-2xl sm:rounded-3xl p-6 sm:p-8 bg-white/[0.04] backdrop-blur-xl border border-[#C5A059]/30 hover:border-[#C5A059]/60 transition-all duration-300 flex flex-col justify-between shadow-xl"
+              >
                 <div>
                   <div className="flex items-center justify-between gap-3 mb-5">
                     <span className="px-3 py-1 rounded-full bg-amber-950/70 border border-amber-500/30 text-amber-300 text-[10px] font-mono uppercase tracking-wider font-semibold">
@@ -308,15 +325,17 @@ export default function Contact() {
                 </div>
 
                 <div className="space-y-2.5">
-                  <a
+                  <motion.a
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.97 }}
                     href="https://wa.me/919136498467?text=Hello%20Chef!%20%F0%9F%8D%AA%20I%20wanted%20to%20share%20my%20tasting%20review%20and%20feedback%20for%20Suki%C3%A9%20Cookies%3A%20"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-full py-3.5 px-5 bg-[#C5A059] hover:bg-[#D4B86A] text-stone-950 rounded-xl font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 shadow-lg active:scale-[0.99] transition-all cursor-pointer"
+                    className="w-full py-3.5 px-5 bg-[#C5A059] hover:bg-[#D4B86A] text-stone-950 rounded-xl font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 shadow-lg cursor-pointer"
                   >
                     <span>Share Review on WhatsApp</span>
                     <span className="text-base">⭐</span>
-                  </a>
+                  </motion.a>
 
                   <a
                     href="https://instagram.com/sukie.mumbai"
@@ -328,7 +347,7 @@ export default function Contact() {
                     <span>📸</span>
                   </a>
                 </div>
-              </div>
+              </motion.div>
             </div>
 
             {/* Bottom Luxury Micro-Badge Strip */}

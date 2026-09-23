@@ -100,7 +100,10 @@ export default function Craftsmanship() {
           <div className="lg:col-span-7 flex flex-col items-center">
             
             {/* Visual Frame */}
-            <div className="relative w-full max-w-lg aspect-[16/11] sm:aspect-[4/3] rounded-2xl sm:rounded-3xl overflow-hidden border border-[#C5A059]/30 shadow-2xl bg-stone-900">
+            <div 
+              className="relative w-full max-w-lg aspect-[16/11] sm:aspect-[4/3] rounded-2xl sm:rounded-3xl overflow-hidden border border-[#C5A059]/30 shadow-2xl bg-stone-900 cookie-card-visual"
+              data-cursor="cookie"
+            >
               <img
                 src="/images/two_chip.jpg"
                 alt="Cookie Anatomy Cutaway"
@@ -135,8 +138,9 @@ export default function Craftsmanship() {
               {layers.map((layer) => {
                 const isSelected = activeLayer === layer.id;
                 return (
-                  <button
+                  <motion.button
                     key={layer.id}
+                    whileTap={{ scale: 0.94 }}
                     onClick={() => setActiveLayer(layer.id)}
                     className={`py-2 px-1 rounded-xl text-[10px] sm:text-xs font-bold uppercase tracking-wider text-center transition-all cursor-pointer border ${
                       isSelected
@@ -145,34 +149,43 @@ export default function Craftsmanship() {
                     }`}
                   >
                     <span>0{layer.id + 1} {layer.shortTitle}</span>
-                  </button>
+                  </motion.button>
                 );
               })}
             </div>
 
-            {/* Clean Detail Card Below (Never Colliding) */}
-            <div className="w-full max-w-lg mt-3.5 p-4 sm:p-5 rounded-2xl bg-white/[0.04] border border-[#C5A059]/30 backdrop-blur-md flex items-center justify-between">
-              <div>
-                <span className="text-[9px] uppercase tracking-widest text-[#C5A059] font-mono block">
-                  Layer 0{current.id + 1} • {current.subtitle}
-                </span>
-                <h3 className="font-heading text-base sm:text-xl font-bold text-white mt-0.5">
-                  {current.title}
-                </h3>
-                <p className="text-white/70 text-xs sm:text-sm mt-1 leading-relaxed font-light line-clamp-2 sm:line-clamp-none">
-                  {current.desc}
-                </p>
-              </div>
+            {/* Clean Detail Card Below with Smooth Crossfade */}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={current.id}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.25 }}
+                className="w-full max-w-lg mt-3.5 p-4 sm:p-5 rounded-2xl bg-white/[0.04] border border-[#C5A059]/30 backdrop-blur-md flex items-center justify-between"
+              >
+                <div>
+                  <span className="text-[9px] uppercase tracking-widest text-[#C5A059] font-mono block">
+                    Layer 0{current.id + 1} • {current.subtitle}
+                  </span>
+                  <h3 className="font-heading text-base sm:text-xl font-bold text-white mt-0.5">
+                    {current.title}
+                  </h3>
+                  <p className="text-white/70 text-xs sm:text-sm mt-1 leading-relaxed font-light line-clamp-2 sm:line-clamp-none">
+                    {current.desc}
+                  </p>
+                </div>
 
-              <div className="text-right shrink-0 ml-3 pl-3 border-l border-white/10">
-                <span className="block font-heading text-xl sm:text-2xl font-bold text-[#C5A059]">
-                  {current.stat}
-                </span>
-                <span className="text-[9px] uppercase tracking-wider text-white/40 font-mono">
-                  {current.statLabel}
-                </span>
-              </div>
-            </div>
+                <div className="text-right shrink-0 ml-3 pl-3 border-l border-white/10">
+                  <span className="block font-heading text-xl sm:text-2xl font-bold text-[#C5A059]">
+                    {current.stat}
+                  </span>
+                  <span className="text-[9px] uppercase tracking-wider text-white/40 font-mono">
+                    {current.statLabel}
+                  </span>
+                </div>
+              </motion.div>
+            </AnimatePresence>
 
           </div>
 
@@ -217,9 +230,14 @@ export default function Craftsmanship() {
           </div>
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
-            {pillars.map((p) => (
-              <div
+            {pillars.map((p, idx) => (
+              <motion.div
                 key={p.num}
+                initial={{ opacity: 0, y: 15 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.45, delay: idx * 0.08 }}
+                whileHover={{ y: -4, transition: { duration: 0.2 } }}
                 className="p-4 sm:p-6 rounded-2xl bg-white/[0.02] border border-white/10 hover:border-[#C5A059]/40 transition-colors flex flex-col justify-between"
               >
                 <div>
@@ -233,7 +251,7 @@ export default function Craftsmanship() {
                     {p.detail}
                   </p>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>

@@ -164,15 +164,28 @@ body {
   opacity: 0.5;
 }
 
-/* ─── Cursor glow (cosmetic) ────────────────────── */
-.cursor-glow {
-  pointer-events: none;
-  position: fixed;
-  width: 400px;
-  height: 400px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(200,160,80,0.06) 0%, transparent 70%);
-  transform: translate(-50%, -50%);
-  z-index: 9999;
-  transition: opacity 0.3s;
+/* ─── Lenis smooth scroll support ──────────────── */
+html.lenis, html.lenis body {
+  height: auto;
 }
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+/* ─── Mobile touch optimizations ───────────────── */
+button, a, input, select {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* Safe area bottom padding for mobile docks */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 16px);
+}
+

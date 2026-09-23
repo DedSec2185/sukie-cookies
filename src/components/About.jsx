@@ -1,8 +1,6 @@
-import { useScrollReveal } from '../hooks/useScrollReveal';
+import { motion } from 'framer-motion';
 
 export default function About() {
-  const [ref, isVisible] = useScrollReveal(0.15);
-
   return (
     <section
       id="story"
@@ -22,11 +20,12 @@ export default function About() {
       {/* Top subtle border highlight */}
       <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-gold/25 to-transparent pointer-events-none" />
 
-      <div
-        ref={ref}
-        className={`max-w-6xl mx-auto lg:grid lg:grid-cols-2 gap-16 items-center relative z-10 reveal ${
-          isVisible ? 'visible' : ''
-        }`}
+      <motion.div
+        initial={{ opacity: 0, y: 25 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.7 }}
+        className="max-w-6xl mx-auto lg:grid lg:grid-cols-2 gap-16 items-center relative z-10"
       >
         {/* Left Column: Story Content */}
         <div className="flex flex-col justify-center">
@@ -113,7 +112,7 @@ export default function About() {
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 }

@@ -1,5 +1,7 @@
 import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../context/CartContext';
+import WarmingSimulator from './WarmingSimulator';
 
 export default function TastingNotes() {
   const { addItem } = useCart();
@@ -273,6 +275,11 @@ export default function TastingNotes() {
             </div>
 
           </div>
+        </div>
+
+        {/* Interactive Warming Protocol Simulator */}
+        <div className="mt-12 sm:mt-16">
+          <WarmingSimulator />
         </div>
 
       </div>

@@ -61,18 +61,22 @@ export default function Hero() {
 
           {/* CTAs */}
           <div className="pt-2 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3">
-            <button
+            <motion.button
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => scrollToSection('#menu')}
-              className="w-full sm:w-auto bg-gradient-to-r from-[#C5A059] via-[#D4B86A] to-[#C5A059] text-black font-bold px-7 py-3.5 rounded-full text-xs uppercase tracking-widest shadow-lg transition-transform active:scale-95 cursor-pointer"
+              className="w-full sm:w-auto bg-gradient-to-r from-[#C5A059] via-[#D4B86A] to-[#C5A059] text-black font-bold px-7 py-3.5 rounded-full text-xs uppercase tracking-widest shadow-lg cursor-pointer"
             >
               Order Today&apos;s Drop →
-            </button>
-            <button
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => scrollToSection('#craftsmanship')}
               className="w-full sm:w-auto border border-white/20 hover:border-[#C5A059] text-white hover:text-[#C5A059] px-6 py-3.5 rounded-full text-xs uppercase tracking-widest backdrop-blur-xs transition-colors cursor-pointer"
             >
               The 170g Anatomy ✦
-            </button>
+            </motion.button>
           </div>
 
           {/* Key Pillars Row */}
@@ -92,11 +96,15 @@ export default function Hero() {
           </div>
         </motion.div>
 
-        {/* Right Hero Showcase Photo Card - Sized Compactly for Mobile */}
+        {/* Right Hero Showcase Photo Card - Sized Compactly for Mobile with Gentle Floating Motion */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.7, delay: 0.15 }}
+          animate={{ opacity: 1, scale: 1, y: [0, -6, 0] }}
+          transition={{
+            opacity: { duration: 0.7, delay: 0.15 },
+            scale: { duration: 0.7, delay: 0.15 },
+            y: { duration: 5, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' },
+          }}
           className="lg:col-span-5 flex justify-center"
         >
           <div className="relative w-full max-w-sm sm:max-w-md group">
@@ -107,11 +115,14 @@ export default function Hero() {
             {/* Framed Photography Display */}
             <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden border border-[#C5A059]/30 bg-black/60 shadow-xl backdrop-blur-xl">
               
-              <div className="relative h-60 sm:h-80 lg:h-[380px] w-full overflow-hidden">
+              <div 
+                className="relative h-60 sm:h-80 lg:h-[380px] w-full overflow-hidden cookie-card-visual"
+                data-cursor="cookie"
+              >
                 <img
                   src="/images/triple_chocolate.jpg"
                   alt="Triple Chocolate Overload Real Cookie"
-                  className="w-full h-full object-cover group-hover:scale-104 transition-transform duration-700 ease-out"
+                  className="w-full h-full object-cover group-hover:scale-106 transition-transform duration-700 ease-out"
                 />
                 
                 {/* Vignette */}

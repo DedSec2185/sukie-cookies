@@ -58,15 +58,12 @@ export default function CookieCard({ product, onAddToCart, onOpenModal }) {
       onClick={() => onOpenModal && onOpenModal(product)}
       className="group rounded-2xl sm:rounded-3xl overflow-hidden bg-white shadow-[0_8px_25px_rgba(0,0,0,0.06)] hover:shadow-[0_20px_50px_rgba(15,36,96,0.18)] flex flex-col justify-between border border-stone-200/80 transition-all duration-300 cursor-pointer relative"
     >
-      {/* Top Image Section - Compact on Mobile with Custom Cursor trigger */}
-      <div 
-        className="relative h-56 sm:h-72 lg:h-80 w-full overflow-hidden bg-stone-900 cookie-card-visual"
-        data-cursor="cookie"
-      >
+      {/* Top Image Section - Compact on Mobile */}
+      <div className="relative h-56 sm:h-72 lg:h-80 w-full overflow-hidden bg-stone-900">
         <img
           src={product.image}
           alt={product.name}
-          className="w-full h-full object-cover object-center group-hover:scale-108 transition-transform duration-700 ease-out"
+          className="w-full h-full object-cover object-center group-hover:scale-106 transition-transform duration-700 ease-out"
           loading="lazy"
         />
 
@@ -146,9 +143,11 @@ export default function CookieCard({ product, onAddToCart, onOpenModal }) {
                 Sold Out
               </span>
             ) : currentQty > 0 ? (
-              <div 
+              <motion.div 
+                initial={{ scale: 0.95 }}
+                animate={{ scale: 1 }}
                 onClick={(e) => e.stopPropagation()} 
-                className="inline-flex items-center rounded-full bg-[#0C419C] text-white p-1 border border-[#C5A059]/40 shadow-md"
+                className="inline-flex items-center rounded-full bg-gradient-to-r from-[#070B14] via-[#0C152B] to-[#070B14] text-white p-1 border border-[#C5A059]/70 shadow-[0_4px_16px_rgba(12,65,156,0.35)] ring-1 ring-[#C5A059]/30"
               >
                 <button
                   type="button"
@@ -157,12 +156,13 @@ export default function CookieCard({ product, onAddToCart, onOpenModal }) {
                     updateQuantity(product.id, currentQty - 1);
                   }}
                   aria-label="Decrease quantity"
-                  className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/10 hover:bg-white/20 active:scale-90 text-white flex items-center justify-center text-sm font-bold transition-all cursor-pointer"
+                  className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/10 hover:bg-white/20 active:scale-90 text-[#C5A059] hover:text-white flex items-center justify-center text-sm font-bold transition-all cursor-pointer border border-[#C5A059]/30"
                 >
                   −
                 </button>
-                <div className="px-2.5 sm:px-3 text-center min-w-[65px] sm:min-w-[70px]">
-                  <span className="text-xs font-bold font-mono text-[#C5A059] block leading-tight">
+                <div className="px-2.5 sm:px-3 text-center min-w-[75px] sm:min-w-[85px] flex items-center justify-center gap-1">
+                  <span className="text-[#C5A059] text-[10px]">✦</span>
+                  <span className="text-xs font-bold font-mono text-white tracking-wide">
                     {currentQty} in Box
                   </span>
                 </div>
@@ -173,11 +173,11 @@ export default function CookieCard({ product, onAddToCart, onOpenModal }) {
                     updateQuantity(product.id, currentQty + 1);
                   }}
                   aria-label="Increase quantity"
-                  className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#C5A059] hover:bg-amber-300 text-stone-950 active:scale-90 flex items-center justify-center text-sm font-bold transition-all cursor-pointer shadow-sm"
+                  className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-r from-[#C5A059] to-[#D4B86A] text-stone-950 active:scale-90 flex items-center justify-center text-sm font-bold transition-all cursor-pointer shadow-md hover:brightness-110"
                 >
                   +
                 </button>
-              </div>
+              </motion.div>
             ) : isAdded ? (
               <motion.button
                 type="button"

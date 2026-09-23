@@ -11,13 +11,23 @@ import About from './components/About';
 import Contact from './components/Contact';
 import Footer from './components/Footer';
 import Cart from './components/Cart';
-import CustomCursor from './components/CustomCursor';
 import MobileBottomDock from './components/MobileBottomDock';
+import ComingSoon from './components/ComingSoon';
 import { useLenis } from './hooks/useLenis';
 
 export default function App() {
-  // Initialize buttery-smooth Lenis momentum scrolling on desktop
+  // Initialize smooth momentum scrolling on desktop
   useLenis();
+
+  // Check if visitor entered via direct preview parameter/hash
+  const checkInitialPreview = () => {
+    if (typeof window === 'undefined') return false;
+    const urlParams = new URLSearchParams(window.location.search);
+    const hash = window.location.hash.toLowerCase();
+    return urlParams.get('preview') === 'true' || hash.includes('preview');
+  };
+
+  const [isPreviewMode, setIsPreviewMode] = useState(checkInitialPreview);
 
   // Helper to determine view from current hash
   const getViewFromHash = () => {
@@ -35,6 +45,10 @@ export default function App() {
   // Sync with browser back/forward and hash changes
   useEffect(() => {
     const handleHashChange = () => {
+      const hash = window.location.hash.toLowerCase();
+      if (hash.includes('preview')) {
+        setIsPreviewMode(true);
+      }
       setActiveView(getViewFromHash());
     };
 
@@ -48,6 +62,11 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // If in Coming Soon mode (DEFAULT FOR PUBLIC VISITS), show memorable teaser
+  if (!isPreviewMode) {
+    return <ComingSoon onEnterPreview={() => setIsPreviewMode(true)} />;
+  }
+
   const viewTabs = [
     { id: 'menu', label: 'Daily Drops', icon: '🍪', desc: 'Fresh 170g Menu' },
     { id: 'story', label: 'NYC Atelier', icon: '✨', desc: 'Story & Anatomy' },
@@ -58,17 +77,32 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#FAF6EE] text-brand-dark selection:bg-brand-gold selection:text-brand-dark overflow-x-hidden pb-24 md:pb-0 relative">
-      {/* 1. Desktop Luxury Custom Trailing Cursor */}
-      <CustomCursor />
+      {/* Discreet Preview Mode Indicator Bar */}
+      <div className="bg-[#070B14] border-b border-[#C5A059]/40 py-2 px-4 text-center text-xs text-white flex items-center justify-between sticky top-0 z-50 shadow-md">
+        <span className="flex items-center gap-1.5 text-[#C5A059] font-mono text-[11px]">
+          <span>✦</span>
+          <span>Atelier Menu Preview Active</span>
+        </span>
+        <button
+          type="button"
+          onClick={() => {
+            setIsPreviewMode(false);
+            window.location.hash = '';
+          }}
+          className="text-[11px] font-mono text-white/80 hover:text-white px-2.5 py-0.5 rounded-full border border-white/20 hover:border-white/50 bg-white/5 transition-colors cursor-pointer"
+        >
+          Return to Coming Soon Landing →
+        </button>
+      </div>
 
-      {/* 2. Top Header Navigation */}
+      {/* Top Header Navigation */}
       <Navbar activeView={activeView} onViewChange={handleViewChange} />
 
-      {/* 3. Sliding Cart Drawer */}
+      {/* Sliding Cart Drawer */}
       <Cart />
 
-      {/* 4. Desktop Ambient View Switcher Bar (Visible on md+ screens) */}
-      <div className="hidden md:block pt-24 pb-3 px-4 bg-[#0A0D14] border-b border-white/10 sticky top-0 z-30 shadow-md">
+      {/* Desktop Ambient View Switcher Bar (Visible on md+ screens) */}
+      <div className="hidden md:block pt-24 pb-3 px-4 bg-[#0A0D14] border-b border-white/10 sticky top-8 z-30 shadow-md">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-1.5 p-1 rounded-full bg-white/5 border border-white/10 backdrop-blur-md">
             {viewTabs.map((tab) => {
@@ -107,7 +141,7 @@ export default function App() {
         </div>
       </div>
 
-      {/* 5. Main Content Area with Smooth Page Transitions */}
+      {/* Main Content Area with Smooth Page Transitions */}
       <main>
         <AnimatePresence mode="wait">
           {activeView === 'menu' && (
@@ -188,10 +222,10 @@ export default function App() {
         </AnimatePresence>
       </main>
 
-      {/* 6. Footer */}
+      {/* Footer */}
       <Footer />
 
-      {/* 7. Mobile-First Bottom Navigation Dock */}
+      {/* Mobile-First Bottom Navigation Dock */}
       <MobileBottomDock activeTab={activeView} onTabChange={handleViewChange} />
     </div>
   );

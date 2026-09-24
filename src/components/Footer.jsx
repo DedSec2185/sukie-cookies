@@ -17,7 +17,7 @@ export default function Footer() {
     { name: 'Home', targetId: 'top' },
     { name: 'Menu Drops', targetId: 'menu' },
     { name: 'Our Story', targetId: 'story' },
-    { name: 'Complaints & Reversals', targetId: 'care' },
+    { name: 'Order Care & Quality', targetId: 'care' },
     { name: 'Feedback & Reviews', targetId: 'care' },
     { name: 'Contact Atelier', targetId: 'contact' },
   ];

@@ -17,7 +17,7 @@ export default function Cart() {
 
   // Navigation views: 'cart' | 'checkout' | 'confirmation'
   const [view, setView] = useState('cart');
-  const [deliveryArea, setDeliveryArea] = useState('Powai');
+  const [deliveryArea, setDeliveryArea] = useState('Vikhroli');
   const [includeGiftBox, setIncludeGiftBox] = useState(false);
 
   // Direct Website Checkout form state
@@ -28,11 +28,17 @@ export default function Cart() {
     landmark: '',
     slot: 'Today Evening (5:00 PM – 8:00 PM)',
     note: '',
+    isBulkOrder: false,
     paymentMethod: 'upi', // 'upi' | 'cod' | 'card'
   });
   const [formErrors, setFormErrors] = useState({});
   const [placedOrder, setPlacedOrder] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // On-Site Post-Order Review states
+  const [orderRating, setOrderRating] = useState(5);
+  const [orderReviewText, setOrderReviewText] = useState('');
+  const [orderReviewSubmitted, setOrderReviewSubmitted] = useState(false);
 
   // Close on Escape key press
   useEffect(() => {
@@ -126,8 +132,9 @@ export default function Cart() {
       errors.phone = 'Please enter a valid 10-digit mobile number';
     }
 
-    if (!formData.address.trim()) {
-      errors.address = 'Please enter your delivery address';
+    // Address is ONLY required if customer selected bulk order delivery
+    if (formData.isBulkOrder && !formData.address.trim()) {
+      errors.address = 'Please enter your delivery address for bulk dispatch';
     }
     return errors;
   };
@@ -150,7 +157,7 @@ export default function Cart() {
       totalPrice,
       packagingFee,
       finalTotal,
-      deliveryArea,
+      deliveryArea: 'Vikhroli Atelier (Pickup)',
       customer: { ...formData },
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }),
       date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
@@ -183,7 +190,7 @@ export default function Cart() {
       order.customer.paymentMethod === 'upi'
         ? 'Instant UPI Transfer'
         : order.customer.paymentMethod === 'cod'
-        ? 'Pay on Delivery / Handover'
+        ? 'Pay on Collection / Handover'
         : 'Online Cards / NetBanking';
 
     const msg =
@@ -191,15 +198,17 @@ export default function Cart() {
       `*Order Placed on Website:* #${order.id}%0A` +
       `*Name:* ${order.customer.name}%0A` +
       `*Phone:* ${order.customer.phone}%0A` +
-      `*Delivery Address:* ${order.customer.address}${order.customer.landmark ? ', ' + order.customer.landmark : ''}%0A` +
-      `*Mumbai Area:* ${order.deliveryArea}%0A` +
-      `*Slot:* ${order.customer.slot}%0A` +
-      (order.customer.note ? `*Gift Note / Instructions:* ${order.customer.note}%0A` : '') +
+      `*Fulfillment:* Kitchen Pickup (Vikhroli Atelier, Mumbai 400079)%0A` +
+      `*Collection Slot:* ${order.customer.slot}%0A` +
+      (order.customer.isBulkOrder && order.customer.address
+        ? `*Bulk Delivery Address:* ${order.customer.address}%0A`
+        : '') +
+      (order.customer.note ? `*Courier Note / Instructions:* ${order.customer.note}%0A` : '') +
       `%0A*Items:*%0A${lines}%0A` +
       (order.packagingFee > 0 ? `🎁 Luxury Ribbon Gift Box: Yes (+₹49)%0A` : '') +
       `%0A*Total Amount:* ₹${order.finalTotal}%0A` +
       `*Payment Choice:* ${paymentMethodText}%0A%0A` +
-      `Please let me know when the batch is heading out!`;
+      `Please let me know when ready for collection!`;
 
     return `https://wa.me/919136498467?text=${msg}`;
   };
@@ -372,27 +381,15 @@ export default function Cart() {
                         />
                       </label>
 
-                      {/* Delivery Hub Selector */}
+                      {/* Collection Hub */}
                       <div className="flex items-center justify-between text-xs bg-stone-50 p-3 rounded-xl border border-stone-200">
                         <div className="flex items-center gap-1.5 text-stone-600 font-medium">
                           <span>📍</span>
-                          <span>Delivery Area:</span>
+                          <span>Fulfillment Hub:</span>
                         </div>
-                        <select
-                          value={deliveryArea}
-                          onChange={(e) => setDeliveryArea(e.target.value)}
-                          className="bg-white border border-stone-200 rounded-lg px-2.5 py-1 text-xs font-bold text-[#0C419C] outline-none cursor-pointer focus:border-[#C5A059]"
-                        >
-                          <option value="Vikhroli">Vikhroli (Direct Atelier)</option>
-                          <option value="Powai">Powai</option>
-                          <option value="Andheri East & West">Andheri East & West</option>
-                          <option value="Chandivali">Chandivali</option>
-                          <option value="Ghatkopar">Ghatkopar</option>
-                          <option value="Bandra / BKC">Bandra / BKC</option>
-                          <option value="Lower Parel / Worli">Lower Parel / Worli</option>
-                          <option value="Navi Mumbai">Navi Mumbai</option>
-                          <option value="Other Mumbai">Other Mumbai</option>
-                        </select>
+                        <span className="font-bold text-[#0C419C] text-xs">
+                          Vikhroli Atelier (Pickups Only)
+                        </span>
                       </div>
 
                       {/* Calculations Breakdown */}
@@ -408,8 +405,8 @@ export default function Cart() {
                           </div>
                         )}
                         <div className="flex justify-between text-stone-500 text-[11px]">
-                          <span>Mumbai Delivery Fee</span>
-                          <span className="text-emerald-700 font-semibold">Calculated at Dispatch</span>
+                          <span>Order Fulfillment</span>
+                          <span className="text-emerald-700 font-semibold font-mono">Kitchen Pickup (Free)</span>
                         </div>
                         <div className="flex justify-between items-baseline pt-2 border-t border-stone-200">
                           <span className="font-heading text-base font-bold text-stone-900">Total Amount</span>
@@ -501,7 +498,7 @@ export default function Cart() {
                             {includeGiftBox ? '🎁 Luxury Keepsake Box & Wax Seal Ribbon' : 'Standard Artisan Bakery Box'}
                           </p>
                           <p className="text-[11px] text-stone-500 mt-0.5">
-                            Destined for: <strong className="text-stone-800">{deliveryArea}</strong>
+                            Fulfillment: <strong className="text-stone-800">Kitchen Pickup (Vikhroli, Mumbai 400079)</strong>
                           </p>
                         </div>
 
@@ -526,7 +523,7 @@ export default function Cart() {
                           <h3 className="text-xs font-bold uppercase tracking-wider text-stone-900 leading-none">
                             Contact Information
                           </h3>
-                          <span className="text-[10px] text-stone-500 font-mono">For Mumbai courier tracking & updates</span>
+                          <span className="text-[10px] text-stone-500 font-mono">For pickup readiness notification</span>
                         </div>
                       </div>
 
@@ -574,76 +571,40 @@ export default function Cart() {
                       </div>
                     </div>
 
-                    {/* Section 2: Delivery Destination */}
+                    {/* Section 2: Collection Schedule & Courier Terms (Pickups Only) */}
                     <div className="bg-white rounded-2xl p-4 sm:p-5 border border-stone-200/90 shadow-[0_2px_12px_rgba(0,0,0,0.03)] space-y-3.5">
                       <div className="flex items-center gap-2 pb-2 border-b border-stone-100">
                         <span className="w-5 h-5 rounded-full bg-[#0C419C] text-white flex items-center justify-center text-[10px] font-bold font-mono shadow-xs">
                           2
                         </span>
                         <div>
-                          <h3 className="text-xs font-bold uppercase tracking-wider text-stone-900 leading-none">
-                            Mumbai Delivery & Schedule
-                          </h3>
-                          <span className="text-[10px] text-stone-500 font-mono">Dispatched warm from our Mumbai kitchen</span>
+                          <div className="flex items-center gap-2">
+                            <h3 className="text-xs font-bold uppercase tracking-wider text-stone-900 leading-none">
+                              Atelier Collection
+                            </h3>
+                            <span className="bg-[#C5A059]/20 text-[#7A5B18] text-[9px] font-bold px-2 py-0.5 rounded-full font-mono uppercase">
+                              Pickups Only
+                            </span>
+                          </div>
+                          <span className="text-[10px] text-stone-500 font-mono">Kitchen: Vikhroli, Mumbai 400079</span>
                         </div>
                       </div>
 
-                      <div>
-                        <label className="block text-[11px] font-semibold text-stone-700 mb-1">
-                          Delivery Area / Hub <span className="text-red-500">*</span>
-                        </label>
-                        <select
-                          value={deliveryArea}
-                          onChange={(e) => setDeliveryArea(e.target.value)}
-                          className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-stone-200 bg-stone-50/60 focus:bg-white focus:border-[#0C419C] focus:ring-2 focus:ring-[#0C419C]/10 focus:outline-none font-semibold text-stone-800 cursor-pointer"
-                        >
-                          <option value="Vikhroli">Vikhroli (Direct Atelier)</option>
-                          <option value="Powai">Powai</option>
-                          <option value="Andheri East & West">Andheri East & West</option>
-                          <option value="Chandivali">Chandivali</option>
-                          <option value="Ghatkopar">Ghatkopar</option>
-                          <option value="Bandra / BKC">Bandra / BKC</option>
-                          <option value="Lower Parel / Worli">Lower Parel / Worli</option>
-                          <option value="Navi Mumbai">Navi Mumbai</option>
-                          <option value="Other Mumbai">Other Mumbai</option>
-                        </select>
+                      {/* Mandatory Third-Party Courier Clause & Bulk Note */}
+                      <div className="p-3.5 rounded-xl bg-amber-50/90 border border-amber-200 text-stone-800 space-y-2 text-xs">
+                        <p className="text-[11px] text-stone-800 leading-relaxed">
+                          <strong>Third-party courier collections:</strong> Once an order has been collected by a courier arranged by the customer, transit and handling are the responsibility of the courier service.
+                        </p>
+                        <div className="pt-2 border-t border-amber-200/70 text-[10px] font-semibold text-amber-950 flex items-center gap-1.5">
+                          <span>✦</span>
+                          <span>Delivery can only be provided for bulk orders</span>
+                        </div>
                       </div>
 
-                      <div>
-                        <label className="block text-[11px] font-semibold text-stone-700 mb-1">
-                          Flat / Building & Street Address <span className="text-red-500">*</span>
-                        </label>
-                        <textarea
-                          rows={2}
-                          value={formData.address}
-                          onChange={(e) => handleInputChange('address', e.target.value)}
-                          placeholder="e.g. Flat 1204, Tower B, Hiranandani Gardens..."
-                          className={`w-full px-3.5 py-2.5 text-xs rounded-xl border bg-stone-50/60 focus:bg-white focus:outline-none transition-all leading-relaxed ${
-                            formErrors.address ? 'border-red-500 bg-red-50/30' : 'border-stone-200 focus:border-[#0C419C] focus:ring-2 focus:ring-[#0C419C]/10'
-                          }`}
-                        />
-                        {formErrors.address && (
-                          <p className="text-[10px] text-red-600 mt-1 font-medium">{formErrors.address}</p>
-                        )}
-                      </div>
-
-                      <div>
-                        <label className="block text-[11px] font-semibold text-stone-700 mb-1">
-                          Nearby Landmark (Optional)
-                        </label>
-                        <input
-                          type="text"
-                          value={formData.landmark}
-                          onChange={(e) => handleInputChange('landmark', e.target.value)}
-                          placeholder="e.g. Near Galleria / Opp. Gate 2"
-                          className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-stone-200 bg-stone-50/60 focus:bg-white focus:border-[#0C419C] focus:outline-none"
-                        />
-                      </div>
-
-                      {/* Interactive Delivery Slot Choice Pills */}
+                      {/* Collection Slot Choice Pills */}
                       <div>
                         <label className="block text-[11px] font-semibold text-stone-700 mb-1.5">
-                          Select Delivery Slot <span className="text-stone-400 font-normal">(Baked Fresh for Slot)</span>
+                          Select Pickup Slot <span className="text-stone-400 font-normal">(Baked Fresh for Collection)</span>
                         </label>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                           {[
@@ -672,17 +633,62 @@ export default function Cart() {
                         </div>
                       </div>
 
+                      {/* Courier / Kitchen Note */}
                       <div>
                         <label className="block text-[11px] font-semibold text-stone-700 mb-1">
-                          Personalised Gifting Message / Kitchen Note <span className="text-stone-400 font-normal">(Optional)</span>
+                          Courier / Collection Note <span className="text-stone-400 font-normal">(Optional)</span>
                         </label>
                         <textarea
                           rows={2}
                           value={formData.note}
                           onChange={(e) => handleInputChange('note', e.target.value)}
-                          placeholder="e.g. 'Happy Birthday Kabir!' or 'Leave with building security guard'"
+                          placeholder="e.g. 'Arranging WeFast / Dunzo at 6:30 PM' or 'Happy Birthday note on box'"
                           className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-stone-200 bg-stone-50/60 focus:bg-white focus:border-[#0C419C] focus:outline-none leading-relaxed"
                         />
+                      </div>
+
+                      {/* Bulk Order Delivery Option */}
+                      <div className="pt-2 border-t border-stone-100">
+                        <label className="flex items-start gap-2.5 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={formData.isBulkOrder || false}
+                            onChange={(e) => handleInputChange('isBulkOrder', e.target.checked)}
+                            className="accent-[#0C419C] w-4 h-4 mt-0.5 cursor-pointer"
+                          />
+                          <div className="text-xs">
+                            <span className="font-semibold text-stone-800 block">
+                              This is a Bulk / Celebration Order (20+ cookies)
+                            </span>
+                            <span className="text-[10px] text-stone-500 block leading-tight">
+                              Dedicated delivery can be provided across Mumbai for bulk orders.
+                            </span>
+                          </div>
+                        </label>
+
+                        {formData.isBulkOrder && (
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            className="mt-3 space-y-2 pt-2 border-t border-stone-100"
+                          >
+                            <label className="block text-[11px] font-semibold text-stone-700">
+                              Bulk Delivery Address <span className="text-red-500">*</span>
+                            </label>
+                            <textarea
+                              rows={2}
+                              value={formData.address}
+                              onChange={(e) => handleInputChange('address', e.target.value)}
+                              placeholder="Enter full delivery address for bulk courier..."
+                              className={`w-full px-3.5 py-2 text-xs rounded-xl border bg-stone-50/60 focus:bg-white focus:outline-none ${
+                                formErrors.address ? 'border-red-500 bg-red-50/30' : 'border-stone-200 focus:border-[#0C419C]'
+                              }`}
+                            />
+                            {formErrors.address && (
+                              <p className="text-[10px] text-red-600 font-medium">{formErrors.address}</p>
+                            )}
+                          </motion.div>
+                        )}
                       </div>
                     </div>
 
@@ -794,8 +800,8 @@ export default function Cart() {
                         )}
                       </button>
                       <p className="text-center text-[10px] text-stone-500 font-mono flex items-center justify-center gap-1.5">
-                        <span>🛡️</span>
-                        <span>100% Quality & Reversal Guarantee • Direct Mumbai Kitchen</span>
+                        <span>✦</span>
+                        <span>100% Artisanal Quality Commitment • Fresh Mumbai Kitchen Drops</span>
                       </p>
                     </div>
                   </form>
@@ -835,26 +841,28 @@ export default function Cart() {
 
                       <div className="space-y-1.5 text-xs text-stone-600">
                         <div className="flex justify-between">
-                          <span className="text-stone-500">Delivery Area:</span>
-                          <span className="font-semibold text-stone-900">{placedOrder.deliveryArea}</span>
+                          <span className="text-stone-500">Fulfillment:</span>
+                          <span className="font-semibold text-stone-900">Kitchen Pickup (Vikhroli Atelier)</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-stone-500">Scheduled Slot:</span>
+                          <span className="text-stone-500">Collection Slot:</span>
                           <span className="font-semibold text-stone-900">{placedOrder.customer.slot}</span>
                         </div>
-                        <div className="flex justify-between">
-                          <span className="text-stone-500">Delivery Address:</span>
-                          <span className="font-semibold text-stone-900 text-right max-w-[65%] truncate">
-                            {placedOrder.customer.address}
-                          </span>
-                        </div>
+                        {placedOrder.customer.isBulkOrder && placedOrder.customer.address && (
+                          <div className="flex justify-between">
+                            <span className="text-stone-500">Bulk Delivery:</span>
+                            <span className="font-semibold text-stone-900 text-right max-w-[65%] truncate">
+                              {placedOrder.customer.address}
+                            </span>
+                          </div>
+                        )}
                         <div className="flex justify-between">
                           <span className="text-stone-500">Payment:</span>
                           <span className="font-semibold text-[#0C419C]">
                             {placedOrder.customer.paymentMethod === 'upi'
                               ? 'Instant UPI'
                               : placedOrder.customer.paymentMethod === 'cod'
-                              ? 'Pay on Dispatch'
+                              ? 'Pay on Collection / Handover'
                               : 'Online Payment'}
                           </span>
                         </div>
@@ -890,24 +898,95 @@ export default function Cart() {
                       </div>
                     </div>
 
-                    {/* Quality & Reversal Guarantee */}
+                    {/* Third-Party Courier Notice */}
+                    <div className="p-3 rounded-xl bg-amber-50/80 border border-amber-200 text-[11px] text-stone-700 leading-relaxed">
+                      <strong>Third-party courier collections:</strong> Once an order has been collected by a courier arranged by the customer, transit and handling are the responsibility of the courier service.
+                    </div>
+
+                    {/* ORDER CARE */}
                     <div className="bg-[#FAF6EE] rounded-2xl p-4 border border-[#C5A059]/40 space-y-2 text-left">
-                      <div className="flex items-center gap-2 text-stone-900 font-bold text-xs">
-                        <span>🛡️</span>
-                        <span>Our Quality & Order Reversal Guarantee</span>
+                      <div className="flex items-center justify-between">
+                        <span className="text-stone-900 font-heading font-bold text-xs uppercase tracking-wider">
+                          ORDER CARE
+                        </span>
+                        <span className="px-2 py-0.5 rounded-full bg-[#C5A059]/20 text-[#7A5B18] text-[9px] font-mono font-bold">
+                          ✦ QUALITY
+                        </span>
                       </div>
-                      <p className="text-[11px] text-stone-600 leading-relaxed">
-                        If anything with your order arrives damaged or imperfect, message our Chef directly on WhatsApp. We personally review all complaints. If genuine, we immediately approve a fresh replacement batch or payment reversal.
+                      <p className="text-[11px] text-stone-700 leading-relaxed font-light">
+                        Every order is freshly prepared, carefully checked and thoughtfully packed before it leaves our kitchen.
                       </p>
                       <a
-                        href={`https://wa.me/919136498467?text=Hello%20Suki%C3%A9%20Care!%20%F0%9F%8D%AA%20I%20have%20an%20issue%20with%20Order%20%23${placedOrder.id}%20for%20review.`}
+                        href={`https://wa.me/919136498467?text=Hello%20Suki%C3%A9%20Care!%20%F0%9F%8D%AA%20I%20have%20a%20question%20regarding%20Order%20%23${placedOrder.id}.`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-1.5 text-xs font-bold text-[#0C419C] hover:underline pt-0.5"
                       >
-                        <span>Need Support or Have a Complaint? Chat on WhatsApp</span>
+                        <span>Need a Hand? Contact Us on WhatsApp</span>
                         <span>→</span>
                       </a>
+                    </div>
+
+                    {/* Post-Order Interactive Review Form (On-Site) */}
+                    <div className="bg-white rounded-2xl p-4 sm:p-5 border border-stone-200 shadow-sm text-left space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="font-heading text-xs font-bold uppercase tracking-wider text-stone-900">
+                          Rate Your Sukié Experience
+                        </span>
+                        <span className="text-[10px] text-amber-600 font-mono">On-Site Review</span>
+                      </div>
+
+                      {orderReviewSubmitted ? (
+                        <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-center space-y-1">
+                          <span className="text-emerald-700 text-xs font-bold block">
+                            ✓ Thank You for Your Tasting Notes!
+                          </span>
+                          <span className="text-[10px] text-stone-500 font-light block">
+                            Your review has been saved to the atelier records.
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="space-y-2.5">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[11px] text-stone-600 font-medium">Your Rating:</span>
+                            <div className="flex items-center gap-1">
+                              {[1, 2, 3, 4, 5].map((star) => (
+                                <button
+                                  key={star}
+                                  type="button"
+                                  onClick={() => setOrderRating(star)}
+                                  className="text-lg transition-transform hover:scale-110 cursor-pointer p-0.5"
+                                  aria-label={`${star} star rating`}
+                                >
+                                  <span className={star <= orderRating ? 'text-amber-400' : 'text-stone-300'}>
+                                    ★
+                                  </span>
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+
+                          <textarea
+                            rows={2}
+                            value={orderReviewText}
+                            onChange={(e) => setOrderReviewText(e.target.value)}
+                            placeholder="Leave any tasting notes or thoughts for our Chef..."
+                            className="w-full p-2.5 text-xs rounded-xl border border-stone-200 bg-stone-50 focus:bg-white focus:border-[#0C419C] focus:outline-none resize-none leading-relaxed"
+                          />
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (orderReviewText.trim() || orderRating) {
+                                setOrderReviewSubmitted(true);
+                              }
+                            }}
+                            className="w-full py-2 bg-[#C5A059] hover:bg-[#D4B86A] text-stone-950 rounded-xl font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer shadow-xs"
+                          >
+                            Submit Review
+                          </button>
+                        </div>
+                      )}
                     </div>
 
                     {/* Notification message */}

@@ -1,6 +1,24 @@
 import { motion } from 'framer-motion';
+import { useCart } from '../context/CartContext';
+import { useMenu } from '../context/MenuContext';
 
 export default function Hero() {
+  const { items, addItem, updateQuantity, openCheckout } = useCart();
+  const { products } = useMenu();
+
+  // Locate Triple Chocolate Overload (id: 1) from live menu
+  const heroProduct = products?.find((p) => p.id === 1) || products?.[0] || {
+    id: 1,
+    name: 'Triple Chocolate Overload',
+    price: 299,
+    weight: '170g (6oz)',
+    image: '/images/triple_chocolate.jpg',
+    available: true,
+  };
+
+  const heroCartItem = items?.find((item) => item.id === heroProduct.id);
+  const heroQty = heroCartItem ? heroCartItem.quantity : 0;
+
   const scrollToSection = (targetId) => {
     const el = document.querySelector(targetId);
     if (el) {
@@ -116,11 +134,12 @@ export default function Hero() {
             <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden border border-[#C5A059]/30 bg-black/60 shadow-xl backdrop-blur-xl">
               
               <div 
-                className="relative h-60 sm:h-80 lg:h-[380px] w-full overflow-hidden cookie-card-visual"
+                className="relative h-60 sm:h-80 lg:h-[380px] w-full overflow-hidden cookie-card-visual cursor-pointer"
                 data-cursor="cookie"
+                onClick={() => scrollToSection('#menu')}
               >
                 <img
-                  src="/images/triple_chocolate.jpg"
+                  src={heroProduct.image || '/images/triple_chocolate.jpg'}
                   alt="Triple Chocolate Overload Real Cookie"
                   className="w-full h-full object-cover group-hover:scale-106 transition-transform duration-700 ease-out"
                 />
@@ -129,10 +148,15 @@ export default function Hero() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20" />
 
                 {/* Info Pill */}
-                <div className="absolute top-3 left-3 z-10">
+                <div className="absolute top-3 left-3 z-10 flex items-center gap-1.5">
                   <span className="bg-black/70 backdrop-blur-md text-[#C5A059] text-[9px] sm:text-[10px] font-bold px-2.5 py-1 rounded-full border border-[#C5A059]/40 uppercase tracking-wider">
                     Signature Cutaway
                   </span>
+                  {heroQty > 0 && (
+                    <span className="bg-[#C5A059] text-stone-950 text-[9px] sm:text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider shadow-md">
+                      ✓ {heroQty} in Box
+                    </span>
+                  )}
                 </div>
 
                 {/* Description */}
@@ -141,7 +165,7 @@ export default function Hero() {
                     Belgian Dark Ganache Molten Center
                   </span>
                   <h3 className="font-heading text-lg sm:text-2xl font-bold mt-0.5">
-                    Triple Chocolate Overload
+                    {heroProduct.name}
                   </h3>
                   <p className="text-[11px] sm:text-xs text-white/70 mt-0.5 font-light line-clamp-1 sm:line-clamp-2">
                     Cracked warm at 160°C to release an avalanche of molten dark chocolate and flaky sea salt.
@@ -149,18 +173,52 @@ export default function Hero() {
                 </div>
               </div>
 
-              {/* Bottom Bar */}
-              <div className="p-3 sm:p-4 bg-[#0F1424] border-t border-white/10 flex items-center justify-between">
+              {/* Bottom Bar - 1-Tap Instant Ordering */}
+              <div className="p-3 sm:p-4 bg-[#0F1424] border-t border-white/10 flex items-center justify-between gap-2">
                 <div>
                   <span className="text-[9px] text-white/40 uppercase font-mono block">Single 170g Unit</span>
-                  <span className="text-lg sm:text-xl font-heading font-bold text-[#C5A059]">₹299</span>
+                  <span className="text-lg sm:text-xl font-heading font-bold text-[#C5A059]">
+                    ₹{heroProduct.price}
+                  </span>
                 </div>
-                <button
-                  onClick={() => scrollToSection('#menu')}
-                  className="bg-[#1B3A8C] hover:bg-[#0F2460] text-white px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer"
-                >
-                  Order This Cookie →
-                </button>
+
+                {heroQty > 0 ? (
+                  <div className="flex items-center gap-2">
+                    <div className="inline-flex items-center rounded-full bg-white/5 border border-[#C5A059]/50 p-0.5">
+                      <button
+                        type="button"
+                        onClick={() => updateQuantity(heroProduct.id, heroQty - 1)}
+                        className="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 text-[#C5A059] flex items-center justify-center text-xs font-bold cursor-pointer"
+                      >
+                        −
+                      </button>
+                      <span className="px-2.5 text-xs font-mono font-bold text-white">{heroQty}</span>
+                      <button
+                        type="button"
+                        onClick={() => updateQuantity(heroProduct.id, heroQty + 1)}
+                        className="w-7 h-7 rounded-full bg-[#C5A059] text-stone-950 flex items-center justify-center text-xs font-bold cursor-pointer"
+                      >
+                        +
+                      </button>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={openCheckout}
+                      className="bg-gradient-to-r from-[#C5A059] to-[#D4B86A] text-stone-950 px-3.5 py-2 rounded-full text-[11px] font-bold uppercase tracking-wider shadow-md hover:brightness-110 transition-all cursor-pointer"
+                    >
+                      Checkout →
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => addItem(heroProduct)}
+                    className="bg-[#0C419C] hover:bg-[#1B3A8C] border border-[#C5A059]/40 text-white px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all shadow-md active:scale-95 cursor-pointer flex items-center gap-1.5"
+                  >
+                    <span>Add to Box</span>
+                    <span className="text-[#C5A059] text-sm leading-none">+</span>
+                  </button>
+                )}
               </div>
 
             </div>

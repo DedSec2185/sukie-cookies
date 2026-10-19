@@ -32,16 +32,20 @@ const cartReducer = (state, action) => {
     case 'CLEAR_CART':
       return { ...state, items: [] };
     case 'TOGGLE_CART':
-      return { ...state, isOpen: !state.isOpen };
+      return { ...state, isOpen: !state.isOpen, requestedView: 'cart' };
     case 'SET_CART_OPEN':
-      return { ...state, isOpen: action.payload };
+      return {
+        ...state,
+        isOpen: typeof action.payload === 'object' ? action.payload.isOpen : action.payload,
+        requestedView: typeof action.payload === 'object' && action.payload.view ? action.payload.view : 'cart',
+      };
     default:
       return state;
   }
 };
 
 export function CartProvider({ children }) {
-  const [state, dispatch] = useReducer(cartReducer, { items: [], isOpen: false });
+  const [state, dispatch] = useReducer(cartReducer, { items: [], isOpen: false, requestedView: 'cart' });
 
   const addItem = useCallback((product) => {
     dispatch({ type: 'ADD_ITEM', payload: product });
@@ -63,8 +67,12 @@ export function CartProvider({ children }) {
     dispatch({ type: 'TOGGLE_CART' });
   }, []);
 
-  const setCartOpen = useCallback((isOpen) => {
-    dispatch({ type: 'SET_CART_OPEN', payload: isOpen });
+  const setCartOpen = useCallback((isOpen, view = 'cart') => {
+    dispatch({ type: 'SET_CART_OPEN', payload: { isOpen, view } });
+  }, []);
+
+  const openCheckout = useCallback(() => {
+    dispatch({ type: 'SET_CART_OPEN', payload: { isOpen: true, view: 'checkout' } });
   }, []);
 
   const totalItems = state.items.reduce((sum, item) => sum + item.quantity, 0);
@@ -75,6 +83,7 @@ export function CartProvider({ children }) {
       value={{
         items: state.items,
         isOpen: state.isOpen,
+        requestedView: state.requestedView,
         totalItems,
         totalPrice,
         addItem,
@@ -83,6 +92,7 @@ export function CartProvider({ children }) {
         clearCart,
         toggleCart,
         setCartOpen,
+        openCheckout,
       }}
     >
       {children}

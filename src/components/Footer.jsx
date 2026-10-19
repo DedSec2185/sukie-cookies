@@ -1,9 +1,36 @@
-export default function Footer() {
+export default function Footer({ onOpenTrack, onViewChange, onOpenAdmin }) {
   const handleScrollTo = (e, targetId) => {
     e.preventDefault();
+    if (targetId === 'track') {
+      if (onOpenTrack) onOpenTrack();
+      else window.location.hash = '#track';
+      return;
+    }
+    if (targetId === 'admin') {
+      if (onOpenAdmin) onOpenAdmin();
+      else window.location.hash = '#admin';
+      return;
+    }
     if (targetId === 'top') {
+      if (onViewChange) onViewChange('menu');
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
+    }
+    if (targetId === 'menu' || targetId === 'story' || targetId === 'care' || targetId === 'ritual') {
+      if (onViewChange) {
+        onViewChange(targetId);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+    }
+    if (targetId === 'contact') {
+      if (onViewChange) {
+        onViewChange('care');
+        setTimeout(() => {
+          document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+        }, 150);
+        return;
+      }
     }
     const element = document.getElementById(targetId);
     if (element) {
@@ -16,10 +43,12 @@ export default function Footer() {
   const quickLinks = [
     { name: 'Home', targetId: 'top' },
     { name: 'Menu Drops', targetId: 'menu' },
+    { name: 'Track My Order', targetId: 'track' },
     { name: 'Our Story', targetId: 'story' },
     { name: 'Order Care & Quality', targetId: 'care' },
     { name: 'Feedback & Reviews', targetId: 'care' },
     { name: 'Contact Atelier', targetId: 'contact' },
+    { name: 'Founder Atelier (PIN)', targetId: 'admin' },
   ];
 
   const connectLinks = [
@@ -73,7 +102,7 @@ export default function Footer() {
   ];
 
   return (
-    <footer className="bg-brand-dark text-white pt-16 pb-8 px-4 sm:px-6 lg:px-8 border-t border-white/5">
+    <footer className="bg-brand-dark text-white pt-16 pb-24 sm:pb-10 px-4 sm:px-6 lg:px-8 border-t border-white/5">
       <div className="max-w-6xl mx-auto">
         {/* Top section: 3 columns */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
@@ -151,11 +180,23 @@ export default function Footer() {
             <p className="text-white/40 text-sm">
               © 2026 Sukié Cookies. All rights reserved.
             </p>
-            <p className="text-white/40 text-sm flex items-center gap-1.5">
-              <span>Made with</span>
-              <span className="text-red-500 animate-pulse">❤️</span>
-              <span>in Mumbai</span>
-            </p>
+            <div className="flex items-center gap-4">
+              <a
+                href="#admin"
+                onClick={(e) => handleScrollTo(e, 'admin')}
+                className="text-white/30 hover:text-[#C5A059] transition-colors flex items-center gap-1.5 text-xs cursor-pointer font-mono"
+                title="Founder Atelier Access"
+              >
+                <span>🔒</span>
+                <span>Founder Studio</span>
+              </a>
+              <span className="text-white/20">•</span>
+              <p className="text-white/40 text-sm flex items-center gap-1.5">
+                <span>Made with</span>
+                <span className="text-red-500 animate-pulse">❤️</span>
+                <span>in Mumbai</span>
+              </p>
+            </div>
           </div>
         </div>
       </div>

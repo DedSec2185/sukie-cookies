@@ -2,13 +2,17 @@ import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../context/CartContext';
+import { useMenu } from '../context/MenuContext';
 
 export default function Cart() {
+  const { addOrder, addReview, products } = useMenu();
   const {
     items,
     isOpen,
+    requestedView,
     totalItems,
     totalPrice,
+    addItem,
     updateQuantity,
     removeItem,
     clearCart,
@@ -19,6 +23,13 @@ export default function Cart() {
   const [view, setView] = useState('cart');
   const [deliveryArea, setDeliveryArea] = useState('Vikhroli');
   const [includeGiftBox, setIncludeGiftBox] = useState(false);
+
+  // Sync requestedView when cart opens
+  useEffect(() => {
+    if (isOpen && requestedView) {
+      setView(requestedView);
+    }
+  }, [isOpen, requestedView]);
 
   // Direct Website Checkout form state
   const [formData, setFormData] = useState({
@@ -91,7 +102,8 @@ export default function Cart() {
     };
   }, [isOpen]);
 
-  const packagingFee = includeGiftBox ? 49 : 0;
+  const isComplimentaryGiftUnlocked = totalItems >= 4;
+  const packagingFee = isComplimentaryGiftUnlocked ? 0 : includeGiftBox ? 49 : 0;
   const finalTotal = totalPrice + packagingFee;
 
   const handleInputChange = (field, value) => {
@@ -164,13 +176,8 @@ export default function Cart() {
     };
 
     setPlacedOrder(newOrder);
-
-    // Save to localStorage for customer reference
-    try {
-      const prev = JSON.parse(localStorage.getItem('sukie_orders') || '[]');
-      localStorage.setItem('sukie_orders', JSON.stringify([newOrder, ...prev]));
-    } catch {
-      // Storage unavailable, continue
+    if (addOrder) {
+      addOrder(newOrder);
     }
 
     // Clear cart items
@@ -353,6 +360,40 @@ export default function Cart() {
                             </div>
                           </div>
                         ))}
+
+                        {/* 1-Tap Quick-Add Bestsellers to complete 4-Pack */}
+                        {totalItems < 4 && products && products.length > 0 && (
+                          <div className="p-3.5 rounded-2xl bg-gradient-to-r from-[#07132B] via-[#0C419C] to-[#07132B] text-white border border-[#C5A059]/40 shadow-md space-y-2.5">
+                            <div className="flex items-center justify-between text-[11px]">
+                              <span className="text-[#F3E5AB] font-bold flex items-center gap-1.5">
+                                <span>✦</span>
+                                <span>Add {4 - totalItems} more {4 - totalItems === 1 ? 'cookie' : 'cookies'} for FREE Luxury Gift Box</span>
+                              </span>
+                              <span className="font-mono text-[10px] text-white/70">{totalItems}/4</span>
+                            </div>
+                            <div className="h-1.5 w-full rounded-full bg-black/40 overflow-hidden">
+                              <div
+                                className="h-full bg-gradient-to-r from-[#F3E5AB] to-[#C5A059] rounded-full transition-all duration-300"
+                                style={{ width: `${Math.min(100, (totalItems / 4) * 100)}%` }}
+                              />
+                            </div>
+                            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-0.5">
+                              {products
+                                .filter((p) => p.available && p.category !== 'combos')
+                                .slice(0, 3)
+                                .map((p) => (
+                                  <button
+                                    key={`quick-add-${p.id}`}
+                                    type="button"
+                                    onClick={() => addItem(p)}
+                                    className="px-2.5 py-1 rounded-full bg-white/10 hover:bg-[#C5A059] hover:text-stone-950 text-white border border-white/20 text-[10px] font-semibold whitespace-nowrap transition-colors cursor-pointer shrink-0"
+                                  >
+                                    + {p.name.split(' ').slice(0, 2).join(' ')} (₹{p.price})
+                                  </button>
+                                ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
@@ -361,7 +402,11 @@ export default function Cart() {
                   {items.length > 0 && (
                     <div className="p-4 sm:p-5 bg-white border-t border-stone-200 space-y-3.5 shadow-[0_-10px_30px_rgba(0,0,0,0.04)] shrink-0">
                       {/* Luxury Gift Packaging Option */}
-                      <label className="flex items-center justify-between p-3 rounded-xl bg-stone-50 border border-stone-200 cursor-pointer hover:border-[#C5A059]/60 transition-colors">
+                      <label className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-colors ${
+                        isComplimentaryGiftUnlocked
+                          ? 'bg-emerald-50/70 border-emerald-300/80'
+                          : 'bg-stone-50 border-stone-200 hover:border-[#C5A059]/60'
+                      }`}>
                         <div className="flex items-center gap-2.5 min-w-0 pr-2">
                           <span className="text-base shrink-0">🎁</span>
                           <div className="min-w-0">
@@ -369,16 +414,24 @@ export default function Cart() {
                               Signature Cobalt Ribbon & Keepsake Box
                             </p>
                             <p className="text-[10px] text-stone-500">
-                              Embossed card, luxury box & wax seal (+₹49)
+                              {isComplimentaryGiftUnlocked
+                                ? 'Complimentary with 4+ cookies! Embossed card & wax seal'
+                                : 'Embossed card, luxury box & wax seal (+₹49)'}
                             </p>
                           </div>
                         </div>
-                        <input
-                          type="checkbox"
-                          checked={includeGiftBox}
-                          onChange={(e) => setIncludeGiftBox(e.target.checked)}
-                          className="accent-[#0F2460] w-4 h-4 cursor-pointer shrink-0"
-                        />
+                        {isComplimentaryGiftUnlocked ? (
+                          <span className="px-2 py-0.5 rounded-full bg-emerald-600 text-white text-[9px] font-mono font-bold uppercase tracking-wider shrink-0">
+                            FREE ✓
+                          </span>
+                        ) : (
+                          <input
+                            type="checkbox"
+                            checked={includeGiftBox}
+                            onChange={(e) => setIncludeGiftBox(e.target.checked)}
+                            className="accent-[#0F2460] w-4 h-4 cursor-pointer shrink-0"
+                          />
+                        )}
                       </label>
 
                       {/* Collection Hub */}
@@ -398,10 +451,12 @@ export default function Cart() {
                           <span>Cookies Subtotal</span>
                           <span className="font-mono font-medium text-stone-900">₹{totalPrice}</span>
                         </div>
-                        {includeGiftBox && (
+                        {(includeGiftBox || isComplimentaryGiftUnlocked) && (
                           <div className="flex justify-between text-stone-600">
                             <span>Luxury Gift Packaging</span>
-                            <span className="font-mono font-medium text-[#C5A059]">₹49</span>
+                            <span className={`font-mono font-semibold ${isComplimentaryGiftUnlocked ? 'text-emerald-700' : 'text-[#C5A059]'}`}>
+                              {isComplimentaryGiftUnlocked ? 'FREE' : '₹49'}
+                            </span>
                           </div>
                         )}
                         <div className="flex justify-between text-stone-500 text-[11px]">
@@ -839,6 +894,19 @@ export default function Cart() {
                         </span>
                       </div>
 
+                      {/* Track Live Timeline CTA Button */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setCartOpen(false);
+                          window.location.hash = `#track=${placedOrder.id}`;
+                        }}
+                        className="w-full py-2.5 px-3.5 rounded-xl bg-gradient-to-r from-[#0C419C] via-[#1654C4] to-[#0C419C] hover:brightness-110 text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-md transition-all cursor-pointer border border-[#C5A059]/40"
+                      >
+                        <span>📦 View Live Baking &amp; Pickup Timeline</span>
+                        <span>→</span>
+                      </button>
+
                       <div className="space-y-1.5 text-xs text-stone-600">
                         <div className="flex justify-between">
                           <span className="text-stone-500">Fulfillment:</span>
@@ -978,6 +1046,14 @@ export default function Cart() {
                             type="button"
                             onClick={() => {
                               if (orderReviewText.trim() || orderRating) {
+                                if (addReview) {
+                                  addReview({
+                                    name: placedOrder?.customer?.name || 'Verified Customer',
+                                    stars: orderRating,
+                                    cookie: placedOrder?.items?.[0]?.name || 'Assorted Bakes',
+                                    comment: orderReviewText.trim() || 'Exceptional fresh artisanal quality!',
+                                  });
+                                }
                                 setOrderReviewSubmitted(true);
                               }
                             }}

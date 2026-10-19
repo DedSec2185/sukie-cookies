@@ -3,23 +3,24 @@ import { motion, AnimatePresence } from 'framer-motion';
 import CookieCard from './CookieCard';
 import CookieModal from './CookieModal';
 import BoxBuilderProgress from './BoxBuilderProgress';
-import { menuData } from '../data/menuData';
+import { useMenu } from '../context/MenuContext';
 import { useCart } from '../context/CartContext';
 
 export default function Menu() {
   const [activeCategory, setActiveCategory] = useState('all');
   const [selectedProduct, setSelectedProduct] = useState(null);
   const { addItem } = useCart();
+  const { products, categories: menuCategories, storeConfig } = useMenu();
 
   const categories = [
     { id: 'all', name: 'All Drops', emoji: '✨' },
-    ...menuData.categories,
+    ...menuCategories,
   ];
 
   const filteredProducts =
     activeCategory === 'all'
-      ? menuData.products
-      : menuData.products.filter((product) => product.category === activeCategory);
+      ? products
+      : products.filter((product) => product.category === activeCategory);
 
   return (
     <section id="menu" className="relative bg-[#FAF6EE] py-12 sm:py-20 px-4 sm:px-6 lg:px-8 border-t border-brand-warm/15">
@@ -37,19 +38,19 @@ export default function Menu() {
             170g (6oz) oversized molten cookies. When a drop sells out, our ovens rest until the next morning.
           </p>
 
-          {/* Freshness Badge */}
+          {/* Freshness Badge (Dynamic from Admin) */}
           <div className="inline-flex items-center gap-2 mt-4 px-3.5 py-1 rounded-full bg-brand-gold/15 border border-brand-gold/30 text-brand-dark text-[10px] sm:text-xs font-semibold uppercase tracking-wider">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span>Ovens Fired Today • Pre-Orders Active</span>
+            <span>{storeConfig?.ovenStatusText || 'Ovens Fired Today • Pre-Orders Active'}</span>
           </div>
         </div>
 
         {/* Interactive Box Builder Progress Bar */}
         <BoxBuilderProgress />
 
-        {/* Mobile Swipeable Category Pills */}
-        <div className="mb-8 sm:mb-12 -mx-4 px-4 overflow-x-auto no-scrollbar">
-          <div className="flex sm:justify-center items-center gap-2 min-w-max pb-1">
+        {/* Mobile-Sticky Swipeable Category Pills */}
+        <div className="sticky top-[60px] sm:static z-30 bg-[#FAF6EE]/95 sm:bg-transparent backdrop-blur-md sm:backdrop-blur-none py-2.5 sm:py-0 mb-6 sm:mb-12 -mx-4 px-4 border-b border-stone-200/70 sm:border-none overflow-x-auto no-scrollbar">
+          <div className="flex sm:justify-center items-center gap-2 min-w-max pb-0.5">
             {categories.map((cat) => {
               const isActive = activeCategory === cat.id;
               return (
@@ -70,7 +71,7 @@ export default function Menu() {
                       transition={{ type: 'spring', damping: 22, stiffness: 280 }}
                     />
                   )}
-                  <span>{cat.emoji}</span>
+                  <span className="text-[#C5A059] text-[10px]">✦</span>
                   <span>{cat.name}</span>
                 </motion.button>
               );
@@ -80,8 +81,9 @@ export default function Menu() {
 
         {/* Product Cards Grid with AnimatePresence */}
         <motion.div 
+          id="cookie-grid"
           layout
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-8"
+          className="scroll-mt-32 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-8"
         >
           <AnimatePresence>
             {filteredProducts.map((product) => (

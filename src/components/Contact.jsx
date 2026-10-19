@@ -135,7 +135,7 @@ export default function Contact() {
     encodeURIComponent('Hi Sukié! I would like to enquire about bulk and corporate cookie orders.');
 
   return (
-    <section id="contact" className="bg-white py-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+    <section id="contact" className="bg-white scroll-mt-24 pt-16 sm:pt-24 pb-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       <div
         ref={ref}
         className={`max-w-6xl mx-auto transition-all duration-700 ease-out ${
@@ -274,7 +274,7 @@ export default function Contact() {
         </div>
 
         {/* Dedicated Order Care & On-Site Reviews Section */}
-        <div id="care" className="mt-20 pt-16 border-t border-stone-200/80">
+        <div id="care" className="scroll-mt-24 mt-16 sm:mt-20 pt-10 sm:pt-16 border-t border-stone-200/80">
           <div className="rounded-3xl sm:rounded-4xl p-6 sm:p-12 bg-gradient-to-br from-[#070D1A] via-[#0C1A38] to-[#050811] text-white shadow-2xl border border-[#C5A059]/30 relative overflow-hidden">
             {/* Ambient gold / cobalt light effects */}
             <div className="absolute top-0 right-1/4 w-96 h-96 bg-[#0C419C]/20 rounded-full blur-3xl pointer-events-none" />
@@ -495,16 +495,33 @@ export default function Contact() {
                     )}
                   </AnimatePresence>
 
-                  {/* Recent Community Tasting Notes Snippet */}
-                  <div className="space-y-2 max-h-36 overflow-y-auto pr-1">
+                  {/* Recent Community Tasting Notes Snippet (Clean, Scrollbar-Free) */}
+                  <div className="space-y-2.5">
                     {reviewsList.slice(0, 2).map((item) => (
-                      <div key={item.id} className="p-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-left text-xs">
-                        <div className="flex items-center justify-between">
-                          <span className="font-bold text-[#F3E5AB]">{item.name}</span>
-                          <span className="text-amber-400 font-mono text-xs">{'★'.repeat(item.stars)}</span>
+                      <div
+                        key={item.id}
+                        className="p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-white/[0.04] border border-[#C5A059]/25 hover:border-[#C5A059]/50 transition-colors text-left"
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <div className="flex items-center gap-2">
+                            <div className="w-6 h-6 rounded-full bg-[#0C419C]/60 border border-[#C5A059]/40 flex items-center justify-center text-[10px] font-bold font-mono text-amber-200">
+                              {item.name.slice(0, 2).toUpperCase()}
+                            </div>
+                            <span className="font-bold text-xs text-[#F3E5AB]">{item.name}</span>
+                            <span className="text-[9px] bg-emerald-950/80 text-emerald-300 border border-emerald-500/30 px-1.5 py-0.5 rounded-full font-mono">
+                              Verified
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-0.5 text-amber-400 text-xs">
+                            {'★'.repeat(item.stars)}
+                          </div>
                         </div>
-                        <p className="text-[10px] text-white/60 font-mono">{item.cookie}</p>
-                        <p className="text-[11px] text-white/80 font-light mt-1 italic">&ldquo;{item.comment}&rdquo;</p>
+                        <p className="text-[10px] text-[#C5A059] font-mono tracking-wide mb-1">
+                          {item.cookie}
+                        </p>
+                        <p className="text-[11px] text-white/80 font-light leading-relaxed italic">
+                          &ldquo;{item.comment}&rdquo;
+                        </p>
                       </div>
                     ))}
                   </div>
@@ -516,10 +533,10 @@ export default function Contact() {
                     href="https://instagram.com/sukie.mumbai"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-full py-2.5 px-4 bg-white/10 hover:bg-white/15 text-white rounded-xl font-medium text-xs flex items-center justify-center gap-2 border border-white/15 transition-colors cursor-pointer"
+                    className="w-full py-3 px-4 bg-gradient-to-r from-white/[0.07] via-white/[0.04] to-white/[0.07] hover:bg-white/[0.12] text-white rounded-xl font-medium text-xs flex items-center justify-center gap-2 border border-[#C5A059]/40 hover:border-[#C5A059] transition-all shadow-md cursor-pointer"
                   >
                     <span>Tag Us on Instagram (@sukie.mumbai)</span>
-                    <span>📸</span>
+                    <span className="text-sm">📸</span>
                   </a>
                 </div>
               </motion.div>
@@ -527,21 +544,18 @@ export default function Contact() {
             </div>
 
             {/* Bottom Luxury Micro-Badge Strip */}
-            <div className="mt-10 sm:mt-12 pt-6 border-t border-white/10 flex flex-wrap items-center justify-center gap-6 text-[11px] text-white/50 font-mono uppercase tracking-wider relative z-10">
-              <span className="flex items-center gap-1.5">
-                <span className="text-emerald-400">✓</span> 100% Pure Eggless
+            <div className="mt-10 sm:mt-12 pt-6 border-t border-[#C5A059]/20 flex flex-wrap items-center justify-center gap-2 sm:gap-3 text-white relative z-10">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.05] border border-emerald-500/30 text-emerald-300 text-[10px] sm:text-xs font-mono uppercase tracking-wider shadow-2xs">
+                <span className="text-emerald-400 font-bold">✓</span> 100% Pure Eggless
               </span>
-              <span className="text-white/20">•</span>
-              <span className="flex items-center gap-1.5">
-                <span className="text-amber-300">✦</span> Flash-Baked in Mumbai
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.05] border border-[#C5A059]/40 text-amber-200 text-[10px] sm:text-xs font-mono uppercase tracking-wider shadow-2xs">
+                <span className="text-[#C5A059]">✦</span> Flash-Baked in Mumbai
               </span>
-              <span className="text-white/20">•</span>
-              <span className="flex items-center gap-1.5">
-                <span className="text-[#C5A059]">📍</span> Atelier Pickup Hub (Vikhroli)
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.05] border border-[#C5A059]/40 text-stone-200 text-[10px] sm:text-xs font-mono uppercase tracking-wider shadow-2xs">
+                <span className="text-[#C5A059]">📍</span> Atelier Hub (Vikhroli)
               </span>
-              <span className="text-white/20">•</span>
-              <span className="flex items-center gap-1.5">
-                <span className="text-amber-300">✦</span> Bulk Order Deliveries
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.05] border border-blue-400/30 text-blue-200 text-[10px] sm:text-xs font-mono uppercase tracking-wider shadow-2xs">
+                <span className="text-blue-300">✦</span> Bulk Order Deliveries
               </span>
             </div>
           </div>

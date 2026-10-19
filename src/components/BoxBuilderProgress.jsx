@@ -1,10 +1,14 @@
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
+import { Sparkles, Crown, Cookie, Plus, Minus, Zap, ShoppingBag, RotateCcw } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { useMenu } from '../context/MenuContext';
 import { menuData } from '../data/menuData';
 
 export default function BoxBuilderProgress() {
-  const { totalItems, totalPrice, items, updateQuantity, clearCart, addItem, toggleCart } = useCart();
+  const { totalItems, totalPrice, items, updateQuantity, clearCart, addItem, toggleCart, openCheckout } = useCart();
+  const { products } = useMenu();
+  const availableProducts = products || menuData.products;
   
   // Custom box size preference: 4-Pack or 6-Pack
   const [preferredSize, setPreferredSize] = useState(4);
@@ -34,17 +38,31 @@ export default function BoxBuilderProgress() {
     updateQuantity(item.id, item.quantity - 1);
   };
 
+  // Handle duplicating a cookie right from the slot
+  const handleDuplicateFromSlot = (e, item) => {
+    e.stopPropagation();
+    if (!item) return;
+    addItem(item);
+  };
+
+  const scrollToCookieGrid = () => {
+    const grid = document.getElementById('cookie-grid') || document.getElementById('menu');
+    if (grid) {
+      grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   // Quick Curate Presets
   const applyPreset = (presetType) => {
     clearCart();
     setTimeout(() => {
       if (presetType === 'bestsellers') {
-        const top4 = menuData.products.filter(p => [1, 2, 3, 4].includes(p.id));
+        const top4 = availableProducts.filter((p) => p.available && p.category !== 'combos').slice(0, 4);
         top4.forEach(p => addItem(p));
       } else if (presetType === 'chocolate') {
-        const choc1 = menuData.products.find(p => p.id === 1); // Triple Choc
-        const choc2 = menuData.products.find(p => p.id === 2); // Two Chip
-        const choc3 = menuData.products.find(p => p.id === 5); // Popcorn Praline
+        const choc1 = availableProducts.find(p => p.id === 1) || availableProducts[0];
+        const choc2 = availableProducts.find(p => p.id === 2) || availableProducts[1];
+        const choc3 = availableProducts.find(p => p.id === 5) || availableProducts[2];
         if (choc1) { addItem(choc1); addItem(choc1); }
         if (choc2) addItem(choc2);
         if (choc3) addItem(choc3);
@@ -57,13 +75,13 @@ export default function BoxBuilderProgress() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
-      className="w-full max-w-4xl mx-auto my-8 sm:my-12 relative"
+      className="w-full max-w-4xl mx-auto my-6 sm:my-12 relative"
     >
       {/* Outer Ambient Glow */}
       <div className="absolute -inset-1 bg-gradient-to-r from-[#C5A059]/30 via-[#195CD3]/30 to-[#C5A059]/30 rounded-[32px] blur-xl opacity-75 pointer-events-none" />
 
       {/* Main Haute Pâtisserie Casket Container */}
-      <div className="relative rounded-[28px] bg-gradient-to-b from-[#0B2558] via-[#0C419C] to-[#061B48] p-5 sm:p-8 text-white border-2 border-[#C5A059]/80 shadow-[0_25px_60px_rgba(10,35,85,0.45)] overflow-hidden">
+      <div className="relative rounded-[26px] sm:rounded-[28px] bg-gradient-to-b from-[#0B2558] via-[#0C419C] to-[#061B48] p-4 sm:p-8 text-white border-2 border-[#C5A059]/80 shadow-[0_25px_60px_rgba(10,35,85,0.45)] overflow-hidden">
         
         {/* Subtle Silk Pattern & Gold Foil Watermark */}
         <div className="absolute inset-0 opacity-[0.04] bg-[radial-gradient(#F3E5AB_1.5px,transparent_1.5px)] [background-size:28px_28px] pointer-events-none" />
@@ -75,14 +93,14 @@ export default function BoxBuilderProgress() {
         <div className="absolute bottom-3 left-3 text-[#F3E5AB]/40 text-xs font-serif pointer-events-none">✦</div>
         <div className="absolute bottom-3 right-3 text-[#F3E5AB]/40 text-xs font-serif pointer-events-none">✦</div>
 
-        <div className="relative z-10 space-y-6">
+        <div className="relative z-10 space-y-5 sm:space-y-6">
 
           {/* 1. Header: Atelier Title, Box Selector & Live Status */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-5 border-b border-[#C5A059]/25">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 sm:pb-5 border-b border-[#C5A059]/25">
             <div className="flex items-center gap-3.5">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#F3E5AB] via-[#C5A059] to-[#8C6D2B] p-0.5 shadow-md shrink-0">
+              <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-[#F3E5AB] via-[#C5A059] to-[#8C6D2B] p-0.5 shadow-md shrink-0">
                 <div className="w-full h-full rounded-[14px] bg-[#071F4F] flex items-center justify-center text-[#F3E5AB]">
-                  <span className="text-xl">✨</span>
+                  <Sparkles className="w-5 h-5 text-[#F3E5AB]" />
                 </div>
               </div>
               <div>
@@ -104,7 +122,7 @@ export default function BoxBuilderProgress() {
               <button
                 type="button"
                 onClick={() => setPreferredSize(4)}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-mono font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                className={`flex-1 sm:flex-initial px-3.5 py-1.5 rounded-full text-xs font-mono font-bold uppercase tracking-wider transition-all cursor-pointer ${
                   target === 4
                     ? 'bg-gradient-to-r from-[#F3E5AB] via-[#C5A059] to-[#D4B86A] text-stone-950 shadow-md'
                     : 'text-white/70 hover:text-white'
@@ -115,7 +133,7 @@ export default function BoxBuilderProgress() {
               <button
                 type="button"
                 onClick={() => setPreferredSize(6)}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-mono font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                className={`flex-1 sm:flex-initial px-3.5 py-1.5 rounded-full text-xs font-mono font-bold uppercase tracking-wider transition-all cursor-pointer ${
                   target === 6
                     ? 'bg-gradient-to-r from-[#F3E5AB] via-[#C5A059] to-[#D4B86A] text-stone-950 shadow-md'
                     : 'text-white/70 hover:text-white'
@@ -127,7 +145,7 @@ export default function BoxBuilderProgress() {
           </div>
 
           {/* 2. Interactive Velvet Cushion Alcoves */}
-          <div className="py-2">
+          <div className="py-1 sm:py-2">
             <div className={`grid gap-3 sm:gap-5 items-center justify-items-center ${
               target === 4 ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-3 sm:grid-cols-6'
             }`}>
@@ -142,10 +160,11 @@ export default function BoxBuilderProgress() {
                   >
                     {/* The Recessed Velvet Cushion Pod */}
                     <div
+                      onClick={!isFilled ? scrollToCookieGrid : undefined}
                       className={`relative w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center transition-all duration-300 ${
                         isFilled
                           ? 'p-1 bg-gradient-to-br from-[#F3E5AB] via-[#C5A059] to-[#8C6D2B] shadow-[0_0_22px_rgba(197,160,89,0.55)] ring-2 ring-[#F3E5AB]/80'
-                          : 'border-2 border-dashed border-[#C5A059]/40 bg-[#06183B]/80 hover:border-[#C5A059]/80 hover:bg-[#08204D] shadow-inner'
+                          : 'border-2 border-dashed border-[#C5A059]/40 bg-[#06183B]/80 hover:border-[#C5A059]/90 hover:bg-[#08204D] active:scale-95 shadow-inner cursor-pointer'
                       }`}
                     >
                       {isFilled ? (
@@ -153,42 +172,52 @@ export default function BoxBuilderProgress() {
                           initial={{ scale: 0.5, rotate: -20 }}
                           animate={{ scale: 1, rotate: 0 }}
                           transition={{ type: 'spring', damping: 14, stiffness: 220 }}
-                          className="w-full h-full rounded-full overflow-hidden relative group/img cursor-pointer"
+                          className="w-full h-full rounded-full relative"
                         >
-                          <img
-                            src={filledItem.image}
-                            alt={filledItem.name}
-                            className="w-full h-full object-cover group-hover/img:scale-110 transition-transform duration-500"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
-                          
-                          {/* Slot Sequence Number Gold Badge */}
-                          <span className="absolute bottom-1 left-1/2 -translate-x-1/2 text-[9px] font-mono font-bold px-1.5 py-0.5 rounded-full bg-[#0C419C]/90 text-[#F3E5AB] border border-[#C5A059]/60 shadow">
-                            0{index + 1}
-                          </span>
+                          <div className="w-full h-full rounded-full overflow-hidden relative group/img">
+                            <img
+                              src={filledItem.image}
+                              alt={filledItem.name}
+                              className="w-full h-full object-cover group-hover/img:scale-110 transition-transform duration-500"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-transparent to-black/20" />
+                            
+                            {/* Slot Sequence Number Gold Badge */}
+                            <span className="absolute bottom-1 left-1/2 -translate-x-1/2 text-[9px] font-mono font-bold px-1.5 py-0.5 rounded-full bg-[#0C419C]/95 text-[#F3E5AB] border border-[#C5A059]/60 shadow">
+                              0{index + 1}
+                            </span>
+                          </div>
 
-                          {/* Quick Remove Action Button on Hover */}
+                          {/* Touch-Friendly Mobile & Desktop Remove Button (- Top Right) */}
                           <button
                             type="button"
                             onClick={(e) => handleRemoveFromSlot(e, filledItem)}
                             aria-label={`Remove ${filledItem.name}`}
-                            className="absolute inset-0 bg-black/60 opacity-0 group-hover/img:opacity-100 flex items-center justify-center transition-opacity text-white text-xs font-bold"
+                            title="Remove cookie"
+                            className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-red-600 hover:bg-red-500 text-white border border-white/80 flex items-center justify-center shadow-md active:scale-90 transition-transform cursor-pointer z-20"
                           >
-                            <span className="w-7 h-7 rounded-full bg-red-600/90 text-white flex items-center justify-center shadow-lg hover:scale-110 transition-transform">
-                              ✕
-                            </span>
+                            <Minus className="w-3 h-3 stroke-[3]" />
+                          </button>
+
+                          {/* Touch-Friendly Duplicate Button (+ Bottom Right) */}
+                          <button
+                            type="button"
+                            onClick={(e) => handleDuplicateFromSlot(e, filledItem)}
+                            aria-label={`Add another ${filledItem.name}`}
+                            title="Add another of this flavor"
+                            className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-[#C5A059] hover:bg-[#F3E5AB] text-stone-950 border border-[#07132B] flex items-center justify-center shadow-md active:scale-90 transition-transform cursor-pointer z-20"
+                          >
+                            <Plus className="w-3 h-3 stroke-[3]" />
                           </button>
                         </motion.div>
                       ) : (
                         <div className="flex flex-col items-center justify-center text-center p-2">
-                          <span className="text-sm sm:text-base text-[#C5A059] group-hover:scale-125 transition-transform duration-300">
-                            ✦
-                          </span>
-                          <span className="text-[9px] font-mono uppercase tracking-widest text-[#F3E5AB]/70 mt-0.5">
+                          <Plus className="w-4 h-4 text-[#C5A059] group-hover:scale-125 transition-transform duration-300" />
+                          <span className="text-[9px] font-mono uppercase tracking-widest text-[#F3E5AB]/80 mt-0.5">
                             Drop 0{index + 1}
                           </span>
-                          <span className="text-[8px] text-white/40 font-light mt-0.5 hidden sm:block">
-                            Reserved
+                          <span className="text-[8px] text-white/45 font-light mt-0.5">
+                            Tap to Pick
                           </span>
                         </div>
                       )}
@@ -200,7 +229,7 @@ export default function BoxBuilderProgress() {
                         {isFilled ? filledItem.name : `Alcove 0${index + 1}`}
                       </p>
                       <p className="text-[9px] font-mono text-[#F3E5AB]/80">
-                        {isFilled ? '170g • In Box' : 'Awaiting'}
+                        {isFilled ? `₹${filledItem.price} • In Box` : 'Tap to Fill'}
                       </p>
                     </div>
                   </div>
@@ -210,7 +239,7 @@ export default function BoxBuilderProgress() {
           </div>
 
           {/* 3. Gold Satin Ribbon Progress Track & Milestone Status */}
-          <div className="pt-2">
+          <div className="pt-1 sm:pt-2">
             {/* Ribbon Track */}
             <div className="relative h-2.5 w-full rounded-full bg-black/50 overflow-hidden p-0.5 border border-[#C5A059]/40 mb-3 shadow-inner">
               <motion.div
@@ -224,28 +253,28 @@ export default function BoxBuilderProgress() {
             </div>
 
             {/* Dynamic Status Bar */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
-              <div className="flex items-center gap-2 text-center sm:text-left">
-                <span className="text-[#F3E5AB] text-sm">✦</span>
+            <div className="flex flex-col md:flex-row items-center justify-between gap-3 text-xs">
+              <div className="flex items-center gap-2 text-center md:text-left">
+                <span className="text-[#F3E5AB] text-sm shrink-0">✦</span>
                 {isComplete ? (
                   <span className="text-[#F3E5AB] font-heading font-medium tracking-wide">
                     <strong>Bespoke Casket Complete!</strong> Complimentary royal blue rigid gift box &amp; wax seal unlocked.
                   </span>
                 ) : currentCount === 0 ? (
                   <span className="text-white/80">
-                    Your velvet casket is waiting. Tap any cookie below to nest your first 170g drop.
+                    Your velvet casket is waiting. Tap any alcove above or cookie card below to nest your first 170g drop.
                   </span>
                 ) : (
                   <span className="text-white/90">
-                    Add <strong className="text-[#F3E5AB] underline font-bold">{target - currentCount} more {target - currentCount === 1 ? 'cookie' : 'cookies'}</strong> to seal your complimentary royal gift packaging.
+                    Add <strong className="text-[#F3E5AB] underline font-bold">{target - currentCount} more {target - currentCount === 1 ? 'cookie' : 'cookies'}</strong> to unlock your <strong className="text-emerald-300">FREE Royal Gift Packaging</strong>.
                   </span>
                 )}
               </div>
 
-              {/* Status Pill & Action */}
-              <div className="flex items-center gap-2 shrink-0">
+              {/* Status Pill & 1-Tap Action Buttons */}
+              <div className="flex flex-wrap items-center justify-center gap-2 shrink-0 w-full md:w-auto">
                 <span
-                  className={`px-3 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider ${
+                  className={`px-3 py-1.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider ${
                     isComplete
                       ? 'bg-emerald-500/25 text-emerald-300 border border-emerald-400/50 shadow-[0_0_15px_rgba(52,211,153,0.35)]'
                       : currentCount === 0
@@ -257,17 +286,29 @@ export default function BoxBuilderProgress() {
                 </span>
 
                 {currentCount > 0 && (
-                  <motion.button
-                    whileHover={{ scale: 1.04 }}
-                    whileTap={{ scale: 0.96 }}
-                    type="button"
-                    onClick={toggleCart}
-                    className="px-4 py-1.5 rounded-full bg-gradient-to-r from-[#F3E5AB] via-[#C5A059] to-[#D4B86A] text-stone-950 text-xs font-mono font-bold uppercase tracking-wider shadow-lg hover:brightness-110 transition-all cursor-pointer flex items-center gap-1.5"
-                  >
-                    <span>View Box</span>
-                    <span>(₹{totalPrice.toLocaleString('en-IN')})</span>
-                    <span>→</span>
-                  </motion.button>
+                  <>
+                    <motion.button
+                      whileHover={{ scale: 1.03 }}
+                      whileTap={{ scale: 0.96 }}
+                      type="button"
+                      onClick={toggleCart}
+                      className="px-3.5 py-1.5 rounded-full bg-white/10 hover:bg-white/20 border border-[#C5A059]/50 text-white text-xs font-mono font-bold uppercase tracking-wider transition-all cursor-pointer flex items-center gap-1.5"
+                    >
+                      <ShoppingBag className="w-3.5 h-3.5 text-[#F3E5AB]" />
+                      <span>Review Box</span>
+                    </motion.button>
+
+                    <motion.button
+                      whileHover={{ scale: 1.04 }}
+                      whileTap={{ scale: 0.96 }}
+                      type="button"
+                      onClick={openCheckout}
+                      className="px-4 py-1.5 rounded-full bg-gradient-to-r from-[#F3E5AB] via-[#C5A059] to-[#D4B86A] text-stone-950 text-xs font-mono font-bold uppercase tracking-wider shadow-lg hover:brightness-110 transition-all cursor-pointer flex items-center gap-1.5"
+                    >
+                      <Zap className="w-3.5 h-3.5 fill-stone-950" />
+                      <span>Express Checkout (₹{totalPrice.toLocaleString('en-IN')})</span>
+                    </motion.button>
+                  </>
                 )}
               </div>
             </div>
@@ -277,31 +318,32 @@ export default function BoxBuilderProgress() {
           <div className="pt-4 border-t border-[#C5A059]/20 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-white/70">
             <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
               <span className="text-[10px] font-mono text-[#F3E5AB]/80 uppercase tracking-widest mr-1">
-                Quick Curate:
+                1-Tap Curate:
               </span>
               <button
                 type="button"
                 onClick={() => applyPreset('bestsellers')}
-                className="px-2.5 py-1 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 text-white text-[10px] font-medium transition-colors cursor-pointer flex items-center gap-1"
+                className="px-3 py-1.5 rounded-full bg-white/10 hover:bg-[#C5A059] hover:text-stone-950 border border-[#C5A059]/30 text-white text-[10px] font-semibold transition-all cursor-pointer flex items-center gap-1.5 active:scale-95"
               >
-                <span>👑</span>
+                <Crown className="w-3 h-3 text-[#F3E5AB] group-hover:text-stone-950" />
                 <span>The Bestsellers 4-Pack</span>
               </button>
               <button
                 type="button"
                 onClick={() => applyPreset('chocolate')}
-                className="px-2.5 py-1 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 text-white text-[10px] font-medium transition-colors cursor-pointer flex items-center gap-1"
+                className="px-3 py-1.5 rounded-full bg-white/10 hover:bg-[#C5A059] hover:text-stone-950 border border-[#C5A059]/30 text-white text-[10px] font-semibold transition-all cursor-pointer flex items-center gap-1.5 active:scale-95"
               >
-                <span>🍫</span>
-                <span>Chocoholic's Dream</span>
+                <Cookie className="w-3 h-3 text-[#F3E5AB]" />
+                <span>Chocoholic&apos;s Dream</span>
               </button>
               {currentCount > 0 && (
                 <button
                   type="button"
                   onClick={clearCart}
-                  className="px-2.5 py-1 rounded-full bg-red-950/40 hover:bg-red-900/60 border border-red-500/30 text-red-200 text-[10px] font-medium transition-colors cursor-pointer"
+                  className="px-2.5 py-1.5 rounded-full bg-red-950/40 hover:bg-red-900/60 border border-red-500/30 text-red-200 text-[10px] font-medium transition-colors cursor-pointer flex items-center gap-1"
                 >
-                  Reset
+                  <RotateCcw className="w-3 h-3" />
+                  <span>Reset</span>
                 </button>
               )}
             </div>

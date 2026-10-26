@@ -278,18 +278,66 @@ export default function Cart() {
                   {/* Cart Items List */}
                   <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3">
                     {items.length === 0 ? (
-                      <div className="h-full min-h-[300px] flex flex-col items-center justify-center text-center p-6 text-stone-500">
-                        <span className="text-5xl sm:text-6xl mb-3 animate-bounce select-none">🍪</span>
-                        <h3 className="font-heading text-xl font-bold text-stone-800">Your box is empty</h3>
-                        <p className="text-xs text-stone-500 mt-2 max-w-xs leading-relaxed">
-                          Our freshly baked 6oz NYC-style cookies are ready to be boxed. Explore today&apos;s limited drops!
-                        </p>
-                        <button
-                          onClick={handleClose}
-                          className="mt-6 bg-[#0C419C] text-white px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider hover:bg-[#1B3A8C] border border-[#C5A059]/40 transition-colors shadow-md cursor-pointer"
-                        >
-                          Explore Menu
-                        </button>
+                      <div className="space-y-5 py-4">
+                        <div className="text-center p-5 rounded-2xl bg-white border border-[#C5A059]/30 shadow-xs">
+                          <span className="text-4xl mb-2 block select-none">🍪</span>
+                          <h3 className="font-heading text-xl font-bold text-[#07132B]">
+                            Start Curating Your Sukié Box
+                          </h3>
+                          <p className="text-xs text-stone-500 mt-1 max-w-xs mx-auto leading-relaxed">
+                            Pick any 170g (6oz) molten cookie below in 1 tap, or add 4 cookies to unlock our Royal Cobalt Keepsake Gift Box for FREE.
+                          </p>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const sampler = (products || [])
+                                .filter((p) => p.available && p.category !== 'combos')
+                                .slice(0, 4);
+                              sampler.forEach((p) => addItem(p));
+                            }}
+                            className="mt-4 w-full py-3 px-4 rounded-xl bg-gradient-to-r from-[#07132B] via-[#0C419C] to-[#07132B] text-[#F3E5AB] font-bold text-xs uppercase tracking-wider border border-[#C5A059]/50 shadow-md cursor-pointer"
+                          >
+                            ✦ 1-Tap Add 4-Flavour Sampler (Free Gift Box)
+                          </button>
+                        </div>
+
+                        {/* Quick-Pick Menu Directly Inside Empty Cart */}
+                        <div className="space-y-2">
+                          <span className="text-[10px] font-mono uppercase tracking-widest text-stone-500 font-bold block px-1">
+                            Or Tap Any Flavour to Add:
+                          </span>
+                          {(products || [])
+                            .filter((p) => p.available)
+                            .map((p) => (
+                              <div
+                                key={`empty-pick-${p.id}`}
+                                className="p-2.5 rounded-2xl bg-white border border-stone-200 hover:border-[#C5A059] flex items-center justify-between gap-3 transition-all"
+                              >
+                                <div className="flex items-center gap-3 min-w-0">
+                                  <img
+                                    src={p.image}
+                                    alt={p.name}
+                                    className="w-12 h-12 rounded-xl object-cover border border-[#C5A059]/30 shrink-0"
+                                  />
+                                  <div className="min-w-0">
+                                    <h4 className="font-heading text-xs sm:text-sm font-bold text-stone-900 truncate">
+                                      {p.name}
+                                    </h4>
+                                    <span className="text-[11px] font-mono text-[#0C419C] font-bold">
+                                      ₹{p.price} • <span className="text-stone-400 font-normal">{p.weight}</span>
+                                    </span>
+                                  </div>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => addItem(p)}
+                                  className="px-3.5 py-2 rounded-xl bg-[#0C419C] hover:bg-[#082B6B] text-white text-xs font-bold shrink-0 cursor-pointer"
+                                >
+                                  + Add
+                                </button>
+                              </div>
+                            ))}
+                        </div>
                       </div>
                     ) : (
                       <div className="space-y-3">
@@ -361,34 +409,46 @@ export default function Cart() {
                           </div>
                         ))}
 
-                        {/* 1-Tap Quick-Add Bestsellers to complete 4-Pack */}
-                        {totalItems < 4 && products && products.length > 0 && (
+                        {/* Visual Mix & Match Strip (With Photos) */}
+                        {products && products.length > 0 && (
                           <div className="p-3.5 rounded-2xl bg-gradient-to-r from-[#07132B] via-[#0C419C] to-[#07132B] text-white border border-[#C5A059]/40 shadow-md space-y-2.5">
                             <div className="flex items-center justify-between text-[11px]">
                               <span className="text-[#F3E5AB] font-bold flex items-center gap-1.5">
                                 <span>✦</span>
-                                <span>Add {4 - totalItems} more {4 - totalItems === 1 ? 'cookie' : 'cookies'} for FREE Luxury Gift Box</span>
+                                <span>
+                                  {totalItems < 4
+                                    ? `Add ${4 - totalItems} more ${4 - totalItems === 1 ? 'cookie' : 'cookies'} for FREE Luxury Gift Box`
+                                    : '🎁 Complimentary Royal Gift Box Unlocked! Add more flavours:'}
+                                </span>
                               </span>
-                              <span className="font-mono text-[10px] text-white/70">{totalItems}/4</span>
+                              <span className="font-mono text-[10px] text-white/70">
+                                {Math.min(4, totalItems)}/4
+                              </span>
                             </div>
-                            <div className="h-1.5 w-full rounded-full bg-black/40 overflow-hidden">
-                              <div
-                                className="h-full bg-gradient-to-r from-[#F3E5AB] to-[#C5A059] rounded-full transition-all duration-300"
-                                style={{ width: `${Math.min(100, (totalItems / 4) * 100)}%` }}
-                              />
-                            </div>
-                            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-0.5">
+                            {totalItems < 4 && (
+                              <div className="h-1.5 w-full rounded-full bg-black/40 overflow-hidden">
+                                <div
+                                  className="h-full bg-gradient-to-r from-[#F3E5AB] to-[#C5A059] rounded-full transition-all duration-300"
+                                  style={{ width: `${Math.min(100, (totalItems / 4) * 100)}%` }}
+                                />
+                              </div>
+                            )}
+                            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pt-1">
                               {products
                                 .filter((p) => p.available && p.category !== 'combos')
-                                .slice(0, 3)
                                 .map((p) => (
                                   <button
                                     key={`quick-add-${p.id}`}
                                     type="button"
                                     onClick={() => addItem(p)}
-                                    className="px-2.5 py-1 rounded-full bg-white/10 hover:bg-[#C5A059] hover:text-stone-950 text-white border border-white/20 text-[10px] font-semibold whitespace-nowrap transition-colors cursor-pointer shrink-0"
+                                    className="p-1.5 pr-3 rounded-full bg-white/10 hover:bg-[#C5A059] hover:text-stone-950 text-white border border-white/20 text-[10px] font-semibold whitespace-nowrap transition-colors cursor-pointer shrink-0 flex items-center gap-1.5"
                                   >
-                                    + {p.name.split(' ').slice(0, 2).join(' ')} (₹{p.price})
+                                    <img
+                                      src={p.image}
+                                      alt={p.name}
+                                      className="w-5 h-5 rounded-full object-cover border border-white/30"
+                                    />
+                                    <span>+ {p.name.split(' ').slice(0, 2).join(' ')} (₹{p.price})</span>
                                   </button>
                                 ))}
                             </div>

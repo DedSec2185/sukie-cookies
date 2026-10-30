@@ -1,6 +1,9 @@
 import { motion } from 'framer-motion';
+import { useMenu } from '../context/MenuContext';
 
 export default function About() {
+  const { storeConfig } = useMenu();
+  const brandLogo = storeConfig?.logoUrl || '/images/logo.png';
   return (
     <section
       id="story"
@@ -75,7 +78,7 @@ export default function About() {
               <div className="absolute inset-0 bg-radial from-white/10 via-transparent to-transparent pointer-events-none" />
 
               <img
-                src="/images/logo.png"
+                src={brandLogo}
                 alt="Sukié Cookies"
                 className="max-w-xs w-full h-auto object-contain mx-auto drop-shadow-2xl group-hover:scale-105 transition-transform duration-500"
               />

@@ -1,4 +1,9 @@
+import { useMenu } from '../context/MenuContext';
+
 export default function Footer({ onOpenTrack, onViewChange, onOpenAdmin }) {
+  const { storeConfig } = useMenu();
+  const brandLogo = storeConfig?.logoUrl || '/images/logo.png';
+  const brandTitle = storeConfig?.brandName || 'Sukié';
   const handleScrollTo = (e, targetId) => {
     e.preventDefault();
     if (targetId === 'track') {
@@ -110,12 +115,12 @@ export default function Footer({ onOpenTrack, onViewChange, onOpenAdmin }) {
           <div className="space-y-4">
             <div className="flex items-center gap-3">
               <img
-                src="/images/logo.png"
-                alt="Sukié Cookies"
-                className="h-12 w-auto object-contain rounded-lg shadow-sm"
+                src={brandLogo}
+                alt={`${brandTitle} Cookies`}
+                className="h-12 w-12 object-cover rounded-full ring-2 ring-brand-gold/50 shadow-sm"
               />
               <span className="font-heading text-xl font-bold tracking-wide text-white">
-                Sukié Cookies
+                {brandTitle} Cookies
               </span>
             </div>
             <p className="text-white/60 text-sm leading-relaxed">

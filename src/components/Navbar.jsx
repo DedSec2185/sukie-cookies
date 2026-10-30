@@ -2,11 +2,15 @@ import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
 import { useCart } from '../context/CartContext';
+import { useMenu } from '../context/MenuContext';
 
 export default function Navbar({ activeView = 'menu', onViewChange, onOpenTrack }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { items, totalItems, totalPrice, toggleCart } = useCart();
+  const { storeConfig } = useMenu();
+  const brandLogo = storeConfig?.logoUrl || '/images/logo.png';
+  const brandTitle = storeConfig?.brandName || 'Sukié';
 
   useEffect(() => {
     const handleScroll = () => {
@@ -78,15 +82,15 @@ export default function Navbar({ activeView = 'menu', onViewChange, onOpenTrack 
             aria-label="Sukié Cookies Home"
           >
             <img
-              src="/images/logo.png"
-              alt="Sukié Cookies Logo"
-              className="h-11 sm:h-12 w-11 sm:w-12 rounded-full object-cover shadow-sm ring-2 ring-[#C5A059]/50 group-hover:scale-105 transition-transform duration-300"
+              src={brandLogo}
+              alt={`${brandTitle} Logo`}
+              className="h-11 sm:h-12 w-11 sm:w-12 rounded-full object-cover shadow-sm ring-2 ring-brand-gold/60 group-hover:scale-105 transition-transform duration-300"
             />
             <div className="flex flex-col">
               <span
                 className="font-heading text-2xl md:text-3xl font-bold tracking-tight text-white group-hover:text-[#F3E5AB] transition-colors duration-300"
               >
-                Sukié
+                {brandTitle}
               </span>
             </div>
           </a>
@@ -302,13 +306,13 @@ export default function Navbar({ activeView = 'menu', onViewChange, onOpenTrack 
               <div className="flex items-center justify-between pb-6 border-b border-[#C5A059]/20">
                 <div className="flex items-center space-x-3">
                   <img
-                    src="/images/logo.png"
-                    alt="Sukié Cookies"
-                    className="h-10 w-10 rounded-full object-cover shadow-sm ring-2 ring-[#C5A059]/60"
+                    src={brandLogo}
+                    alt={`${brandTitle} Cookies`}
+                    className="h-10 w-10 rounded-full object-cover shadow-sm ring-2 ring-brand-gold/60"
                   />
                   <div className="flex flex-col">
                     <span className="font-heading text-2xl font-bold text-white tracking-tight">
-                      Sukié
+                      {brandTitle}
                     </span>
                     <span className="text-[10px] font-mono uppercase tracking-widest text-[#C5A059]">
                       NYC Cookies Mumbai

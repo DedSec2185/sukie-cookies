@@ -79,8 +79,8 @@ export default function AdminAuthModal({ onSuccess, onExit }) {
         <div className="relative z-10 flex flex-col items-center">
           <div className="w-16 h-16 rounded-full p-1 bg-gradient-to-b from-[#F3E5AB] via-[#C5A059] to-[#8C6D2B] shadow-lg mb-3">
             <img
-              src="/images/logo.png"
-              alt="Sukié Logo"
+              src={storeConfig?.logoUrl || '/images/logo.png'}
+              alt={`${storeConfig?.brandName || 'Sukié'} Logo`}
               className="w-full h-full rounded-full object-cover"
             />
           </div>
@@ -89,7 +89,7 @@ export default function AdminAuthModal({ onSuccess, onExit }) {
             FOUNDER ATELIER
           </span>
           <h2 className="font-heading text-xl sm:text-2xl font-bold text-white mt-0.5">
-            Admin Studio Access
+            {storeConfig?.brandName || 'Sukié'} Studio Access
           </h2>
           <p className="text-[11px] text-white/70 font-light mt-1 max-w-[240px]">
             Enter your 4-digit PIN to manage menu drops, photo uploads &amp; demand analytics.

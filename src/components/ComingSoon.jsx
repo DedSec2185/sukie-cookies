@@ -1,7 +1,11 @@
 import { motion } from 'framer-motion';
 import { Sparkles, MessageCircle, ShieldCheck, Flame, Scale, Award } from 'lucide-react';
+import { useMenu } from '../context/MenuContext';
 
 export default function ComingSoon({ onEnterPreview, onOpenAdmin }) {
+  const { storeConfig } = useMenu();
+  const brandLogo = storeConfig?.logoUrl || '/images/logo.png';
+  const brandTitle = storeConfig?.brandName || 'Sukié';
   const whatsappVipUrl =
     "https://wa.me/919136498467?text=Hello%20Suki%C3%A9!%20%F0%9F%8D%AA%20Please%20notify%20me%20when%20the%20first%20drop%20goes%20live%20in%20Mumbai!";
 
@@ -35,14 +39,14 @@ export default function ComingSoon({ onEnterPreview, onOpenAdmin }) {
         >
           <div className="w-10 h-10 sm:w-13 sm:h-13 rounded-full p-0.5 bg-gradient-to-b from-[#F3E5AB] via-[#C5A059] to-[#8C6D2B] shadow-[0_0_18px_rgba(197,160,89,0.35)] shrink-0">
             <img
-              src="/images/logo.png"
-              alt="Sukié Logo"
+              src={brandLogo}
+              alt={`${brandTitle} Logo`}
               className="w-full h-full rounded-full object-cover"
             />
           </div>
           <div className="flex flex-col">
             <span className="font-heading text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-white leading-none">
-              Sukié
+              {brandTitle}
             </span>
             <span className="text-[9px] sm:text-[10px] tracking-[0.25em] font-mono uppercase text-[#F3E5AB] font-semibold mt-1">
               MUMBAI ATELIER
@@ -80,8 +84,8 @@ export default function ComingSoon({ onEnterPreview, onOpenAdmin }) {
           <div className="absolute -inset-4 bg-radial from-[#C5A059]/25 via-transparent to-transparent rounded-full blur-xl pointer-events-none" />
           <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full p-1.5 bg-gradient-to-b from-[#F3E5AB] via-[#C5A059] to-[#0A2668] shadow-[0_15px_40px_rgba(0,0,0,0.6)] ring-4 ring-[#C5A059]/20">
             <img
-              src="/images/logo.png"
-              alt="Sukié Cookies Official Logo"
+              src={brandLogo}
+              alt={`${brandTitle} Cookies Official Logo`}
               className="w-full h-full rounded-full object-cover shadow-inner"
             />
           </div>

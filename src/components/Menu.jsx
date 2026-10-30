@@ -116,9 +116,9 @@ export default function Menu() {
           </div>
         </div>
 
-        {/* Mobile-Sticky Swipeable Category Pills */}
-        <div className="sticky top-[60px] sm:static z-30 bg-[#FAF6EE]/95 sm:bg-transparent backdrop-blur-md sm:backdrop-blur-none py-2.5 sm:py-0 mb-6 sm:mb-10 -mx-4 px-4 border-b border-stone-200/70 sm:border-none overflow-x-auto no-scrollbar">
-          <div className="flex sm:justify-center items-center gap-2 min-w-max pb-0.5">
+        {/* Clean Wrapped Category Pills (Zero Horizontal Scroll Needed) */}
+        <div className="mb-8 sm:mb-10">
+          <div className="flex flex-wrap justify-center items-center gap-2 sm:gap-2.5">
             {categories.map((cat) => {
               const isActive = activeCategory === cat.id;
               return (
@@ -126,7 +126,7 @@ export default function Menu() {
                   key={cat.id}
                   whileTap={{ scale: 0.94 }}
                   onClick={() => setActiveCategory(cat.id)}
-                  className={`relative px-4 py-2 rounded-full text-xs sm:text-sm font-semibold tracking-wide transition-colors duration-200 cursor-pointer flex items-center gap-1.5 whitespace-nowrap shadow-xs ${
+                  className={`relative px-4 py-2 rounded-full text-xs sm:text-sm font-semibold tracking-wide transition-colors duration-200 cursor-pointer flex items-center gap-1.5 shadow-xs ${
                     isActive
                       ? 'text-white'
                       : 'bg-white text-stone-700 hover:text-stone-950 border border-[#C5A059]/30'
@@ -135,11 +135,11 @@ export default function Menu() {
                   {isActive && (
                     <motion.div
                       layoutId="menuCatPill"
-                      className="absolute inset-0 bg-[#0C419C] rounded-full shadow-md -z-10"
+                      className="absolute inset-0 bg-brand-blue rounded-full shadow-md -z-10"
                       transition={{ type: 'spring', damping: 22, stiffness: 280 }}
                     />
                   )}
-                  <span className="text-[#C5A059] text-[10px]">✦</span>
+                  <span className="text-brand-gold text-[10px]">✦</span>
                   <span>{cat.name}</span>
                 </motion.button>
               );

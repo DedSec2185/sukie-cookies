@@ -130,13 +130,19 @@ export default function App() {
   // Determine whether Coming Soon is active based on storeConfig
   const isComingSoonActive = storeConfig?.isComingSoon !== false && !isPreviewMode;
 
-  const viewTabs = [
-    { id: 'menu', label: 'Daily Drops', desc: 'Fresh 170g Menu' },
-    { id: 'story', label: 'NYC Atelier', desc: 'Story & Anatomy' },
-    { id: 'ritual', label: 'Warming & Tasting', desc: 'Reheat Simulator' },
-    { id: 'care', label: 'Care Lounge', desc: 'Founder Support' },
-    { id: 'all', label: 'View All', desc: 'Full Editorial' },
-  ];
+  // Sync Brand Color Combination from Founder Studio live across CSS variables
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    const root = document.documentElement;
+    const primary = storeConfig?.primaryColor || '#0C419C';
+    const accent = storeConfig?.accentColor || '#C5A059';
+    const surface = storeConfig?.surfaceColor || '#FAF6EE';
+    root.style.setProperty('--color-brand-blue', primary);
+    root.style.setProperty('--color-brand-vividblue', primary);
+    root.style.setProperty('--color-brand-gold', accent);
+    root.style.setProperty('--color-brand-cream', surface);
+    root.style.setProperty('--color-brand-ivory', surface);
+  }, [storeConfig?.primaryColor, storeConfig?.accentColor, storeConfig?.surfaceColor]);
 
   return (
     <>
@@ -165,82 +171,39 @@ export default function App() {
           onOpenAdmin={() => setIsAdminOpen(true)}
         />
       ) : (
-        <div className="min-h-screen bg-[#FAF6EE] text-brand-dark selection:bg-brand-gold selection:text-brand-dark overflow-x-hidden pb-24 md:pb-0 relative">
-          {/* Discreet Preview Mode Indicator Bar (shown when Coming Soon is configured on, but previewing) */}
-          {storeConfig?.isComingSoon && (
-            <div className="bg-[#070B14] border-b border-[#C5A059]/40 py-2 px-4 text-center text-xs text-white flex items-center justify-between sticky top-0 z-50 shadow-md">
-              <span className="flex items-center gap-1.5 text-[#C5A059] font-mono text-[11px]">
-                <span>✦</span>
-                <span>Atelier Menu Preview Active</span>
-              </span>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setIsAdminOpen(true)}
-                  className="text-[11px] font-mono text-[#F3E5AB] hover:text-white px-2.5 py-0.5 rounded-full border border-[#C5A059]/40 hover:border-[#C5A059] bg-[#C5A059]/10 transition-colors cursor-pointer flex items-center gap-1"
-                >
-                  <span>🔒</span>
-                  <span>Founder Studio</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsPreviewMode(false);
-                    window.location.hash = '';
-                  }}
-                  className="text-[11px] font-mono text-white/80 hover:text-white px-2.5 py-0.5 rounded-full border border-white/20 hover:border-white/50 bg-white/5 transition-colors cursor-pointer"
-                >
-                  Return to Coming Soon →
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Top Header Navigation */}
+        <div
+          className="min-h-screen text-brand-dark selection:bg-brand-gold selection:text-brand-dark overflow-x-hidden pb-24 md:pb-0 relative"
+          style={{ backgroundColor: storeConfig?.surfaceColor || '#FAF6EE' }}
+        >
+          {/* Top Header Navigation (Single Clean Uncluttered Header) */}
           <Navbar activeView={activeView} onViewChange={handleViewChange} onOpenTrack={() => setIsTrackOpen(true)} />
 
           {/* Sliding Cart Drawer */}
           <Cart />
 
-          {/* Desktop Ambient View Switcher Bar (Visible on md+ screens) */}
-          <div className="hidden md:block pt-24 pb-3 px-4 bg-[#0A0D14] border-b border-white/10 sticky top-8 z-30 shadow-md">
-            <div className="max-w-7xl mx-auto flex items-center justify-between">
-              <div className="flex items-center gap-1.5 p-1 rounded-full bg-white/5 border border-white/10 backdrop-blur-md">
-                {viewTabs.map((tab) => {
-                  const isActive = activeView === tab.id;
-                  return (
-                    <button
-                      key={tab.id}
-                      type="button"
-                      onClick={() => handleViewChange(tab.id)}
-                      className={`relative px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider transition-colors duration-200 cursor-pointer flex items-center gap-1.5 ${
-                        isActive ? 'text-stone-950 font-bold' : 'text-white/70 hover:text-white'
-                      }`}
-                    >
-                      {isActive && (
-                        <motion.div
-                          layoutId="desktopViewPill"
-                          className="absolute inset-0 bg-[#C5A059] rounded-full shadow-md -z-10"
-                          transition={{ type: 'spring', damping: 22, stiffness: 280 }}
-                        />
-                      )}
-                      {isActive && <span className="text-[10px]">✦</span>}
-                      <span>{tab.label}</span>
-                    </button>
-                  );
-                })}
-              </div>
-
-              <div className="flex items-center gap-3 text-[11px] font-mono text-white/50">
-                <span className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  Mumbai Atelier Active
-                </span>
-                <span>•</span>
-                <span className="text-[#C5A059]">100% Pure Eggless</span>
-              </div>
+          {/* Discreet Floating Preview Pill (Never clutters top header!) */}
+          {storeConfig?.isComingSoon && (
+            <div className="fixed bottom-20 md:bottom-5 left-4 z-40 flex items-center gap-1.5 p-1.5 pl-3 rounded-full bg-[#07132B]/95 backdrop-blur-md border border-[#C5A059]/50 shadow-xl text-white text-[11px]">
+              <span className="text-[#F3E5AB] font-mono hidden sm:inline">Preview</span>
+              <button
+                type="button"
+                onClick={() => setIsAdminOpen(true)}
+                className="px-2.5 py-1 rounded-full bg-[#C5A059] text-stone-950 font-bold cursor-pointer"
+              >
+                Studio
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsPreviewMode(false);
+                  window.location.hash = '';
+                }}
+                className="px-2.5 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white/85 cursor-pointer"
+              >
+                Teaser ↗
+              </button>
             </div>
-          </div>
+          )}
 
           {/* Main Content Area with Smooth Page Transitions */}
           <main>
@@ -267,7 +230,7 @@ export default function App() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -16 }}
                   transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-                  className="pt-20 md:pt-6"
+                  className="pt-20"
                 >
                   <About />
                   <Craftsmanship />
@@ -282,7 +245,7 @@ export default function App() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -16 }}
                   transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-                  className="pt-20 md:pt-6"
+                  className="pt-20"
                 >
                   <TastingNotes />
                   <Craftsmanship />
@@ -296,7 +259,7 @@ export default function App() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -16 }}
                   transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-                  className="pt-20 md:pt-6"
+                  className="pt-20"
                 >
                   <Contact />
                 </motion.div>

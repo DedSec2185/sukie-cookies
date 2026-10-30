@@ -1,11 +1,11 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ShoppingBag,
   Sparkles,
   BarChart3,
   Users,
-  Settings,
+  Palette,
   Plus,
   Search,
   Edit3,
@@ -15,31 +15,62 @@ import {
   CheckCircle2,
   Clock,
   Flame,
-  Package,
   Phone,
   Lock,
   ExternalLink,
   Copy,
   Check,
   MessageSquare,
-  Award,
-  Layers,
-  MapPin,
   Calendar,
   Download,
   RotateCcw,
   Building2,
-  Star,
   CreditCard,
   TrendingUp,
   ChevronRight,
-  ShieldCheck,
-  Zap,
+  ChevronDown,
+  ChevronUp,
+  Upload,
 } from 'lucide-react';
 import { useMenu } from '../../context/MenuContext';
 import ProductEditorModal from './ProductEditorModal';
 import NotificationModal from './NotificationModal';
 import CustomerDrawer from './CustomerDrawer';
+
+const BRAND_COLOR_PRESETS = [
+  {
+    id: 'royal_cobalt',
+    name: 'Sukié Royal Cobalt & Gold',
+    desc: 'Official signature royal blue, champagne gold & warm cream',
+    primary: '#0C419C',
+    accent: '#C5A059',
+    surface: '#FAF6EE',
+  },
+  {
+    id: 'midnight_navy',
+    name: 'Midnight Navy & Champagne',
+    desc: 'Deep Parisian midnight blue with bright gold foil',
+    primary: '#091D42',
+    accent: '#D4AF37',
+    surface: '#FDFBF7',
+  },
+  {
+    id: 'espresso_gold',
+    name: 'Artisanal Cocoa & Gold',
+    desc: 'Rich Belgian dark chocolate brown with warm caramel gold',
+    primary: '#3B1F14',
+    accent: '#C89D54',
+    surface: '#FAF5EE',
+  },
+  {
+    id: 'emerald_patisserie',
+    name: 'Emerald Patisserie & Gold',
+    desc: 'Classic European botanical emerald with antique gold',
+    primary: '#0F4C45',
+    accent: '#C5A059',
+    surface: '#F7FAF8',
+  },
+];
 
 export default function AdminPortal({ onClose }) {
   const {
@@ -67,14 +98,25 @@ export default function AdminPortal({ onClose }) {
     changePin,
   } = useMenu();
 
-  // 5 Clear, Stress-Free Navigation Tabs
+  const logoInputRef = useRef(null);
+
+  // Live Brand Values
+  const brandPrimary = storeConfig?.primaryColor || '#0C419C';
+  const brandAccent = storeConfig?.accentColor || '#C5A059';
+  const brandLogo = storeConfig?.logoUrl || '/images/logo.png';
+  const brandTitle = storeConfig?.brandName || 'Sukié';
+
+  // 5 Short, Clear Mobile-First Tabs (Zero Horizontal Scroll)
   const [activeTab, setActiveTab] = useState('orders');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [orderStatusFilter, setOrderStatusFilter] = useState('all');
-
-  // Sub-view inside Customers & B2B tab ('vip' | 'b2b')
   const [crmSubTab, setCrmSubTab] = useState('vip');
+
+  // Progressive Disclosure States (Keeps UI Calm & Spacious!)
+  const [showBakeSheet, setShowBakeSheet] = useState(false);
+  const [expandedOrderIds, setExpandedOrderIds] = useState({});
+  const [expandedMenuIds, setExpandedMenuIds] = useState({});
 
   // Modals & Drawers
   const [isEditorOpen, setIsEditorOpen] = useState(false);
@@ -84,18 +126,18 @@ export default function AdminPortal({ onClose }) {
   const [notifyModalOrder, setNotifyModalOrder] = useState(null);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [isNewOrderOpen, setIsNewOrderOpen] = useState(false);
-  const [showBakeSheet, setShowBakeSheet] = useState(true);
+  const [isNewB2BOpen, setIsNewB2BOpen] = useState(false);
 
-  // Inline Quick Price Editing State in Menu Studio
+  // Inline Quick Price Editing State
   const [inlinePriceId, setInlinePriceId] = useState(null);
   const [inlinePriceValue, setInlinePriceValue] = useState('');
 
-  // Website Banner Text Inline State
+  // Editable Drafts in Brand & Studio
   const [bannerTextDraft, setBannerTextDraft] = useState(
     storeConfig?.ovenStatusText || 'Ovens Fired Today • Pre-Orders Active'
   );
+  const [brandNameDraft, setBrandNameDraft] = useState(brandTitle);
 
-  // Add Review Form State (in Atelier Controls)
   const [newReviewForm, setNewReviewForm] = useState({
     name: '',
     cookie: 'Triple Chocolate Overload',
@@ -103,20 +145,17 @@ export default function AdminPortal({ onClose }) {
     comment: '',
   });
 
-  // Add B2B Inquiry Form State
-  const [isNewB2BOpen, setIsNewB2BOpen] = useState(false);
   const [newB2BForm, setNewB2BForm] = useState({
     company: '',
     contact: '',
     phone: '',
     occasion: 'Corporate Gifting Boxes',
     units: 30,
-    budget: '₹15,000',
-    deliveryDate: 'This Week',
+    budget: '₹25,000',
+    deliveryDate: 'This Month',
     notes: '',
   });
 
-  // Walk-in / WhatsApp Order Entry State
   const [manualOrder, setManualOrder] = useState({
     name: '',
     phone: '',
@@ -134,24 +173,56 @@ export default function AdminPortal({ onClose }) {
   const [confirmPin, setConfirmPin] = useState('');
   const [pinMessage, setPinMessage] = useState({ type: '', text: '' });
 
-  // Toast Notification
+  // Toast Feedback
   const [toast, setToast] = useState(null);
   const [copiedId, setCopiedId] = useState(null);
 
   const showToast = (msg) => {
     setToast(msg);
-    setTimeout(() => setToast(null), 3200);
+    setTimeout(() => setToast(null), 3000);
+  };
+
+  const toggleOrderExpand = (id) => {
+    setExpandedOrderIds((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const toggleMenuExpand = (id) => {
+    setExpandedMenuIds((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
   const handleCopyText = (text, id) => {
     navigator.clipboard?.writeText(text);
     setCopiedId(id);
-    showToast('Copied to clipboard');
+    showToast('Copied link to clipboard');
     setTimeout(() => setCopiedId(null), 2000);
   };
 
+  // Logo Upload Handler (Compressed via Canvas)
+  const handleLogoUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file || !file.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX = 400;
+        const scale = img.width > MAX ? MAX / img.width : 1;
+        canvas.width = img.width * scale;
+        canvas.height = img.height * scale;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        const dataUrl = canvas.toDataURL('image/png', 0.9);
+        updateStoreConfig({ logoUrl: dataUrl });
+        showToast('Updated brand logo live!');
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  };
+
   // ============================================================================
-  // COMPLETE ANALYTICS, KITCHEN BAKE SHEET & FINANCIAL BREAKDOWN
+  // METRICS & COMPLETE BREAKDOWNS
   // ============================================================================
   const metrics = useMemo(() => {
     const totalRevenue = orders.reduce((acc, o) => acc + (Number(o.finalTotal) || 0), 0);
@@ -171,7 +242,7 @@ export default function AdminPortal({ onClose }) {
       return s.includes('collect') || s.includes('complete');
     }).length;
 
-    // Active Oven Queue Breakdown (Orders that are Pending or Kitchen Prepping)
+    // Active Oven Queue Breakdown
     const activeKitchenMap = {};
     let activeCookiesToBake = 0;
     orders.forEach((o) => {
@@ -181,15 +252,14 @@ export default function AdminPortal({ onClose }) {
           const qty = Number(item.quantity) || 1;
           activeCookiesToBake += qty;
           if (!activeKitchenMap[item.name]) {
-            activeKitchenMap[item.name] = { name: item.name, qty: 0, ordersCount: 0 };
+            activeKitchenMap[item.name] = { name: item.name, qty: 0 };
           }
           activeKitchenMap[item.name].qty += qty;
-          activeKitchenMap[item.name].ordersCount += 1;
         });
       }
     });
     const activeBakeList = Object.values(activeKitchenMap).sort((a, b) => b.qty - a.qty);
-    const activeDoughKg = ((activeCookiesToBake * 170) / 1000).toFixed(2);
+    const activeDoughKg = ((activeCookiesToBake * 170) / 1000).toFixed(1);
 
     // Product Sales Breakdown
     const productStatsMap = {};
@@ -199,7 +269,6 @@ export default function AdminPortal({ onClose }) {
         name: p.name,
         image: p.image,
         price: p.price,
-        available: p.available,
         qty: 0,
         revenue: 0,
       };
@@ -212,7 +281,6 @@ export default function AdminPortal({ onClose }) {
             name: i.name,
             image: '/images/triple_chocolate.jpg',
             price: i.price || 299,
-            available: true,
             qty: 0,
             revenue: 0,
           };
@@ -225,28 +293,15 @@ export default function AdminPortal({ onClose }) {
 
     // Payment Mode Breakdown
     const paymentBreakdown = {
-      upi: { label: 'Instant UPI Transfer', count: 0, revenue: 0 },
-      cod: { label: 'Pay on Collection / Handover', count: 0, revenue: 0 },
-      card: { label: 'Online Cards / NetBanking', count: 0, revenue: 0 },
+      upi: { label: 'Instant UPI', count: 0, revenue: 0 },
+      cod: { label: 'Pay on Handover', count: 0, revenue: 0 },
+      card: { label: 'Card / Online', count: 0, revenue: 0 },
     };
     orders.forEach((o) => {
       const method = (o.customer?.paymentMethod || 'upi').toLowerCase();
       const bucket = paymentBreakdown[method] ? method : 'upi';
       paymentBreakdown[bucket].count += 1;
       paymentBreakdown[bucket].revenue += Number(o.finalTotal) || 0;
-    });
-
-    // Fulfillment Channel Breakdown
-    const channelBreakdown = {};
-    orders.forEach((o) => {
-      const ch = o.customer?.isBulkOrder
-        ? 'Bulk Delivery Dispatch'
-        : o.channel || 'Website Pre-Order (Pickup)';
-      if (!channelBreakdown[ch]) {
-        channelBreakdown[ch] = { label: ch, count: 0, revenue: 0 };
-      }
-      channelBreakdown[ch].count += 1;
-      channelBreakdown[ch].revenue += Number(o.finalTotal) || 0;
     });
 
     // Pickup Slot Breakdown
@@ -260,7 +315,7 @@ export default function AdminPortal({ onClose }) {
       slotBreakdown[slot].cookies += Number(o.totalItems) || 0;
     });
 
-    // Customer Directory Aggregation
+    // Customer Directory
     const customerMap = {};
     orders.forEach((o) => {
       const phoneKey = (o.customer?.phone || '').replace(/\D/g, '') || o.customer?.name || o.id;
@@ -273,7 +328,6 @@ export default function AdminPortal({ onClose }) {
           totalOrders: 0,
           totalSpent: 0,
           totalCookies: 0,
-          lastOrderDate: o.date || 'Today',
           favoriteCookie: o.items?.[0]?.name || 'Triple Chocolate Overload',
           isBulk: !!o.customer?.isBulkOrder,
         };
@@ -300,13 +354,11 @@ export default function AdminPortal({ onClose }) {
       activeBakeList,
       productBreakdown,
       paymentBreakdown: Object.values(paymentBreakdown),
-      channelBreakdown: Object.values(channelBreakdown),
       slotBreakdown: Object.values(slotBreakdown),
       customersList,
     };
   }, [orders, products]);
 
-  // Filtered Products for Menu Studio
   const filteredProducts = useMemo(() => {
     return products.filter((p) => {
       const matchesCat = selectedCategory === 'all' || p.category === selectedCategory;
@@ -317,7 +369,6 @@ export default function AdminPortal({ onClose }) {
     });
   }, [products, selectedCategory, searchQuery]);
 
-  // Filtered Orders for Orders & Kitchen Tab
   const filteredOrders = useMemo(() => {
     return orders.filter((ord) => {
       if (orderStatusFilter === 'all') return true;
@@ -336,34 +387,31 @@ export default function AdminPortal({ onClose }) {
   const handleSaveProduct = (productData) => {
     if (editingProduct) {
       updateProduct(editingProduct.id, productData);
-      showToast(`Saved changes to "${productData.name}"`);
+      showToast(`Saved "${productData.name}"`);
     } else {
       addProduct(productData);
-      showToast(`Added "${productData.name}" to live menu`);
+      showToast(`Added "${productData.name}" to menu`);
     }
     setIsEditorOpen(false);
     setEditingProduct(null);
   };
 
   const handleDuplicateProduct = (product) => {
-    const { id: _unusedId, ...rest } = product;
+    const { id: _unused, ...rest } = product;
     addProduct({
       ...rest,
-      name: `${product.name} ( Seasonal Drop )`,
+      name: `${product.name} (New Drop)`,
       available: false,
     });
-    showToast(`Duplicated "${product.name}" (Paused so you can edit it safely)`);
+    showToast(`Duplicated "${product.name}"`);
   };
 
   const handleSaveInlinePrice = (product) => {
     const parsed = Number(inlinePriceValue);
-    if (!parsed || parsed < 1) {
-      showToast('Please enter a valid price');
-      return;
-    }
+    if (!parsed || parsed < 1) return;
     updateProduct(product.id, { price: parsed });
     setInlinePriceId(null);
-    showToast(`Updated ${product.name} price to ₹${parsed}`);
+    showToast(`${product.name} updated to ₹${parsed}`);
   };
 
   const handleCreateManualOrder = (e) => {
@@ -378,16 +426,8 @@ export default function AdminPortal({ onClose }) {
 
     addOrder({
       id: orderId,
-      date: new Date().toLocaleDateString('en-IN', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
-      }),
-      time: new Date().toLocaleTimeString([], {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: true,
-      }),
+      date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }),
       channel: manualOrder.channel,
       totalItems: qty,
       totalPrice: subTotal,
@@ -429,30 +469,27 @@ export default function AdminPortal({ onClose }) {
   };
 
   const handleExportCSV = () => {
-    const headers = ['Order ID', 'Date', 'Time', 'Customer', 'Phone', 'Slot', 'Items', 'Packaging Fee', 'Total INR', 'Status'];
+    const headers = ['Order ID', 'Date', 'Customer', 'Phone', 'Slot', 'Items', 'Total INR', 'Status'];
     const rows = orders.map((o) => [
       o.id,
       o.date,
-      o.time,
       `"${(o.customer?.name || '').replace(/"/g, '""')}"`,
       o.customer?.phone || '',
       `"${(o.customer?.slot || '').replace(/"/g, '""')}"`,
       `"${(o.items || []).map((i) => `${i.name} x${i.quantity}`).join('; ')}"`,
-      o.packagingFee || 0,
       o.finalTotal || 0,
       o.status || 'Pending',
     ]);
     const csvContent =
       'data:text/csv;charset=utf-8,' +
       [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
-    const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
+    link.setAttribute('href', encodeURI(csvContent));
     link.setAttribute('download', `sukie_orders_${new Date().toISOString().slice(0, 10)}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    showToast('Downloaded Orders CSV Ledger');
+    showToast('Downloaded Orders CSV');
   };
 
   const handlePinSubmit = (e) => {
@@ -468,580 +505,616 @@ export default function AdminPortal({ onClose }) {
     changePin(newPin);
     setNewPin('');
     setConfirmPin('');
-    setPinMessage({ type: 'success', text: 'Admin PIN updated!' });
+    setPinMessage({ type: 'success', text: 'PIN updated!' });
     showToast('Security PIN updated');
     setTimeout(() => setPinMessage({ type: '', text: '' }), 3000);
   };
 
-  const getOrderStepIndex = (statusStr) => {
+  // Next logical 1-tap action for an order card
+  const getNextOrderAction = (statusStr) => {
     const s = (statusStr || '').toLowerCase();
-    if (s.includes('collect') || s.includes('complete')) return 3;
-    if (s.includes('ready')) return 2;
-    if (s.includes('prep') || s.includes('bake')) return 1;
-    return 0;
+    if (s === 'pending') {
+      return { label: 'Start Baking →', next: 'Kitchen Prepping', pillBg: 'bg-amber-100 text-amber-900', badge: 'Pending' };
+    }
+    if (s.includes('prep') || s.includes('bake')) {
+      return { label: 'Mark Ready for Pickup →', next: 'Ready for Collection', pillBg: 'bg-blue-100 text-blue-900', badge: 'In Ovens' };
+    }
+    if (s.includes('ready')) {
+      return { label: 'Mark Collected ✓', next: 'Collected', pillBg: 'bg-emerald-100 text-emerald-900', badge: 'Ready' };
+    }
+    return { label: null, next: null, pillBg: 'bg-stone-100 text-stone-600', badge: 'Collected ✓' };
   };
 
+  // Short 1-word mobile-first navigation items (fits 5-across on mobile without ANY horizontal scroll!)
   const navTabs = [
     {
       id: 'orders',
-      label: 'Orders & Kitchen',
+      shortLabel: 'Orders',
+      fullLabel: 'Orders & Kitchen',
       icon: ShoppingBag,
       badge: metrics.pendingCount + metrics.preppingCount || null,
     },
     {
       id: 'menu',
-      label: 'Menu Studio',
+      shortLabel: 'Menu',
+      fullLabel: 'Menu & Prices',
       icon: Sparkles,
-      badge: `${products.filter((p) => p.available).length}/${products.length}`,
+      badge: null,
     },
     {
       id: 'analytics',
-      label: 'Sales & Breakdown',
+      shortLabel: 'Sales',
+      fullLabel: 'Sales Breakdown',
       icon: BarChart3,
+      badge: null,
     },
     {
       id: 'customers',
-      label: 'Customers & B2B',
+      shortLabel: 'Clients',
+      fullLabel: 'Clients & Bulk',
       icon: Users,
-      badge: metrics.customersList.length + (bulkInquiries?.length || 0),
+      badge: null,
     },
     {
       id: 'settings',
-      label: 'Atelier Controls',
-      icon: Settings,
+      shortLabel: 'Brand',
+      fullLabel: 'Logo, Colors & Site',
+      icon: Palette,
+      badge: null,
     },
   ];
 
   return (
-    <div className="fixed inset-0 z-[150] bg-[#061024] text-white overflow-y-auto selection:bg-[#C5A059] selection:text-stone-950 font-sans">
-      {/* Subtle Ambient Royal Glow */}
-      <div className="fixed top-0 left-1/4 w-[500px] h-[500px] bg-[#0C419C]/15 rounded-full blur-[150px] pointer-events-none" />
-      <div className="fixed bottom-0 right-1/4 w-[450px] h-[450px] bg-[#C5A059]/10 rounded-full blur-[150px] pointer-events-none" />
-
-      {/* Toast Feedback Banner */}
+    <div className="fixed inset-0 z-[150] bg-[#F6F3EC] text-[#07132B] overflow-y-auto font-sans">
+      {/* Toast Notification */}
       <AnimatePresence>
         {toast && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, y: -16 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="fixed top-5 right-5 z-[300] bg-gradient-to-r from-[#091E46] to-[#0C317A] text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 text-sm font-semibold border border-[#C5A059]"
+            exit={{ opacity: 0, y: -16 }}
+            className="fixed top-4 right-4 z-[320] px-4 py-3 rounded-2xl shadow-xl flex items-center gap-2.5 text-xs sm:text-sm font-semibold text-white"
+            style={{ backgroundColor: brandPrimary }}
           >
-            <CheckCircle2 className="w-4 h-4 text-[#C5A059] shrink-0" />
+            <CheckCircle2 className="w-4 h-4 shrink-0" style={{ color: brandAccent }} />
             <span>{toast}</span>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* ===================================================================== */}
-      {/* CLEAN, SPACIOUS STICKY HEADER                                         */}
-      {/* ===================================================================== */}
-      <header className="sticky top-0 z-40 bg-[#061024]/90 backdrop-blur-xl border-b border-[#C5A059]/25 px-4 sm:px-8 py-4 shadow-lg">
-        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-          {/* Left: Brand Identity & Reassurance */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3.5">
-              <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-[#0C419C] to-[#082256] p-1 border border-[#C5A059]/60 flex items-center justify-center shadow-md shrink-0">
-                <img src="/images/logo.png" alt="Sukié" className="w-full h-full object-contain" />
+      <div className="min-h-screen flex flex-col lg:flex-row">
+        {/* =================================================================== */}
+        {/* DESKTOP LEFT SIDEBAR (Clean, Spacious, Zero Top Header Clutter)     */}
+        {/* =================================================================== */}
+        <aside
+          className="hidden lg:flex w-68 shrink-0 flex-col justify-between p-6 text-white sticky top-0 h-screen"
+          style={{ backgroundColor: '#07132B' }}
+        >
+          <div className="space-y-8">
+            {/* Brand Identity */}
+            <div className="flex items-center gap-3.5 pb-6 border-b border-white/10">
+              <img
+                src={brandLogo}
+                alt={brandTitle}
+                className="w-12 h-12 rounded-full object-cover ring-2 shrink-0"
+                style={{ '--tw-ring-color': brandAccent }}
+              />
+              <div className="min-w-0">
+                <h1 className="font-heading text-xl font-bold text-white truncate">
+                  {brandTitle} Studio
+                </h1>
+                <span className="text-[11px] text-emerald-300 flex items-center gap-1.5 mt-0.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  {storeConfig?.isComingSoon ? 'Teaser Mode' : 'Storefront Live'}
+                </span>
               </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h1 className="font-heading text-lg sm:text-xl font-bold text-white tracking-wide">
-                    Sukié Founder Studio
-                  </h1>
-                  <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-mono uppercase tracking-wider bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 font-semibold">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                    Auto-Save Active
+            </div>
+
+            {/* Vertical Spacious Navigation */}
+            <nav className="space-y-2">
+              {navTabs.map((tab) => {
+                const Icon = tab.icon;
+                const isActive = activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`w-full px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all flex items-center justify-between cursor-pointer ${
+                      isActive
+                        ? 'text-stone-950 font-bold shadow-md'
+                        : 'text-white/75 hover:bg-white/10 hover:text-white'
+                    }`}
+                    style={isActive ? { backgroundColor: brandAccent } : undefined}
+                  >
+                    <span className="flex items-center gap-3">
+                      <Icon className="w-4 h-4 shrink-0" />
+                      <span>{tab.fullLabel}</span>
+                    </span>
+                    {tab.badge && (
+                      <span
+                        className={`px-2 py-0.5 rounded-full text-[11px] font-mono font-bold ${
+                          isActive ? 'bg-stone-950 text-white' : 'bg-white/15 text-white'
+                        }`}
+                      >
+                        {tab.badge}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </nav>
+          </div>
+
+          {/* Sidebar Bottom Actions */}
+          <div className="space-y-3 pt-6 border-t border-white/10">
+            <button
+              type="button"
+              onClick={() => setIsNewOrderOpen(true)}
+              className="w-full py-3 px-4 rounded-2xl text-xs font-bold uppercase tracking-wider text-white flex items-center justify-center gap-2 shadow-md cursor-pointer"
+              style={{ backgroundColor: brandPrimary }}
+            >
+              <Plus className="w-4 h-4" />
+              <span>New Order</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={onClose}
+              className="w-full py-3 px-4 rounded-2xl bg-white/10 hover:bg-white/15 text-white text-xs font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer"
+            >
+              <span>Back to Website</span>
+              <ExternalLink className="w-3.5 h-3.5" style={{ color: brandAccent }} />
+            </button>
+          </div>
+        </aside>
+
+        {/* =================================================================== */}
+        {/* MOBILE TOP HEADER (Ultra-Clean, Zero Horizontal Scrolling!)         */}
+        {/* =================================================================== */}
+        <header
+          className="lg:hidden sticky top-0 z-40 px-4 py-3.5 text-white flex items-center justify-between shadow-md"
+          style={{ backgroundColor: '#07132B' }}
+        >
+          <div className="flex items-center gap-2.5 min-w-0">
+            <img
+              src={brandLogo}
+              alt={brandTitle}
+              className="w-9 h-9 rounded-full object-cover ring-2 shrink-0"
+              style={{ '--tw-ring-color': brandAccent }}
+            />
+            <div className="min-w-0">
+              <h1 className="font-heading text-base font-bold text-white truncate leading-tight">
+                {brandTitle} Studio
+              </h1>
+              <span className="text-[10px] text-emerald-300 flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                {storeConfig?.isComingSoon ? 'Teaser Active' : 'Live Store'}
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={() => setIsNewOrderOpen(true)}
+              className="px-3 py-2 rounded-xl text-stone-950 text-xs font-bold flex items-center gap-1 cursor-pointer"
+              style={{ backgroundColor: brandAccent }}
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Order</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-3 py-2 rounded-xl bg-white/10 text-white text-xs font-semibold flex items-center gap-1 cursor-pointer"
+            >
+              <span>Site</span>
+              <ExternalLink className="w-3 h-3" />
+            </button>
+          </div>
+        </header>
+
+        {/* =================================================================== */}
+        {/* MAIN WORKSPACE (Airy Padding, Huge Breathing Space, Mobile-First)   */}
+        {/* =================================================================== */}
+        <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-8 lg:px-10 py-6 sm:py-10 pb-28 lg:pb-16">
+          {/* ================================================================= */}
+          {/* TAB 1: ORDERS & KITCHEN (CALM, SPACIOUS, PROGRESSIVE DISCLOSURE)  */}
+          {/* ================================================================= */}
+          {activeTab === 'orders' && (
+            <div className="space-y-7">
+              {/* Page Title */}
+              <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
+                <div>
+                  <h2 className="font-heading text-2xl sm:text-3xl font-bold text-[#07132B]">
+                    Orders &amp; Kitchen
+                  </h2>
+                  <p className="text-xs sm:text-sm text-stone-500 mt-1">
+                    Tap an order&apos;s main button to move it forward, or send a 1-tap WhatsApp update.
+                  </p>
+                </div>
+              </div>
+
+              {/* 3 Calm, High-Contrast Summary Tiles */}
+              <div className="grid grid-cols-3 gap-3 sm:gap-5">
+                <div className="p-4 sm:p-6 rounded-3xl bg-white border border-stone-200/80 shadow-xs">
+                  <span className="text-[11px] font-semibold text-amber-700 uppercase tracking-wider block">
+                    To Bake
+                  </span>
+                  <p className="font-heading text-2xl sm:text-3xl font-bold text-[#07132B] mt-1.5">
+                    {metrics.activeCookiesToBake}
+                  </p>
+                  <span className="text-[11px] text-stone-400 block mt-0.5">
+                    cookies ({metrics.activeDoughKg} kg)
                   </span>
                 </div>
-                <p className="text-xs text-white/60">
-                  Complete control over orders, oven batches, 3-month menu drops &amp; revenue
-                </p>
-              </div>
-            </div>
 
-            {/* Mobile Exit Button */}
-            <button
-              type="button"
-              onClick={onClose}
-              className="lg:hidden px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer border border-white/15"
-            >
-              <span>Storefront</span>
-              <ExternalLink className="w-3.5 h-3.5 text-[#C5A059]" />
-            </button>
-          </div>
-
-          {/* Center: 5 Clean Navigation Pills */}
-          <nav className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 lg:pb-0">
-            {navTabs.map((tab) => {
-              const Icon = tab.icon;
-              const isActive = activeTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  type="button"
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
-                    isActive
-                      ? 'bg-gradient-to-r from-[#C5A059] to-[#DFBD73] text-stone-950 font-bold shadow-[0_4px_20px_rgba(197,160,89,0.35)]'
-                      : 'bg-white/[0.05] text-white/75 hover:bg-white/10 hover:text-white border border-white/10'
-                  }`}
-                >
-                  <Icon className="w-4 h-4 shrink-0" />
-                  <span>{tab.label}</span>
-                  {tab.badge && (
-                    <span
-                      className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${
-                        isActive ? 'bg-stone-950 text-[#F3E5AB]' : 'bg-[#0C419C] text-white'
-                      }`}
-                    >
-                      {tab.badge}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </nav>
-
-          {/* Right: Desktop Return to Website Button */}
-          <div className="hidden lg:flex items-center gap-3">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-semibold transition-all flex items-center gap-2 cursor-pointer border border-[#C5A059]/30"
-            >
-              <span>View Live Website</span>
-              <ExternalLink className="w-3.5 h-3.5 text-[#C5A059]" />
-            </button>
-          </div>
-        </div>
-      </header>
-
-      {/* ===================================================================== */}
-      {/* MAIN CONTENT CONTAINER (SPACIOUS & NATURALLY SCROLLABLE)              */}
-      {/* ===================================================================== */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-8 py-8 sm:py-10 pb-28 space-y-8 relative z-10">
-        {/* =================================================================== */}
-        {/* TAB 1: ORDERS & KITCHEN (COMPLETE DAILY DISPATCH & OVEN SHEET)      */}
-        {/* =================================================================== */}
-        {activeTab === 'orders' && (
-          <div className="space-y-8">
-            {/* Top 4 Executive Summary Cards */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-              <div className="p-5 sm:p-6 rounded-3xl bg-gradient-to-br from-[#0A1E46] to-[#071533] border border-[#C5A059]/30 shadow-xl">
-                <span className="text-[11px] font-mono uppercase tracking-wider text-[#F3E5AB] block">
-                  Total Revenue
-                </span>
-                <p className="font-heading text-2xl sm:text-3xl font-bold text-white mt-2">
-                  ₹{metrics.totalRevenue.toLocaleString('en-IN')}
-                </p>
-                <span className="text-xs text-white/55 mt-1 block">
-                  Across {orders.length} atelier orders
-                </span>
-              </div>
-
-              <div className="p-5 sm:p-6 rounded-3xl bg-gradient-to-br from-[#0A1E46] to-[#071533] border border-amber-400/30 shadow-xl">
-                <span className="text-[11px] font-mono uppercase tracking-wider text-amber-300 block">
-                  To Bake Right Now
-                </span>
-                <p className="font-heading text-2xl sm:text-3xl font-bold text-amber-300 mt-2">
-                  {metrics.activeCookiesToBake} Cookies
-                </p>
-                <span className="text-xs text-white/55 mt-1 block">
-                  {metrics.pendingCount + metrics.preppingCount} orders in active queue ({metrics.activeDoughKg} kg dough)
-                </span>
-              </div>
-
-              <div className="p-5 sm:p-6 rounded-3xl bg-gradient-to-br from-[#0A1E46] to-[#071533] border border-emerald-400/30 shadow-xl">
-                <span className="text-[11px] font-mono uppercase tracking-wider text-emerald-300 block">
-                  Ready for Pickup
-                </span>
-                <p className="font-heading text-2xl sm:text-3xl font-bold text-emerald-400 mt-2">
-                  {metrics.readyCount} Boxes
-                </p>
-                <span className="text-xs text-white/55 mt-1 block">
-                  Awaiting customer / courier
-                </span>
-              </div>
-
-              <div className="p-5 sm:p-6 rounded-3xl bg-gradient-to-br from-[#0A1E46] to-[#071533] border border-white/10 shadow-xl">
-                <span className="text-[11px] font-mono uppercase tracking-wider text-white/60 block">
-                  Completed Handovers
-                </span>
-                <p className="font-heading text-2xl sm:text-3xl font-bold text-white mt-2">
-                  {metrics.collectedCount} Orders
-                </p>
-                <span className="text-xs text-white/55 mt-1 block">
-                  {metrics.totalCookiesBaked} total 170g cookies sold
-                </span>
-              </div>
-            </div>
-
-            {/* Collapsible "Today's Kitchen Oven Bake Sheet" Breakdown */}
-            <div className="rounded-3xl bg-gradient-to-r from-[#0A1F4A] via-[#0D285E] to-[#0A1F4A] border border-[#C5A059]/40 p-5 sm:p-6 shadow-xl">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-2xl bg-[#C5A059]/20 border border-[#C5A059]/50 flex items-center justify-center text-[#F3E5AB]">
-                    <Flame className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-heading text-lg font-bold text-white">
-                        Kitchen Oven Bake Breakdown
-                      </h3>
-                      <span className="px-2.5 py-0.5 rounded-full bg-[#C5A059]/20 text-[#F3E5AB] text-[10px] font-mono font-bold uppercase">
-                        {metrics.activeCookiesToBake} Cookies Needed
-                      </span>
-                    </div>
-                    <p className="text-xs text-white/65">
-                      Exact count of cookies needed for all <strong className="text-white">Pending</strong> &amp; <strong className="text-white">In-Oven</strong> orders right now
-                    </p>
-                  </div>
+                <div className="p-4 sm:p-6 rounded-3xl bg-white border border-stone-200/80 shadow-xs">
+                  <span className="text-[11px] font-semibold text-emerald-700 uppercase tracking-wider block">
+                    Ready
+                  </span>
+                  <p className="font-heading text-2xl sm:text-3xl font-bold text-[#07132B] mt-1.5">
+                    {metrics.readyCount}
+                  </p>
+                  <span className="text-[11px] text-stone-400 block mt-0.5">
+                    boxes waiting
+                  </span>
                 </div>
 
+                <div className="p-4 sm:p-6 rounded-3xl bg-white border border-stone-200/80 shadow-xs">
+                  <span className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider block">
+                    Sales
+                  </span>
+                  <p
+                    className="font-heading text-xl sm:text-3xl font-bold mt-1.5"
+                    style={{ color: brandPrimary }}
+                  >
+                    ₹{metrics.totalRevenue.toLocaleString('en-IN')}
+                  </p>
+                  <span className="text-[11px] text-stone-400 block mt-0.5">
+                    {orders.length} orders
+                  </span>
+                </div>
+              </div>
+
+              {/* Clean Collapsible Oven Bake Sheet (Collapsed by default so screen breathes!) */}
+              <div className="rounded-3xl bg-white border border-stone-200/90 shadow-xs overflow-hidden">
                 <button
                   type="button"
                   onClick={() => setShowBakeSheet(!showBakeSheet)}
-                  className="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-xs font-semibold text-[#F3E5AB] cursor-pointer self-start sm:self-auto"
+                  className="w-full p-4 sm:p-5 flex items-center justify-between text-left hover:bg-stone-50/80 transition-colors cursor-pointer"
                 >
-                  {showBakeSheet ? 'Hide Bake Sheet' : 'Show Bake Sheet'}
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="w-10 h-10 rounded-2xl flex items-center justify-center text-white shrink-0"
+                      style={{ backgroundColor: brandPrimary }}
+                    >
+                      <Flame className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="font-heading text-base sm:text-lg font-bold text-[#07132B]">
+                        Today&apos;s Oven Bake Sheet
+                      </h3>
+                      <p className="text-xs text-stone-500">
+                        {metrics.activeCookiesToBake === 0
+                          ? 'All orders are baked & boxed!'
+                          : `${metrics.activeCookiesToBake} cookies needed across ${metrics.activeBakeList.length} flavours`}
+                      </p>
+                    </div>
+                  </div>
+                  <span className="text-xs font-semibold text-stone-500 flex items-center gap-1 shrink-0">
+                    <span>{showBakeSheet ? 'Hide' : 'View'}</span>
+                    {showBakeSheet ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                  </span>
                 </button>
-              </div>
 
-              {showBakeSheet && (
-                <div className="mt-5 pt-5 border-t border-white/10">
-                  {metrics.activeBakeList.length === 0 ? (
-                    <p className="text-xs text-emerald-300 font-medium">
-                      ✓ All current orders are already boxed or collected! No pending cookies waiting for the oven.
-                    </p>
-                  ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                      {metrics.activeBakeList.map((item) => (
-                        <div
-                          key={item.name}
-                          className="p-3.5 rounded-2xl bg-black/35 border border-white/10 flex items-center justify-between gap-3"
-                        >
-                          <div className="min-w-0">
-                            <p className="text-xs font-bold text-white truncate">{item.name}</p>
-                            <span className="text-[11px] text-white/50 font-mono">
-                              Across {item.ordersCount} {item.ordersCount === 1 ? 'order' : 'orders'} • {(item.qty * 0.17).toFixed(2)} kg
+                {showBakeSheet && (
+                  <div className="px-4 sm:px-5 pb-5 pt-2 border-t border-stone-100">
+                    {metrics.activeBakeList.length === 0 ? (
+                      <p className="text-xs text-emerald-700 font-medium py-2">
+                        ✓ Nothing waiting for the oven right now.
+                      </p>
+                    ) : (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2">
+                        {metrics.activeBakeList.map((item) => (
+                          <div
+                            key={item.name}
+                            className="p-3.5 rounded-2xl bg-[#F8F6F0] border border-stone-200/70 flex items-center justify-between gap-3"
+                          >
+                            <span className="text-xs sm:text-sm font-semibold text-[#07132B] truncate">
+                              {item.name}
+                            </span>
+                            <span
+                              className="px-3 py-1 rounded-xl text-white font-mono font-bold text-xs shrink-0"
+                              style={{ backgroundColor: brandPrimary }}
+                            >
+                              ×{item.qty}
                             </span>
                           </div>
-                          <span className="px-3 py-1.5 rounded-xl bg-[#C5A059] text-stone-950 font-mono font-bold text-sm shrink-0">
-                            ×{item.qty}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
 
-            {/* Filter Pills & Action Bar */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 sm:pb-0">
+              {/* Wrapped Status Filter Pills (Zero Horizontal Scroll!) */}
+              <div className="flex flex-wrap items-center gap-2">
                 {[
-                  { id: 'all', label: `All Orders (${orders.length})` },
+                  { id: 'all', label: `All (${orders.length})` },
                   { id: 'pending', label: `Pending (${metrics.pendingCount})` },
                   { id: 'prepping', label: `In Ovens (${metrics.preppingCount})` },
-                  { id: 'ready', label: `Ready for Pickup (${metrics.readyCount})` },
-                  { id: 'collected', label: `Collected (${metrics.collectedCount})` },
-                ].map((f) => (
-                  <button
-                    key={f.id}
-                    type="button"
-                    onClick={() => setOrderStatusFilter(f.id)}
-                    className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
-                      orderStatusFilter === f.id
-                        ? 'bg-[#0C419C] text-white border border-[#C5A059]'
-                        : 'bg-[#0A1E46] text-white/70 hover:text-white border border-white/10'
-                    }`}
-                  >
-                    {f.label}
-                  </button>
-                ))}
-              </div>
-
-              <div className="flex items-center gap-2.5">
-                <button
-                  type="button"
-                  onClick={handleExportCSV}
-                  className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-semibold flex items-center gap-2 cursor-pointer border border-white/15"
-                >
-                  <Download className="w-4 h-4 text-[#C5A059]" />
-                  <span>Export CSV</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setIsNewOrderOpen(true)}
-                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#C5A059] to-[#DFBD73] hover:brightness-105 text-stone-950 text-xs font-bold flex items-center gap-2 shadow-lg cursor-pointer"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>Log Walk-in / WhatsApp Order</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Order Cards List with Complete Item & Financial Breakdown */}
-            <div className="space-y-5">
-              {filteredOrders.length === 0 ? (
-                <div className="p-12 rounded-3xl bg-[#0A1E46]/70 border border-white/10 text-center space-y-2">
-                  <ShoppingBag className="w-8 h-8 text-[#C5A059] mx-auto opacity-80" />
-                  <h3 className="font-heading text-lg font-bold text-white">
-                    No orders in this filter
-                  </h3>
-                  <p className="text-xs text-white/60">
-                    Switch filters above or log a new WhatsApp / Walk-in order.
-                  </p>
-                </div>
-              ) : (
-                filteredOrders.map((ord) => {
-                  const stepIdx = getOrderStepIndex(ord.status);
-                  const steps = ['Pending', 'Kitchen Prepping', 'Ready for Collection', 'Collected'];
-
+                  { id: 'ready', label: `Ready (${metrics.readyCount})` },
+                  { id: 'collected', label: `Done (${metrics.collectedCount})` },
+                ].map((f) => {
+                  const active = orderStatusFilter === f.id;
                   return (
-                    <div
-                      key={ord.id}
-                      className="p-6 sm:p-7 rounded-3xl bg-gradient-to-br from-[#0A1E46] via-[#091A3E] to-[#07132E] border border-[#C5A059]/25 hover:border-[#C5A059]/50 transition-all shadow-xl space-y-5"
+                    <button
+                      key={f.id}
+                      type="button"
+                      onClick={() => setOrderStatusFilter(f.id)}
+                      className={`px-4 py-2 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+                        active
+                          ? 'text-white shadow-sm'
+                          : 'bg-white text-stone-600 hover:text-stone-900 border border-stone-200'
+                      }`}
+                      style={active ? { backgroundColor: brandPrimary } : undefined}
                     >
-                      {/* Top Row: Order ID, Channel, Customer Info & Price Breakdown */}
-                      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 border-b border-white/10">
-                        <div className="space-y-1.5">
-                          <div className="flex flex-wrap items-center gap-2.5">
-                            <span className="font-mono text-base font-bold text-[#F3E5AB] bg-black/30 px-3 py-1 rounded-xl border border-[#C5A059]/30">
-                              #{ord.id}
-                            </span>
-                            <span className="text-xs text-white/60 font-mono">
-                              {ord.date} • {ord.time}
-                            </span>
-                            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-mono bg-[#0C419C]/40 text-blue-200 border border-blue-400/30">
-                              {ord.channel || 'Website Pickup'}
-                            </span>
-                            {ord.customer?.isBulkOrder && (
-                              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-mono bg-amber-500/20 text-amber-300 border border-amber-400/30 font-bold">
-                                ★ Bulk Delivery Order
+                      {f.label}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Clean, Breathable Order Cards */}
+              <div className="space-y-5">
+                {filteredOrders.length === 0 ? (
+                  <div className="p-12 rounded-3xl bg-white border border-stone-200/80 text-center space-y-2">
+                    <ShoppingBag className="w-8 h-8 text-stone-400 mx-auto" />
+                    <h3 className="font-heading text-lg font-bold text-[#07132B]">
+                      No orders in this stage
+                    </h3>
+                    <p className="text-xs text-stone-500">
+                      Tap another filter pill above or add a new walk-in / WhatsApp order.
+                    </p>
+                  </div>
+                ) : (
+                  filteredOrders.map((ord) => {
+                    const action = getNextOrderAction(ord.status);
+                    const isExpanded = !!expandedOrderIds[ord.id];
+
+                    return (
+                      <div
+                        key={ord.id}
+                        className="p-5 sm:p-7 rounded-3xl bg-white border border-stone-200/90 shadow-xs space-y-5 transition-all"
+                      >
+                        {/* Row 1: Customer Name, Status Badge & Total */}
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="space-y-1">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <h3 className="font-heading text-lg sm:text-xl font-bold text-[#07132B]">
+                                {ord.customer?.name}
+                              </h3>
+                              <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold ${action.pillBg}`}>
+                                {action.badge}
                               </span>
-                            )}
+                              {ord.customer?.isBulkOrder && (
+                                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-purple-100 text-purple-900">
+                                  Bulk Delivery
+                                </span>
+                              )}
+                            </div>
+
+                            <p className="text-xs text-stone-500 flex flex-wrap items-center gap-x-3 gap-y-1">
+                              <span className="font-mono font-semibold text-stone-700">#{ord.id}</span>
+                              <span>•</span>
+                              <span className="flex items-center gap-1">
+                                <Clock className="w-3.5 h-3.5 text-stone-400" />
+                                {ord.customer?.slot || 'Today Evening'}
+                              </span>
+                            </p>
                           </div>
 
-                          <div className="flex flex-wrap items-center gap-x-5 gap-y-1 pt-1">
-                            <h3 className="font-heading text-xl font-bold text-white">
-                              {ord.customer?.name}
-                            </h3>
-                            <a
-                              href={`tel:${ord.customer?.phone}`}
-                              className="text-xs text-emerald-300 hover:underline font-mono flex items-center gap-1.5"
+                          <div className="text-right shrink-0">
+                            <span
+                              className="font-heading text-xl sm:text-2xl font-bold block"
+                              style={{ color: brandPrimary }}
                             >
-                              <Phone className="w-3.5 h-3.5" />
-                              <span>{ord.customer?.phone}</span>
-                            </a>
-                            <span className="text-xs text-white/75 flex items-center gap-1.5">
-                              <Clock className="w-3.5 h-3.5 text-[#C5A059]" />
-                              <span>Slot: <strong className="text-white">{ord.customer?.slot || 'Today Evening'}</strong></span>
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* Itemized Financial Breakdown Box */}
-                        <div className="flex flex-wrap items-center gap-4 bg-black/30 p-3.5 rounded-2xl border border-white/10">
-                          <div className="text-xs space-y-0.5 pr-4 border-r border-white/10">
-                            <div className="text-white/60 flex justify-between gap-4">
-                              <span>Cookies ({ord.totalItems || 1}):</span>
-                              <span className="font-mono text-white">
-                                ₹{(ord.totalPrice || ord.finalTotal - (ord.packagingFee || 0)).toLocaleString('en-IN')}
-                              </span>
-                            </div>
-                            <div className="text-white/60 flex justify-between gap-4">
-                              <span>Gift Box:</span>
-                              <span className="font-mono text-[#F3E5AB]">
-                                {ord.packagingFee > 0 ? `+₹${ord.packagingFee}` : (ord.totalItems >= 4 ? 'FREE (4+ Box)' : 'Standard')}
-                              </span>
-                            </div>
-                            <div className="text-white/60 flex justify-between gap-4">
-                              <span>Payment:</span>
-                              <span className="font-mono uppercase text-emerald-300">
-                                {ord.customer?.paymentMethod || 'UPI'}
-                              </span>
-                            </div>
-                          </div>
-
-                          <div className="text-right pr-1">
-                            <span className="text-[10px] font-mono uppercase tracking-wider text-white/50 block">
-                              Final Total
-                            </span>
-                            <span className="font-heading text-2xl font-bold text-[#F3E5AB]">
                               ₹{(ord.finalTotal || 0).toLocaleString('en-IN')}
                             </span>
+                            <span className="text-[11px] text-stone-400 uppercase font-mono">
+                              {ord.customer?.paymentMethod || 'UPI'}
+                            </span>
                           </div>
                         </div>
-                      </div>
 
-                      {/* Middle Row: Ordered Cookies Pills + Special Notes */}
-                      <div className="space-y-3">
-                        <div className="flex flex-wrap gap-2">
+                        {/* Row 2: Clean Cookie List */}
+                        <div className="p-3.5 sm:p-4 rounded-2xl bg-[#F8F6F0] border border-stone-200/60 space-y-2">
                           {(ord.items || []).map((item, idx) => (
-                            <div
-                              key={idx}
-                              className="px-3.5 py-2 rounded-xl bg-black/35 border border-white/10 text-xs flex items-center gap-2.5"
-                            >
-                              <span className="w-6 h-6 rounded-lg bg-[#C5A059]/20 text-[#F3E5AB] font-mono font-bold flex items-center justify-center text-xs">
-                                {item.quantity}×
+                            <div key={idx} className="flex items-center justify-between text-xs sm:text-sm">
+                              <span className="font-semibold text-[#07132B]">
+                                <span
+                                  className="inline-block font-mono font-bold mr-2 px-2 py-0.5 rounded-md text-white text-xs"
+                                  style={{ backgroundColor: brandPrimary }}
+                                >
+                                  {item.quantity}×
+                                </span>
+                                {item.name}
                               </span>
+                              <span className="font-mono text-stone-500 text-xs">
+                                ₹{((item.price || 299) * (item.quantity || 1)).toLocaleString('en-IN')}
+                              </span>
+                            </div>
+                          ))}
+
+                          {(ord.customer?.note || ord.customer?.address) && (
+                            <div className="pt-2 mt-2 border-t border-stone-200/80 text-xs text-amber-900 space-y-1">
+                              {ord.customer?.note && (
+                                <p>
+                                  <strong>Note:</strong> {ord.customer.note}
+                                </p>
+                              )}
+                              {ord.customer?.address && (
+                                <p>
+                                  <strong>Address:</strong> {ord.customer.address}
+                                </p>
+                              )}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Row 3: Simple Thumb-Friendly Primary Actions */}
+                        <div className="flex flex-wrap items-center justify-between gap-2.5 pt-1">
+                          <div className="flex flex-wrap items-center gap-2.5 flex-1">
+                            {action.next && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  updateOrderStatus(ord.id, action.next);
+                                  showToast(`Order #${ord.id} → ${action.next}`);
+                                }}
+                                className="px-4 sm:px-5 py-2.5 rounded-xl text-white text-xs font-bold shadow-xs cursor-pointer transition-transform active:scale-98"
+                                style={{ backgroundColor: brandPrimary }}
+                              >
+                                {action.label}
+                              </button>
+                            )}
+
+                            <button
+                              type="button"
+                              onClick={() => setNotifyModalOrder(ord)}
+                              className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer"
+                            >
+                              <MessageSquare className="w-3.5 h-3.5" />
+                              <span>WhatsApp</span>
+                            </button>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => toggleOrderExpand(ord.id)}
+                            className="px-3 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-semibold flex items-center gap-1 cursor-pointer"
+                          >
+                            <span>{isExpanded ? 'Less' : 'Breakdown'}</span>
+                            {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                          </button>
+                        </div>
+
+                        {/* Expandable Full Breakdown & Manual Stage Controls (Hidden until tapped!) */}
+                        {isExpanded && (
+                          <div className="pt-4 border-t border-stone-200/80 space-y-4 text-xs">
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3.5 rounded-2xl bg-stone-50 border border-stone-200/70">
                               <div>
-                                <span className="text-white font-semibold block">{item.name}</span>
-                                <span className="text-[10px] text-white/50 font-mono">
-                                  ₹{item.price || 299} each • ₹{((item.price || 299) * (item.quantity || 1)).toLocaleString('en-IN')}
+                                <span className="text-stone-400 block">Customer Phone</span>
+                                <a
+                                  href={`tel:${ord.customer?.phone}`}
+                                  className="font-mono font-bold text-[#07132B] hover:underline flex items-center gap-1 mt-0.5"
+                                >
+                                  <Phone className="w-3 h-3" />
+                                  {ord.customer?.phone}
+                                </a>
+                              </div>
+                              <div>
+                                <span className="text-stone-400 block">Bill Breakdown</span>
+                                <span className="font-mono text-stone-800 block mt-0.5">
+                                  Cookies: ₹{(ord.totalPrice || ord.finalTotal - (ord.packagingFee || 0)).toLocaleString('en-IN')} • Box: {ord.packagingFee > 0 ? `₹${ord.packagingFee}` : 'Free'}
+                                </span>
+                              </div>
+                              <div>
+                                <span className="text-stone-400 block">Placed On</span>
+                                <span className="font-mono text-stone-800 block mt-0.5">
+                                  {ord.date} at {ord.time} ({ord.channel || 'Website'})
                                 </span>
                               </div>
                             </div>
-                          ))}
-                        </div>
 
-                        {(ord.customer?.note || ord.customer?.address) && (
-                          <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-400/25 text-xs text-amber-100 space-y-1">
-                            {ord.customer?.note && (
-                              <p>
-                                <strong className="text-amber-300">Kitchen / Courier Note:</strong> {ord.customer.note}
-                              </p>
-                            )}
-                            {ord.customer?.address && (
-                              <p>
-                                <strong className="text-amber-300">Bulk Delivery Address:</strong> {ord.customer.address}
-                              </p>
-                            )}
+                            {/* Change to Any Stage */}
+                            <div>
+                              <span className="text-[11px] font-semibold text-stone-500 block mb-2">
+                                Set Order Stage Manually:
+                              </span>
+                              <div className="flex flex-wrap gap-2">
+                                {['Pending', 'Kitchen Prepping', 'Ready for Collection', 'Collected'].map((st) => {
+                                  const isCurr = (ord.status || 'Pending') === st;
+                                  return (
+                                    <button
+                                      key={st}
+                                      type="button"
+                                      onClick={() => {
+                                        updateOrderStatus(ord.id, st);
+                                        showToast(`Order #${ord.id} → ${st}`);
+                                      }}
+                                      className={`px-3 py-1.5 rounded-xl text-xs font-semibold cursor-pointer ${
+                                        isCurr
+                                          ? 'text-white'
+                                          : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+                                      }`}
+                                      style={isCurr ? { backgroundColor: brandPrimary } : undefined}
+                                    >
+                                      {st}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </div>
+
+                            <div className="flex items-center justify-between pt-2">
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  handleCopyText(
+                                    `${window.location.origin}/#track=${ord.id}`,
+                                    `track-${ord.id}`
+                                  )
+                                }
+                                className="text-stone-600 hover:text-stone-950 font-semibold flex items-center gap-1.5 cursor-pointer"
+                              >
+                                {copiedId === `track-${ord.id}` ? (
+                                  <Check className="w-3.5 h-3.5 text-emerald-600" />
+                                ) : (
+                                  <Copy className="w-3.5 h-3.5" />
+                                )}
+                                <span>Copy Customer Live Tracking Link</span>
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  deleteOrder(ord.id);
+                                  showToast(`Deleted Order #${ord.id}`);
+                                }}
+                                className="text-red-600 hover:underline font-semibold flex items-center gap-1 cursor-pointer"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                                <span>Delete Order</span>
+                              </button>
+                            </div>
                           </div>
                         )}
                       </div>
-
-                      {/* Bottom Row: 1-Click 4-Step Kitchen Status Bar & WhatsApp Notification */}
-                      <div className="pt-3 border-t border-white/10 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                        {/* 4-Step Interactive Status Pills (No ugly native <select>!) */}
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span className="text-[11px] font-mono uppercase tracking-wider text-white/50 mr-1">
-                            1-Click Stage:
-                          </span>
-                          {steps.map((st, idx) => {
-                            const isCurrent = stepIdx === idx;
-                            const isDone = stepIdx > idx;
-                            return (
-                              <button
-                                key={st}
-                                type="button"
-                                onClick={() => {
-                                  updateOrderStatus(ord.id, st);
-                                  showToast(`Order #${ord.id} → ${st}`);
-                                }}
-                                className={`px-3.5 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
-                                  isCurrent
-                                    ? 'bg-[#C5A059] text-stone-950 font-bold shadow-md'
-                                    : isDone
-                                    ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30'
-                                    : 'bg-white/[0.05] text-white/65 hover:bg-white/10 border border-white/10'
-                                }`}
-                              >
-                                <span>{isDone ? '✓' : `${idx + 1}.`}</span>
-                                <span>{st === 'Kitchen Prepping' ? 'In Ovens 160°C' : st}</span>
-                              </button>
-                            );
-                          })}
-                        </div>
-
-                        {/* Right Action Buttons */}
-                        <div className="flex flex-wrap items-center gap-2.5">
-                          <button
-                            type="button"
-                            onClick={() => setNotifyModalOrder(ord)}
-                            className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-2 transition-all cursor-pointer shadow-md"
-                          >
-                            <MessageSquare className="w-4 h-4" />
-                            <span>Send WhatsApp Update</span>
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() =>
-                              handleCopyText(
-                                `${window.location.origin}/#track=${ord.id}`,
-                                `track-${ord.id}`
-                              )
-                            }
-                            className="px-3.5 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white/85 text-xs font-semibold flex items-center gap-1.5 cursor-pointer border border-white/10"
-                            title="Copy Customer Live Tracking Link"
-                          >
-                            {copiedId === `track-${ord.id}` ? (
-                              <Check className="w-3.5 h-3.5 text-emerald-400" />
-                            ) : (
-                              <Copy className="w-3.5 h-3.5 text-[#C5A059]" />
-                            )}
-                            <span>Copy Tracker Link</span>
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() => {
-                              deleteOrder(ord.id);
-                              showToast(`Removed Order #${ord.id}`);
-                            }}
-                            className="p-2.5 rounded-xl bg-white/5 hover:bg-red-500/20 text-white/40 hover:text-red-300 transition-colors cursor-pointer"
-                            title="Delete Order"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* =================================================================== */}
-        {/* TAB 2: MENU STUDIO (STRESS-FREE 3-MONTH MENU, INLINE PRICE & STOCK) */}
-        {/* =================================================================== */}
-        {activeTab === 'menu' && (
-          <div className="space-y-8">
-            {/* Stress-Free Reassurance & Quick Batch Controls Banner */}
-            <div className="p-6 sm:p-7 rounded-3xl bg-gradient-to-r from-[#0A1E46] via-[#0D285E] to-[#0A1E46] border border-[#C5A059]/40 shadow-xl flex flex-col lg:flex-row lg:items-center justify-between gap-5">
-              <div className="space-y-1.5">
-                <div className="flex items-center gap-2">
-                  <span className="px-2.5 py-0.5 rounded-full bg-[#C5A059]/20 text-[#F3E5AB] text-[10px] font-mono uppercase tracking-wider font-bold">
-                    ✦ Stress-Free Menu Studio
-                  </span>
-                  <span className="text-xs text-emerald-300 font-mono">
-                    • Instant Live Sync
-                  </span>
-                </div>
-                <h2 className="font-heading text-2xl sm:text-3xl font-bold text-white">
-                  Quarterly Drops, Prices &amp; Stock Control
-                </h2>
-                <p className="text-xs sm:text-sm text-white/70 max-w-2xl">
-                  Change any price directly on the card, mark a flavor Sold Out in 1 click, or launch a new seasonal cookie. Made a mistake? You can restore the default menu anytime.
-                </p>
+                    );
+                  })
+                )}
               </div>
+            </div>
+          )}
 
-              <div className="flex flex-wrap items-center gap-2.5 shrink-0">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setAllProductsAvailability(true);
-                    showToast('All cookies marked In Stock on website!');
-                  }}
-                  className="px-3.5 py-2.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 text-xs font-semibold cursor-pointer"
-                >
-                  Mark All In Stock
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setConfirmResetMenu(true)}
-                  className="px-3.5 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white/80 border border-white/15 text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
-                >
-                  <RotateCcw className="w-3.5 h-3.5 text-[#C5A059]" />
-                  <span>Restore Default Menu</span>
-                </button>
+          {/* ================================================================= */}
+          {/* TAB 2: MENU & PRICES (SIMPLE, SPACIOUS, 1-TAP CONTROLS)           */}
+          {/* ================================================================= */}
+          {activeTab === 'menu' && (
+            <div className="space-y-7">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <h2 className="font-heading text-2xl sm:text-3xl font-bold text-[#07132B]">
+                    Menu &amp; Prices
+                  </h2>
+                  <p className="text-xs sm:text-sm text-stone-500 mt-1">
+                    Change prices, mark flavours sold out, or add seasonal cookies anytime.
+                  </p>
+                </div>
 
                 <button
                   type="button"
@@ -1049,1011 +1122,1208 @@ export default function AdminPortal({ onClose }) {
                     setEditingProduct(null);
                     setIsEditorOpen(true);
                   }}
-                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#C5A059] to-[#DFBD73] hover:brightness-105 text-stone-950 font-bold text-xs flex items-center gap-2 shadow-lg cursor-pointer"
+                  className="px-5 py-3 rounded-2xl text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-sm cursor-pointer self-start sm:self-auto"
+                  style={{ backgroundColor: brandPrimary }}
                 >
                   <Plus className="w-4 h-4" />
                   <span>Add New Cookie / Box</span>
                 </button>
               </div>
-            </div>
 
-            {/* Confirmation bar for Restore Default Menu */}
-            {confirmResetMenu && (
-              <div className="p-4 rounded-2xl bg-amber-500/15 border border-amber-400/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <p className="text-xs text-amber-100">
-                  <strong>Restore Original Sukié Menu?</strong> This will reset all cookie photos, prices, and descriptions to the official default collection.
-                </p>
-                <div className="flex items-center gap-2 shrink-0">
+              {/* Search & Wrapped Category Pills (Zero Horizontal Scroll) */}
+              <div className="space-y-3">
+                <div className="relative">
+                  <Search className="w-4 h-4 text-stone-400 absolute left-4 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search cookies or gift boxes..."
+                    className="w-full pl-11 pr-4 py-3 rounded-2xl bg-white border border-stone-200 text-xs sm:text-sm text-[#07132B] focus:outline-none focus:border-stone-400"
+                  />
+                </div>
+
+                <div className="flex flex-wrap gap-2">
                   <button
                     type="button"
-                    onClick={() => {
-                      resetToDefaultMenu();
-                      setConfirmResetMenu(false);
-                      showToast('Restored default Sukié menu collection');
-                    }}
-                    className="px-4 py-2 rounded-xl bg-[#C5A059] text-stone-950 font-bold text-xs cursor-pointer"
+                    onClick={() => setSelectedCategory('all')}
+                    className={`px-4 py-2 rounded-full text-xs font-semibold cursor-pointer ${
+                      selectedCategory === 'all'
+                        ? 'text-white shadow-xs'
+                        : 'bg-white text-stone-600 border border-stone-200'
+                    }`}
+                    style={selectedCategory === 'all' ? { backgroundColor: brandPrimary } : undefined}
                   >
-                    Yes, Restore Defaults
+                    All ({products.length})
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => setConfirmResetMenu(false)}
-                    className="px-4 py-2 rounded-xl bg-white/10 text-white text-xs cursor-pointer"
-                  >
-                    Cancel
-                  </button>
+                  {categories.map((cat) => {
+                    const active = selectedCategory === cat.id;
+                    return (
+                      <button
+                        key={cat.id}
+                        type="button"
+                        onClick={() => setSelectedCategory(cat.id)}
+                        className={`px-4 py-2 rounded-full text-xs font-semibold cursor-pointer ${
+                          active
+                            ? 'text-white shadow-xs'
+                            : 'bg-white text-stone-600 border border-stone-200'
+                        }`}
+                        style={active ? { backgroundColor: brandPrimary } : undefined}
+                      >
+                        {cat.name}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
-            )}
 
-            {/* Category Filter & Search */}
-            <div className="flex flex-col sm:flex-row gap-3 justify-between">
-              <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 sm:pb-0">
-                <button
-                  type="button"
-                  onClick={() => setSelectedCategory('all')}
-                  className={`px-4 py-2 rounded-xl text-xs font-semibold cursor-pointer whitespace-nowrap ${
-                    selectedCategory === 'all'
-                      ? 'bg-[#0C419C] text-white border border-[#C5A059]'
-                      : 'bg-[#0A1E46] text-white/70 hover:text-white border border-white/10'
-                  }`}
-                >
-                  All Items ({products.length})
-                </button>
-                {categories.map((cat) => (
-                  <button
-                    key={cat.id}
-                    type="button"
-                    onClick={() => setSelectedCategory(cat.id)}
-                    className={`px-4 py-2 rounded-xl text-xs font-semibold cursor-pointer whitespace-nowrap ${
-                      selectedCategory === cat.id
-                        ? 'bg-[#0C419C] text-white border border-[#C5A059]'
-                        : 'bg-[#0A1E46] text-white/70 hover:text-white border border-white/10'
-                    }`}
-                  >
-                    {cat.name}
-                  </button>
-                ))}
-              </div>
+              {/* Clean Spacious Product Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {filteredProducts.map((product) => {
+                  const moreOpen = !!expandedMenuIds[product.id];
+                  return (
+                    <div
+                      key={product.id}
+                      className="rounded-3xl bg-white border border-stone-200/90 shadow-xs overflow-hidden flex flex-col justify-between"
+                    >
+                      <div>
+                        {/* Photo + Clean Stock Badge */}
+                        <div className="relative h-52 bg-stone-900 overflow-hidden">
+                          <img
+                            src={product.image}
+                            alt={product.name}
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-transparent to-black/20" />
 
-              <div className="relative w-full sm:w-72">
-                <Search className="w-4 h-4 text-white/40 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search cookie or box..."
-                  className="w-full pl-10 pr-4 py-2 rounded-xl bg-[#0A1E46] border border-white/15 text-xs text-white placeholder:text-white/40 focus:outline-none focus:border-[#C5A059]"
-                />
-              </div>
-            </div>
+                          <span
+                            className={`absolute top-3.5 left-3.5 px-3 py-1 rounded-full text-[11px] font-bold shadow-sm ${
+                              product.available
+                                ? 'bg-emerald-600 text-white'
+                                : 'bg-red-600 text-white'
+                            }`}
+                          >
+                            {product.available ? '● In Stock' : '○ Sold Out'}
+                          </span>
 
-            {/* Product Grid with Stress-Free Inline Controls */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredProducts.map((product) => (
-                <div
-                  key={product.id}
-                  className={`rounded-3xl bg-gradient-to-br from-[#0A1E46] to-[#071533] border transition-all overflow-hidden flex flex-col justify-between shadow-xl ${
-                    product.available
-                      ? 'border-[#C5A059]/30 hover:border-[#C5A059]/60'
-                      : 'border-red-500/30 opacity-85'
-                  }`}
-                >
-                  <div>
-                    {/* Product Image & Stock Pill */}
-                    <div className="relative h-52 bg-stone-950 overflow-hidden">
-                      <img
-                        src={product.image}
-                        alt={product.name}
-                        className="w-full h-full object-cover"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-[#071533] via-black/20 to-transparent" />
-
-                      <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
-                        <span
-                          className={`px-3 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider shadow-md ${
-                            product.available
-                              ? 'bg-emerald-600 text-white'
-                              : 'bg-red-600 text-white'
-                          }`}
-                        >
-                          {product.available ? '● In Stock' : '○ Sold Out'}
-                        </span>
-                      </div>
-
-                      {/* Quick Edit Photo Button on Image */}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setEditingProduct(product);
-                          setIsEditorOpen(true);
-                        }}
-                        className="absolute top-3 right-3 px-3 py-1 rounded-full bg-black/70 hover:bg-[#C5A059] text-white hover:text-stone-950 text-[10px] font-semibold backdrop-blur-md border border-white/20 transition-colors cursor-pointer"
-                      >
-                        Change Photo / Recipe
-                      </button>
-
-                      {/* Bottom Row on Image: Inline Price Editor */}
-                      <div className="absolute bottom-3 left-4 right-4 flex items-end justify-between">
-                        {inlinePriceId === product.id ? (
-                          <div className="flex items-center gap-1.5 bg-black/85 p-1.5 rounded-xl border border-[#C5A059]">
-                            <span className="text-xs font-mono text-[#F3E5AB] pl-1">₹</span>
-                            <input
-                              type="number"
-                              value={inlinePriceValue}
-                              onChange={(e) => setInlinePriceValue(e.target.value)}
-                              className="w-20 px-2 py-1 rounded-lg bg-white/10 text-white font-mono text-sm font-bold focus:outline-none"
-                              autoFocus
-                            />
-                            <button
-                              type="button"
-                              onClick={() => handleSaveInlinePrice(product)}
-                              className="px-2.5 py-1 rounded-lg bg-[#C5A059] text-stone-950 text-[11px] font-bold cursor-pointer"
-                            >
-                              Save
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setInlinePriceId(null)}
-                              className="px-2 py-1 text-white/60 hover:text-white text-[11px] cursor-pointer"
-                            >
-                              ✕
-                            </button>
-                          </div>
-                        ) : (
-                          <div className="flex items-center gap-2">
-                            <span className="font-heading text-2xl font-bold text-[#F3E5AB]">
-                              ₹{product.price}
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setInlinePriceId(product.id);
-                                setInlinePriceValue(String(product.price));
-                              }}
-                              className="px-2 py-0.5 rounded-lg bg-white/15 hover:bg-white/25 text-[10px] text-white/90 font-mono cursor-pointer"
-                              title="Quick change price"
-                            >
-                              Edit ₹
-                            </button>
-                          </div>
-                        )}
-                        <span className="text-xs text-white/80 font-mono bg-black/50 px-2.5 py-1 rounded-lg">
-                          {product.weight}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Product Title, Description & Ingredients Preview */}
-                    <div className="p-5 space-y-2.5">
-                      <h3 className="font-heading text-lg font-bold text-white leading-snug">
-                        {product.name}
-                      </h3>
-                      <p className="text-xs text-white/65 line-clamp-2 leading-relaxed">
-                        {product.shortDesc}
-                      </p>
-                      {product.ingredients && product.ingredients.length > 0 && (
-                        <div className="flex flex-wrap gap-1 pt-1">
-                          {product.ingredients.slice(0, 3).map((ing, i) => (
-                            <span
-                              key={i}
-                              className="text-[10px] px-2 py-0.5 rounded-md bg-white/[0.05] text-white/60 border border-white/10"
-                            >
-                              {ing}
-                            </span>
-                          ))}
+                          <span className="absolute bottom-3.5 right-3.5 px-2.5 py-1 rounded-xl bg-black/65 text-white text-xs font-mono">
+                            {product.weight}
+                          </span>
                         </div>
-                      )}
-                    </div>
-                  </div>
 
-                  {/* Card Footer Controls */}
-                  <div className="p-5 pt-0 space-y-2">
-                    <div className="grid grid-cols-2 gap-2 pt-3 border-t border-white/10">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          toggleProductAvailability(product.id);
-                          showToast(
-                            product.available
-                              ? `"${product.name}" marked Sold Out`
-                              : `"${product.name}" is back In Stock`
-                          );
-                        }}
-                        className={`py-2.5 px-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
-                          product.available
-                            ? 'bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30'
-                            : 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30'
-                        }`}
-                      >
-                        {product.available ? (
-                          <>
-                            <EyeOff className="w-3.5 h-3.5" />
-                            <span>Mark Sold Out</span>
-                          </>
-                        ) : (
-                          <>
-                            <Eye className="w-3.5 h-3.5" />
-                            <span>Mark In Stock</span>
-                          </>
-                        )}
-                      </button>
+                        {/* Title, Quick Price & Description */}
+                        <div className="p-5 sm:p-6 space-y-3">
+                          <div className="flex items-start justify-between gap-3">
+                            <h3 className="font-heading text-lg sm:text-xl font-bold text-[#07132B] leading-snug">
+                              {product.name}
+                            </h3>
 
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setEditingProduct(product);
-                          setIsEditorOpen(true);
-                        }}
-                        className="py-2.5 px-3 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer border border-white/10"
-                      >
-                        <Edit3 className="w-3.5 h-3.5 text-[#C5A059]" />
-                        <span>Full Edit</span>
-                      </button>
-                    </div>
+                            {/* 1-Tap Inline Price Control */}
+                            {inlinePriceId === product.id ? (
+                              <div className="flex items-center gap-1 bg-stone-100 p-1 rounded-xl border border-stone-300 shrink-0">
+                                <span className="text-xs font-mono pl-1.5">₹</span>
+                                <input
+                                  type="number"
+                                  value={inlinePriceValue}
+                                  onChange={(e) => setInlinePriceValue(e.target.value)}
+                                  className="w-16 px-1.5 py-1 rounded-lg bg-white text-xs font-mono font-bold focus:outline-none"
+                                  autoFocus
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => handleSaveInlinePrice(product)}
+                                  className="px-2.5 py-1 rounded-lg text-white text-[11px] font-bold cursor-pointer"
+                                  style={{ backgroundColor: brandPrimary }}
+                                >
+                                  Save
+                                </button>
+                              </div>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setInlinePriceId(product.id);
+                                  setInlinePriceValue(String(product.price));
+                                }}
+                                className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-[#F8F6F0] hover:bg-stone-200/70 border border-stone-200/80 shrink-0 cursor-pointer"
+                                title="Tap to edit price"
+                              >
+                                <span
+                                  className="font-heading text-lg font-bold"
+                                  style={{ color: brandPrimary }}
+                                >
+                                  ₹{product.price}
+                                </span>
+                                <Edit3 className="w-3 h-3 text-stone-400" />
+                              </button>
+                            )}
+                          </div>
 
-                    <div className="flex items-center justify-between pt-1">
-                      <button
-                        type="button"
-                        onClick={() => handleDuplicateProduct(product)}
-                        className="text-[11px] text-white/50 hover:text-[#F3E5AB] flex items-center gap-1 cursor-pointer"
-                      >
-                        <Copy className="w-3 h-3" />
-                        <span>Duplicate for Next Drop</span>
-                      </button>
+                          <p className="text-xs sm:text-sm text-stone-500 line-clamp-2 leading-relaxed">
+                            {product.shortDesc}
+                          </p>
+                        </div>
+                      </div>
 
-                      {confirmDeleteId === product.id ? (
-                        <div className="flex items-center gap-1.5">
+                      {/* Simple 2-Button Footer + Quiet Expandable Options */}
+                      <div className="px-5 sm:px-6 pb-5 sm:pb-6 space-y-3">
+                        <div className="grid grid-cols-2 gap-2.5 pt-3 border-t border-stone-100">
                           <button
                             type="button"
                             onClick={() => {
-                              deleteProduct(product.id);
-                              setConfirmDeleteId(null);
-                              showToast(`Deleted "${product.name}"`);
+                              toggleProductAvailability(product.id);
+                              showToast(
+                                product.available
+                                  ? `"${product.name}" marked Sold Out`
+                                  : `"${product.name}" marked In Stock`
+                              );
                             }}
-                            className="px-2.5 py-1 rounded-lg bg-red-600 text-white text-[10px] font-bold cursor-pointer"
+                            className={`py-2.5 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer ${
+                              product.available
+                                ? 'bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200'
+                                : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-200'
+                            }`}
                           >
-                            Confirm Delete
+                            {product.available ? (
+                              <>
+                                <EyeOff className="w-3.5 h-3.5" />
+                                <span>Mark Sold Out</span>
+                              </>
+                            ) : (
+                              <>
+                                <Eye className="w-3.5 h-3.5" />
+                                <span>Mark In Stock</span>
+                              </>
+                            )}
                           </button>
+
                           <button
                             type="button"
-                            onClick={() => setConfirmDeleteId(null)}
-                            className="px-2 py-1 text-white/60 text-[10px] cursor-pointer"
+                            onClick={() => {
+                              setEditingProduct(product);
+                              setIsEditorOpen(true);
+                            }}
+                            className="py-2.5 px-3 rounded-xl text-white text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer"
+                            style={{ backgroundColor: brandPrimary }}
                           >
-                            Cancel
+                            <Edit3 className="w-3.5 h-3.5" />
+                            <span>Edit Recipe &amp; Photo</span>
                           </button>
                         </div>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() => setConfirmDeleteId(product.id)}
-                          className="text-[11px] text-white/40 hover:text-red-400 flex items-center gap-1 cursor-pointer"
-                        >
-                          <Trash2 className="w-3 h-3" />
-                          <span>Delete</span>
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
 
-        {/* =================================================================== */}
-        {/* TAB 3: SALES & BREAKDOWN (COMPLETE FINANCIAL & FLAVOR BREAKDOWN)    */}
-        {/* =================================================================== */}
-        {activeTab === 'analytics' && (
-          <div className="space-y-8">
-            {/* Top 4 Financial Pillar Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-              <div className="p-6 rounded-3xl bg-gradient-to-br from-[#0A1E46] to-[#071533] border border-[#C5A059]/35 shadow-xl">
-                <span className="text-xs text-[#F3E5AB] font-mono uppercase">Gross Revenue</span>
-                <p className="font-heading text-3xl font-bold text-white mt-2">
-                  ₹{metrics.totalRevenue.toLocaleString('en-IN')}
-                </p>
-                <span className="text-xs text-white/55 mt-1 block">
-                  Cookies: ₹{metrics.cookiesSubtotalRev.toLocaleString('en-IN')} • Gift Boxes: ₹{metrics.totalPackagingRev.toLocaleString('en-IN')}
-                </span>
-              </div>
+                        <div className="flex items-center justify-between text-xs pt-1">
+                          <button
+                            type="button"
+                            onClick={() => toggleMenuExpand(product.id)}
+                            className="text-stone-400 hover:text-stone-700 font-medium cursor-pointer"
+                          >
+                            {moreOpen ? 'Hide extra actions ▲' : 'More actions (Duplicate / Delete) ▾'}
+                          </button>
+                        </div>
 
-              <div className="p-6 rounded-3xl bg-gradient-to-br from-[#0A1E46] to-[#071533] border border-white/10 shadow-xl">
-                <span className="text-xs text-white/60 font-mono uppercase">Average Order Value</span>
-                <p className="font-heading text-3xl font-bold text-[#F3E5AB] mt-2">
-                  ₹{metrics.avgOrderValue.toLocaleString('en-IN')}
-                </p>
-                <span className="text-xs text-white/55 mt-1 block">
-                  Across {orders.length} total orders
-                </span>
-              </div>
+                        {moreOpen && (
+                          <div className="p-3 rounded-2xl bg-stone-50 border border-stone-200/70 flex items-center justify-between text-xs">
+                            <button
+                              type="button"
+                              onClick={() => handleDuplicateProduct(product)}
+                              className="font-semibold text-stone-700 hover:text-stone-950 flex items-center gap-1.5 cursor-pointer"
+                            >
+                              <Copy className="w-3.5 h-3.5" />
+                              <span>Duplicate Item</span>
+                            </button>
 
-              <div className="p-6 rounded-3xl bg-gradient-to-br from-[#0A1E46] to-[#071533] border border-white/10 shadow-xl">
-                <span className="text-xs text-white/60 font-mono uppercase">Total Cookies Sold</span>
-                <p className="font-heading text-3xl font-bold text-emerald-400 mt-2">
-                  {metrics.totalCookiesBaked} Units
-                </p>
-                <span className="text-xs text-white/55 mt-1 block">
-                  {((metrics.totalCookiesBaked * 170) / 1000).toFixed(1)} kg total artisanal batch weight
-                </span>
-              </div>
-
-              <div className="p-6 rounded-3xl bg-gradient-to-br from-[#0A1E46] to-[#071533] border border-white/10 shadow-xl">
-                <span className="text-xs text-white/60 font-mono uppercase">Repeat &amp; VIP Patrons</span>
-                <p className="font-heading text-3xl font-bold text-white mt-2">
-                  {metrics.customersList.length} Clients
-                </p>
-                <span className="text-xs text-white/55 mt-1 block">
-                  {bulkInquiries?.length || 0} Corporate B2B leads logged
-                </span>
-              </div>
-            </div>
-
-            {/* Complete Product-by-Product Revenue & Unit Share Breakdown */}
-            <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-[#0A1E46] to-[#071533] border border-[#C5A059]/30 shadow-xl space-y-5">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                <div>
-                  <h3 className="font-heading text-xl font-bold text-white">
-                    Complete Cookie &amp; Box Sales Breakdown
-                  </h3>
-                  <p className="text-xs text-white/60">
-                    Exact units sold, revenue generated, and share of total bakery sales for every menu item
-                  </p>
-                </div>
-                <span className="text-xs font-mono text-[#F3E5AB]">
-                  Sorted by Highest Revenue
-                </span>
-              </div>
-
-              <div className="space-y-4">
-                {metrics.productBreakdown.map((item, idx) => {
-                  const sharePct =
-                    metrics.totalRevenue > 0
-                      ? Math.min(100, Math.round((item.revenue / metrics.totalRevenue) * 100))
-                      : 0;
-                  return (
-                    <div
-                      key={item.id}
-                      className="p-4 rounded-2xl bg-black/30 border border-white/10 space-y-2.5"
-                    >
-                      <div className="flex items-center justify-between gap-3">
-                        <div className="flex items-center gap-3 min-w-0">
-                          <span className="w-7 h-7 rounded-lg bg-[#C5A059]/20 text-[#F3E5AB] font-mono text-xs font-bold flex items-center justify-center shrink-0">
-                            #{idx + 1}
-                          </span>
-                          <img
-                            src={item.image}
-                            alt={item.name}
-                            className="w-10 h-10 rounded-xl object-cover border border-white/15 shrink-0"
-                          />
-                          <div className="min-w-0">
-                            <span className="font-bold text-sm text-white block truncate">
-                              {item.name}
-                            </span>
-                            <span className="text-[11px] text-white/50 font-mono">
-                              ₹{item.price} per unit • {item.qty} sold
-                            </span>
+                            {confirmDeleteId === product.id ? (
+                              <div className="flex items-center gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    deleteProduct(product.id);
+                                    setConfirmDeleteId(null);
+                                    showToast(`Deleted "${product.name}"`);
+                                  }}
+                                  className="px-2.5 py-1 rounded-lg bg-red-600 text-white font-bold cursor-pointer"
+                                >
+                                  Confirm
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setConfirmDeleteId(null)}
+                                  className="text-stone-500 cursor-pointer"
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => setConfirmDeleteId(product.id)}
+                                className="font-semibold text-red-600 hover:underline flex items-center gap-1 cursor-pointer"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                                <span>Delete</span>
+                              </button>
+                            )}
                           </div>
-                        </div>
-
-                        <div className="text-right shrink-0">
-                          <span className="font-heading text-lg font-bold text-[#F3E5AB] block">
-                            ₹{item.revenue.toLocaleString('en-IN')}
-                          </span>
-                          <span className="text-[10px] font-mono text-emerald-300">
-                            {sharePct}% of sales
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="h-2 w-full rounded-full bg-white/10 overflow-hidden">
-                        <div
-                          className="h-full rounded-full bg-gradient-to-r from-[#0C419C] via-[#C5A059] to-[#F3E5AB]"
-                          style={{ width: `${Math.max(4, sharePct)}%` }}
-                        />
+                        )}
                       </div>
                     </div>
                   );
                 })}
               </div>
-            </div>
 
-            {/* 3-Column Operational Breakdown: Payment Modes, Channels & Pickup Slots */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Payment Mode Breakdown */}
-              <div className="p-6 rounded-3xl bg-gradient-to-br from-[#0A1E46] to-[#071533] border border-white/10 shadow-xl space-y-4">
-                <div className="flex items-center gap-2.5">
-                  <CreditCard className="w-5 h-5 text-[#C5A059]" />
-                  <h4 className="font-heading text-lg font-bold text-white">
-                    Payment Mode Breakdown
+              {/* Quiet Safety Net Box at Bottom */}
+              <div className="p-5 sm:p-6 rounded-3xl bg-white border border-stone-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <h4 className="font-heading text-base font-bold text-[#07132B]">
+                    Quick Menu Safety Controls
                   </h4>
+                  <p className="text-xs text-stone-500 mt-0.5">
+                    Restock all items in one tap or restore the original Sukié menu if you ever make a mistake.
+                  </p>
                 </div>
-                <div className="space-y-3">
-                  {metrics.paymentBreakdown.map((pm) => (
-                    <div
-                      key={pm.label}
-                      className="p-3.5 rounded-2xl bg-black/30 border border-white/10 flex items-center justify-between"
-                    >
-                      <div>
-                        <span className="text-xs font-bold text-white block">{pm.label}</span>
-                        <span className="text-[11px] text-white/50 font-mono">
-                          {pm.count} {pm.count === 1 ? 'order' : 'orders'}
-                        </span>
-                      </div>
-                      <span className="font-heading font-bold text-base text-[#F3E5AB]">
-                        ₹{pm.revenue.toLocaleString('en-IN')}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
 
-              {/* Order Channel Breakdown */}
-              <div className="p-6 rounded-3xl bg-gradient-to-br from-[#0A1E46] to-[#071533] border border-white/10 shadow-xl space-y-4">
-                <div className="flex items-center gap-2.5">
-                  <TrendingUp className="w-5 h-5 text-[#C5A059]" />
-                  <h4 className="font-heading text-lg font-bold text-white">
-                    Order Source Breakdown
-                  </h4>
-                </div>
-                <div className="space-y-3">
-                  {metrics.channelBreakdown.map((ch) => (
-                    <div
-                      key={ch.label}
-                      className="p-3.5 rounded-2xl bg-black/30 border border-white/10 flex items-center justify-between"
-                    >
-                      <div>
-                        <span className="text-xs font-bold text-white block">{ch.label}</span>
-                        <span className="text-[11px] text-white/50 font-mono">
-                          {ch.count} {ch.count === 1 ? 'order' : 'orders'}
-                        </span>
-                      </div>
-                      <span className="font-heading font-bold text-base text-emerald-300">
-                        ₹{ch.revenue.toLocaleString('en-IN')}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
+                <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAllProductsAvailability(true);
+                      showToast('All items marked In Stock!');
+                    }}
+                    className="px-4 py-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-200 text-xs font-bold cursor-pointer"
+                  >
+                    Mark All In Stock
+                  </button>
 
-              {/* Pickup Slot Demand Breakdown */}
-              <div className="p-6 rounded-3xl bg-gradient-to-br from-[#0A1E46] to-[#071533] border border-white/10 shadow-xl space-y-4">
-                <div className="flex items-center gap-2.5">
-                  <Calendar className="w-5 h-5 text-[#C5A059]" />
-                  <h4 className="font-heading text-lg font-bold text-white">
-                    Pickup Slot Popularity
-                  </h4>
-                </div>
-                <div className="space-y-3">
-                  {metrics.slotBreakdown.map((sl) => (
-                    <div
-                      key={sl.label}
-                      className="p-3.5 rounded-2xl bg-black/30 border border-white/10 flex items-center justify-between gap-2"
-                    >
-                      <div className="min-w-0">
-                        <span className="text-xs font-bold text-white block truncate">
-                          {sl.label}
-                        </span>
-                        <span className="text-[11px] text-white/50 font-mono">
-                          {sl.count} {sl.count === 1 ? 'pickup' : 'pickups'}
-                        </span>
-                      </div>
-                      <span className="px-2.5 py-1 rounded-xl bg-[#C5A059]/20 text-[#F3E5AB] font-mono text-xs font-bold shrink-0">
-                        {sl.cookies} cookies
-                      </span>
+                  {confirmResetMenu ? (
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          resetToDefaultMenu();
+                          setConfirmResetMenu(false);
+                          showToast('Restored original Sukié menu!');
+                        }}
+                        className="px-4 py-2.5 rounded-xl bg-red-600 text-white text-xs font-bold cursor-pointer"
+                      >
+                        Confirm Reset
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setConfirmResetMenu(false)}
+                        className="px-3 py-2 text-xs text-stone-500 cursor-pointer"
+                      >
+                        Cancel
+                      </button>
                     </div>
-                  ))}
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setConfirmResetMenu(true)}
+                      className="px-4 py-2.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5" />
+                      <span>Restore Default Menu</span>
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* =================================================================== */}
-        {/* TAB 4: CUSTOMERS & B2B (VIP CLIENT DOSSIER & CORPORATE LEADS)       */}
-        {/* =================================================================== */}
-        {activeTab === 'customers' && (
-          <div className="space-y-6">
-            {/* Sub-tab Switcher between VIP Patrons & Corporate B2B Leads */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="flex items-center gap-2">
+          {/* ================================================================= */}
+          {/* TAB 3: SALES BREAKDOWN (CLEAN, SPACIOUS INSIGHTS)                 */}
+          {/* ================================================================= */}
+          {activeTab === 'analytics' && (
+            <div className="space-y-7">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <h2 className="font-heading text-2xl sm:text-3xl font-bold text-[#07132B]">
+                    Sales &amp; Breakdown
+                  </h2>
+                  <p className="text-xs sm:text-sm text-stone-500 mt-1">
+                    Complete breakdown of revenue, cookie performance, payments, and pickup slots.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleExportCSV}
+                  className="px-4 py-2.5 rounded-2xl bg-white border border-stone-200 hover:bg-stone-50 text-[#07132B] text-xs font-bold flex items-center gap-2 shadow-2xs cursor-pointer self-start sm:self-auto"
+                >
+                  <Download className="w-4 h-4" style={{ color: brandPrimary }} />
+                  <span>Download Orders CSV</span>
+                </button>
+              </div>
+
+              {/* 3 Spacious Financial Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                <div className="p-6 rounded-3xl bg-white border border-stone-200/80 shadow-xs">
+                  <span className="text-xs font-semibold text-stone-400 uppercase">Total Revenue</span>
+                  <p
+                    className="font-heading text-3xl font-bold mt-2"
+                    style={{ color: brandPrimary }}
+                  >
+                    ₹{metrics.totalRevenue.toLocaleString('en-IN')}
+                  </p>
+                  <p className="text-xs text-stone-500 mt-1">
+                    Cookies: ₹{metrics.cookiesSubtotalRev.toLocaleString('en-IN')} • Boxes: ₹{metrics.totalPackagingRev.toLocaleString('en-IN')}
+                  </p>
+                </div>
+
+                <div className="p-6 rounded-3xl bg-white border border-stone-200/80 shadow-xs">
+                  <span className="text-xs font-semibold text-stone-400 uppercase">Average Order</span>
+                  <p className="font-heading text-3xl font-bold text-[#07132B] mt-2">
+                    ₹{metrics.avgOrderValue.toLocaleString('en-IN')}
+                  </p>
+                  <p className="text-xs text-stone-500 mt-1">
+                    Across {orders.length} orders
+                  </p>
+                </div>
+
+                <div className="p-6 rounded-3xl bg-white border border-stone-200/80 shadow-xs">
+                  <span className="text-xs font-semibold text-stone-400 uppercase">Cookies Sold</span>
+                  <p className="font-heading text-3xl font-bold text-emerald-700 mt-2">
+                    {metrics.totalCookiesBaked}
+                  </p>
+                  <p className="text-xs text-stone-500 mt-1">
+                    {((metrics.totalCookiesBaked * 170) / 1000).toFixed(1)} kg total baked
+                  </p>
+                </div>
+              </div>
+
+              {/* Flavour-by-Flavour Breakdown */}
+              <div className="p-6 sm:p-8 rounded-3xl bg-white border border-stone-200/80 shadow-xs space-y-5">
+                <div>
+                  <h3 className="font-heading text-xl font-bold text-[#07132B]">
+                    Sales by Cookie &amp; Box
+                  </h3>
+                  <p className="text-xs text-stone-500 mt-0.5">
+                    See which flavours bring in the highest revenue.
+                  </p>
+                </div>
+
+                <div className="space-y-4">
+                  {metrics.productBreakdown.map((item) => {
+                    const pct =
+                      metrics.totalRevenue > 0
+                        ? Math.min(100, Math.round((item.revenue / metrics.totalRevenue) * 100))
+                        : 0;
+                    return (
+                      <div key={item.id} className="space-y-2">
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <img
+                              src={item.image}
+                              alt={item.name}
+                              className="w-10 h-10 rounded-xl object-cover shrink-0"
+                            />
+                            <div className="min-w-0">
+                              <span className="text-sm font-bold text-[#07132B] block truncate">
+                                {item.name}
+                              </span>
+                              <span className="text-xs text-stone-400">
+                                {item.qty} sold • ₹{item.price} each
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="text-right shrink-0">
+                            <span className="font-heading text-base font-bold text-[#07132B] block">
+                              ₹{item.revenue.toLocaleString('en-IN')}
+                            </span>
+                            <span className="text-[11px] font-mono text-stone-400">{pct}%</span>
+                          </div>
+                        </div>
+
+                        <div className="h-2 w-full rounded-full bg-stone-100 overflow-hidden">
+                          <div
+                            className="h-full rounded-full"
+                            style={{
+                              width: `${Math.max(4, pct)}%`,
+                              backgroundColor: brandPrimary,
+                            }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Payment Modes & Pickup Slots */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="p-6 rounded-3xl bg-white border border-stone-200/80 shadow-xs space-y-4">
+                  <div className="flex items-center gap-2">
+                    <CreditCard className="w-5 h-5" style={{ color: brandPrimary }} />
+                    <h4 className="font-heading text-lg font-bold text-[#07132B]">
+                      Payment Methods
+                    </h4>
+                  </div>
+                  <div className="space-y-2.5">
+                    {metrics.paymentBreakdown.map((pm) => (
+                      <div
+                        key={pm.label}
+                        className="p-3.5 rounded-2xl bg-[#F8F6F0] flex items-center justify-between"
+                      >
+                        <div>
+                          <span className="text-xs font-bold text-[#07132B] block">{pm.label}</span>
+                          <span className="text-[11px] text-stone-500">{pm.count} orders</span>
+                        </div>
+                        <span className="font-heading font-bold text-base text-[#07132B]">
+                          ₹{pm.revenue.toLocaleString('en-IN')}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="p-6 rounded-3xl bg-white border border-stone-200/80 shadow-xs space-y-4">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-5 h-5" style={{ color: brandPrimary }} />
+                    <h4 className="font-heading text-lg font-bold text-[#07132B]">
+                      Popular Pickup Slots
+                    </h4>
+                  </div>
+                  <div className="space-y-2.5">
+                    {metrics.slotBreakdown.map((sl) => (
+                      <div
+                        key={sl.label}
+                        className="p-3.5 rounded-2xl bg-[#F8F6F0] flex items-center justify-between gap-2"
+                      >
+                        <div className="min-w-0">
+                          <span className="text-xs font-bold text-[#07132B] block truncate">
+                            {sl.label}
+                          </span>
+                          <span className="text-[11px] text-stone-500">{sl.count} orders</span>
+                        </div>
+                        <span
+                          className="px-2.5 py-1 rounded-xl text-white font-mono text-xs font-bold shrink-0"
+                          style={{ backgroundColor: brandPrimary }}
+                        >
+                          {sl.cookies} cookies
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ================================================================= */}
+          {/* TAB 4: CLIENTS & BULK B2B                                         */}
+          {/* ================================================================= */}
+          {activeTab === 'customers' && (
+            <div className="space-y-7">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <h2 className="font-heading text-2xl sm:text-3xl font-bold text-[#07132B]">
+                    Clients &amp; Corporate Orders
+                  </h2>
+                  <p className="text-xs sm:text-sm text-stone-500 mt-1">
+                    Tap any client to view their complete order history, or manage bulk event leads.
+                  </p>
+                </div>
+
+                {crmSubTab === 'b2b' && (
+                  <button
+                    type="button"
+                    onClick={() => setIsNewB2BOpen(true)}
+                    className="px-4 py-2.5 rounded-2xl text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer self-start sm:self-auto"
+                    style={{ backgroundColor: brandPrimary }}
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Add Bulk Lead</span>
+                  </button>
+                )}
+              </div>
+
+              {/* Clean 2-Button Switch */}
+              <div className="inline-flex p-1.5 rounded-2xl bg-white border border-stone-200">
                 <button
                   type="button"
                   onClick={() => setCrmSubTab('vip')}
-                  className={`px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 cursor-pointer transition-all ${
-                    crmSubTab === 'vip'
-                      ? 'bg-[#C5A059] text-stone-950 shadow-md'
-                      : 'bg-[#0A1E46] text-white/75 hover:text-white border border-white/10'
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    crmSubTab === 'vip' ? 'text-white shadow-xs' : 'text-stone-600'
                   }`}
+                  style={crmSubTab === 'vip' ? { backgroundColor: brandPrimary } : undefined}
                 >
-                  <Users className="w-4 h-4" />
-                  <span>VIP Customer Directory ({metrics.customersList.length})</span>
+                  Regular Clients ({metrics.customersList.length})
                 </button>
-
                 <button
                   type="button"
                   onClick={() => setCrmSubTab('b2b')}
-                  className={`px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 cursor-pointer transition-all ${
-                    crmSubTab === 'b2b'
-                      ? 'bg-[#C5A059] text-stone-950 shadow-md'
-                      : 'bg-[#0A1E46] text-white/75 hover:text-white border border-white/10'
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    crmSubTab === 'b2b' ? 'text-white shadow-xs' : 'text-stone-600'
                   }`}
+                  style={crmSubTab === 'b2b' ? { backgroundColor: brandPrimary } : undefined}
                 >
-                  <Building2 className="w-4 h-4" />
-                  <span>Corporate &amp; Bulk Inquiries ({bulkInquiries?.length || 0})</span>
+                  Bulk &amp; Corporate ({bulkInquiries?.length || 0})
                 </button>
               </div>
 
-              {crmSubTab === 'b2b' && (
-                <button
-                  type="button"
-                  onClick={() => setIsNewB2BOpen(true)}
-                  className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#C5A059] to-[#DFBD73] text-stone-950 font-bold text-xs flex items-center gap-1.5 cursor-pointer self-start sm:self-auto"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>Log Corporate / Event Lead</span>
-                </button>
-              )}
-            </div>
-
-            {crmSubTab === 'vip' ? (
-              <div className="space-y-4">
-                <p className="text-xs text-white/60">
-                  Click any patron card below to open their full <strong>VIP Client Dossier</strong> (complete order history, lifetime spend, favorite cookie, and 1-click WhatsApp concierge chat).
-                </p>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {crmSubTab === 'vip' ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   {metrics.customersList.map((cust) => (
                     <div
                       key={cust.id}
                       onClick={() => setSelectedCustomer(cust)}
-                      className="p-6 rounded-3xl bg-gradient-to-br from-[#0A1E46] to-[#071533] border border-[#C5A059]/25 hover:border-[#C5A059] transition-all cursor-pointer flex flex-col justify-between gap-4 shadow-xl group"
+                      className="p-6 rounded-3xl bg-white border border-stone-200/90 hover:border-stone-400 transition-all cursor-pointer flex items-center justify-between gap-4 shadow-xs"
                     >
-                      <div className="space-y-3">
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex items-center gap-3">
-                            <div className="w-11 h-11 rounded-2xl bg-[#0C419C] border border-[#C5A059]/50 flex items-center justify-center font-heading font-bold text-sm text-[#F3E5AB]">
-                              {cust.name.slice(0, 2).toUpperCase()}
-                            </div>
-                            <div>
-                              <h3 className="font-heading text-base font-bold text-white group-hover:text-[#F3E5AB] transition-colors">
-                                {cust.name}
-                              </h3>
-                              <span className="text-xs text-white/55 font-mono block">
-                                {cust.phone}
-                              </span>
-                            </div>
-                          </div>
-
+                      <div className="space-y-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-heading text-lg font-bold text-[#07132B] truncate">
+                            {cust.name}
+                          </h3>
                           {(cust.totalSpent >= 2500 || cust.isBulk) && (
-                            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono uppercase bg-amber-500/20 text-amber-300 border border-amber-400/30 font-bold">
-                              ★ VIP
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900">
+                              VIP
                             </span>
                           )}
                         </div>
-
-                        <div className="grid grid-cols-2 gap-2.5 pt-2">
-                          <div className="p-3 rounded-2xl bg-black/30 border border-white/10">
-                            <span className="text-[10px] text-white/45 font-mono uppercase block">
-                              Lifetime Spend
-                            </span>
-                            <span className="font-heading text-lg font-bold text-[#F3E5AB]">
-                              ₹{cust.totalSpent.toLocaleString('en-IN')}
-                            </span>
-                          </div>
-                          <div className="p-3 rounded-2xl bg-black/30 border border-white/10">
-                            <span className="text-[10px] text-white/45 font-mono uppercase block">
-                              Orders Placed
-                            </span>
-                            <span className="font-heading text-lg font-bold text-white">
-                              {cust.totalOrders} ({cust.totalCookies} cookies)
-                            </span>
-                          </div>
-                        </div>
-
-                        <div className="text-xs text-white/65 flex items-center justify-between pt-1">
-                          <span>Favorite: <strong className="text-white">{cust.favoriteCookie}</strong></span>
-                        </div>
+                        <p className="text-xs text-stone-500 font-mono">{cust.phone}</p>
+                        <p className="text-xs text-stone-500 truncate">
+                          Loves: <strong className="text-stone-800">{cust.favoriteCookie}</strong>
+                        </p>
                       </div>
 
-                      <div className="pt-3 border-t border-white/10 flex items-center justify-between text-xs text-[#C5A059] font-semibold">
-                        <span>Open Client Dossier &amp; History</span>
-                        <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                      <div className="text-right shrink-0 flex items-center gap-2">
+                        <div>
+                          <span
+                            className="font-heading text-lg font-bold block"
+                            style={{ color: brandPrimary }}
+                          >
+                            ₹{cust.totalSpent.toLocaleString('en-IN')}
+                          </span>
+                          <span className="text-[11px] text-stone-400">
+                            {cust.totalOrders} {cust.totalOrders === 1 ? 'order' : 'orders'}
+                          </span>
+                        </div>
+                        <ChevronRight className="w-4 h-4 text-stone-400" />
                       </div>
                     </div>
                   ))}
                 </div>
-              </div>
-            ) : (
-              /* Corporate & Bulk B2B Inquiries */
-              <div className="space-y-4">
-                {(!bulkInquiries || bulkInquiries.length === 0) ? (
-                  <div className="p-10 rounded-3xl bg-[#0A1E46] border border-white/10 text-center">
-                    <p className="text-sm text-white/70">No corporate inquiries logged yet.</p>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    {bulkInquiries.map((inq) => {
-                      const cleanPhone = (inq.phone || '').replace(/\D/g, '');
-                      const waPhone = cleanPhone.length === 10 ? `91${cleanPhone}` : cleanPhone;
-                      const waUrl = `https://wa.me/${waPhone}?text=${encodeURIComponent(
-                        `Hello ${inq.contact}! 🍪 Greetings from Sukié Mumbai Atelier regarding your ${inq.occasion} inquiry (${inq.units} boxes).`
-                      )}`;
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  {(bulkInquiries || []).map((inq) => {
+                    const contactName = inq.contact || inq.contactPerson || 'Client';
+                    const occasionName = inq.occasion || inq.event || 'Corporate Gifting';
+                    const unitCount = inq.units || inq.estimatedUnits || 25;
+                    const budgetDisplay =
+                      inq.budget ||
+                      (inq.estimatedValue
+                        ? `₹${Number(inq.estimatedValue).toLocaleString('en-IN')}`
+                        : 'Custom');
+                    const dateDisplay = inq.deliveryDate || inq.dateRequired || 'Upcoming';
+                    const cleanPhone = (inq.phone || '').replace(/\D/g, '');
+                    const waPhone = cleanPhone.length === 10 ? `91${cleanPhone}` : cleanPhone;
+                    const waUrl = `https://wa.me/${waPhone}?text=${encodeURIComponent(
+                      `Hello ${contactName}! 🍪 Greetings from ${brandTitle} Mumbai regarding your ${occasionName} inquiry (${unitCount} boxes).`
+                    )}`;
 
-                      return (
-                        <div
-                          key={inq.id}
-                          className="p-6 rounded-3xl bg-gradient-to-br from-[#0A1E46] to-[#071533] border border-[#C5A059]/30 shadow-xl space-y-4 flex flex-col justify-between"
-                        >
-                          <div className="space-y-3">
-                            <div className="flex items-start justify-between gap-2">
-                              <div>
-                                <span className="text-[10px] font-mono text-[#C5A059] uppercase tracking-wider block">
-                                  {inq.id} • {inq.occasion}
-                                </span>
-                                <h3 className="font-heading text-xl font-bold text-white mt-0.5">
-                                  {inq.company}
-                                </h3>
-                                <p className="text-xs text-white/65">
-                                  Contact: <strong className="text-white">{inq.contact}</strong> • {inq.phone}
-                                </p>
-                              </div>
-
-                              <span className="px-3 py-1 rounded-full bg-[#C5A059]/20 text-[#F3E5AB] text-[10px] font-mono font-bold uppercase border border-[#C5A059]/40">
-                                {inq.status}
+                    return (
+                      <div
+                        key={inq.id}
+                        className="p-6 rounded-3xl bg-white border border-stone-200/90 shadow-xs space-y-4 flex flex-col justify-between"
+                      >
+                        <div className="space-y-3">
+                          <div className="flex items-start justify-between gap-2">
+                            <div>
+                              <span className="text-[11px] font-semibold text-stone-400 uppercase block">
+                                {occasionName}
                               </span>
-                            </div>
-
-                            <div className="grid grid-cols-3 gap-2 p-3 rounded-2xl bg-black/30 border border-white/10 text-xs">
-                              <div>
-                                <span className="text-[10px] text-white/45 font-mono block">Quantity</span>
-                                <span className="font-bold text-white">{inq.units} Boxes</span>
-                              </div>
-                              <div>
-                                <span className="text-[10px] text-white/45 font-mono block">Est. Budget</span>
-                                <span className="font-bold text-[#F3E5AB]">{inq.budget}</span>
-                              </div>
-                              <div>
-                                <span className="text-[10px] text-white/45 font-mono block">Target Date</span>
-                                <span className="font-bold text-emerald-300">{inq.deliveryDate}</span>
-                              </div>
-                            </div>
-
-                            {inq.notes && (
-                              <p className="text-xs text-white/75 italic bg-white/[0.03] p-3 rounded-xl border border-white/10">
-                                &ldquo;{inq.notes}&rdquo;
+                              <h3 className="font-heading text-xl font-bold text-[#07132B]">
+                                {inq.company}
+                              </h3>
+                              <p className="text-xs text-stone-500 mt-0.5">
+                                {contactName} • {inq.phone}
                               </p>
-                            )}
+                            </div>
+                            <span className="px-2.5 py-1 rounded-full bg-amber-100 text-amber-900 text-[10px] font-bold">
+                              {inq.status}
+                            </span>
                           </div>
 
-                          <div className="pt-3 border-t border-white/10 flex flex-wrap items-center justify-between gap-2">
-                            <div className="flex items-center gap-1.5">
-                              {['New Inquiry', 'Sample Dispatched', 'Quote Approved'].map((st) => (
-                                <button
-                                  key={st}
-                                  type="button"
-                                  onClick={() => {
-                                    updateBulkInquiryStatus(inq.id, st);
-                                    showToast(`${inq.company} → ${st}`);
-                                  }}
-                                  className={`px-2.5 py-1 rounded-lg text-[10px] font-semibold cursor-pointer ${
-                                    inq.status === st
-                                      ? 'bg-[#C5A059] text-stone-950 font-bold'
-                                      : 'bg-white/10 text-white/70 hover:text-white'
-                                  }`}
-                                >
-                                  {st}
-                                </button>
-                              ))}
+                          <div className="grid grid-cols-3 gap-2 p-3 rounded-2xl bg-[#F8F6F0] text-xs">
+                            <div>
+                              <span className="text-stone-400 block text-[10px]">Boxes</span>
+                              <span className="font-bold text-[#07132B]">{unitCount}</span>
                             </div>
+                            <div>
+                              <span className="text-stone-400 block text-[10px]">Estimate</span>
+                              <span className="font-bold text-[#07132B]">{budgetDisplay}</span>
+                            </div>
+                            <div>
+                              <span className="text-stone-400 block text-[10px]">Date</span>
+                              <span className="font-bold text-[#07132B]">{dateDisplay}</span>
+                            </div>
+                          </div>
 
-                            <div className="flex items-center gap-2">
-                              <a
-                                href={waUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1.5"
-                              >
-                                <MessageSquare className="w-3.5 h-3.5" />
-                                <span>WhatsApp</span>
-                              </a>
+                          {inq.notes && (
+                            <p className="text-xs text-stone-600 italic">&ldquo;{inq.notes}&rdquo;</p>
+                          )}
+                        </div>
+
+                        <div className="pt-3 border-t border-stone-100 flex flex-wrap items-center justify-between gap-2">
+                          <div className="flex flex-wrap gap-1.5">
+                            {['New Inquiry', 'Sample Sent', 'Confirmed'].map((st) => (
                               <button
+                                key={st}
                                 type="button"
                                 onClick={() => {
-                                  deleteBulkInquiry(inq.id);
-                                  showToast('Removed inquiry');
+                                  updateBulkInquiryStatus(inq.id, st);
+                                  showToast(`${inq.company} → ${st}`);
                                 }}
-                                className="p-1.5 text-white/40 hover:text-red-400 cursor-pointer"
+                                className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold cursor-pointer ${
+                                  inq.status === st
+                                    ? 'text-white'
+                                    : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+                                }`}
+                                style={inq.status === st ? { backgroundColor: brandPrimary } : undefined}
                               >
-                                <Trash2 className="w-4 h-4" />
+                                {st}
                               </button>
-                            </div>
+                            ))}
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            <a
+                              href={waUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="px-3 py-1.5 rounded-xl bg-emerald-600 text-white text-xs font-bold flex items-center gap-1"
+                            >
+                              <MessageSquare className="w-3.5 h-3.5" />
+                              <span>WhatsApp</span>
+                            </a>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                deleteBulkInquiry(inq.id);
+                                showToast('Removed bulk lead');
+                              }}
+                              className="p-1.5 text-stone-400 hover:text-red-600 cursor-pointer"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
                           </div>
                         </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
 
-        {/* =================================================================== */}
-        {/* TAB 5: ATELIER CONTROLS (BANNER TEXT, MODE, REVIEWS & PIN)          */}
-        {/* =================================================================== */}
-        {activeTab === 'settings' && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* 1. Storefront Mode & Live Oven Banner Text Control */}
-            <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-[#0A1E46] to-[#071533] border border-[#C5A059]/30 shadow-xl space-y-6">
+          {/* ================================================================= */}
+          {/* TAB 5: LOGO, COLORS & SITE CONTROLS (EASY TO HANDLE ANYTHING!)    */}
+          {/* ================================================================= */}
+          {activeTab === 'settings' && (
+            <div className="space-y-7">
               <div>
-                <span className="text-[10px] font-mono uppercase tracking-widest text-[#C5A059] block">
-                  Live Storefront Controls
-                </span>
-                <h3 className="font-heading text-xl font-bold text-white mt-1">
-                  Website Mode &amp; Oven Status Banner
-                </h3>
-              </div>
-
-              {/* Storefront Mode Switch */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <button
-                  type="button"
-                  onClick={() => {
-                    updateStoreConfig({ isComingSoon: false });
-                    showToast('Storefront is now LIVE for orders!');
-                  }}
-                  className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
-                    !storeConfig?.isComingSoon
-                      ? 'bg-emerald-500/15 border-emerald-400 text-white shadow-lg'
-                      : 'bg-black/25 border-white/10 text-white/60 hover:text-white'
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="font-bold text-sm">Live Ordering Storefront</span>
-                    {!storeConfig?.isComingSoon && <Check className="w-4 h-4 text-emerald-400" />}
-                  </div>
-                  <p className="text-xs text-white/60">
-                    Customers can browse the menu, build boxes, and place pre-orders.
-                  </p>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    updateStoreConfig({ isComingSoon: true });
-                    showToast('Switched public site to Coming Soon Teaser');
-                  }}
-                  className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
-                    storeConfig?.isComingSoon
-                      ? 'bg-amber-500/15 border-[#C5A059] text-white shadow-lg'
-                      : 'bg-black/25 border-white/10 text-white/60 hover:text-white'
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="font-bold text-sm">Coming Soon Teaser</span>
-                    {storeConfig?.isComingSoon && <Check className="w-4 h-4 text-[#C5A059]" />}
-                  </div>
-                  <p className="text-xs text-white/60">
-                    Shows the luxury teaser screen while you prepare the next drop.
-                  </p>
-                </button>
-              </div>
-
-              {/* Live Website Oven Status Badge Editor */}
-              <div className="pt-4 border-t border-white/10 space-y-3">
-                <label className="block text-xs font-bold text-[#F3E5AB]">
-                  Website Menu Live Status Pill Text
-                </label>
-                <p className="text-xs text-white/60">
-                  This text appears with the pulsing green dot at the top of your public Menu section.
+                <h2 className="font-heading text-2xl sm:text-3xl font-bold text-[#07132B]">
+                  Logo, Colors &amp; Website Controls
+                </h2>
+                <p className="text-xs sm:text-sm text-stone-500 mt-1">
+                  Customize your brand logo, color combination, live website status, banner text, reviews, and PIN in one tap.
                 </p>
-                <div className="flex gap-2">
+              </div>
+
+              {/* 1. BRAND LOGO & NAME CARD */}
+              <div className="p-6 sm:p-8 rounded-3xl bg-white border border-stone-200/90 shadow-xs space-y-5">
+                <div>
+                  <h3 className="font-heading text-xl font-bold text-[#07132B]">
+                    1. Brand Logo &amp; Name
+                  </h3>
+                  <p className="text-xs text-stone-500 mt-0.5">
+                    Updates your logo immediately across the Website Header, Coming Soon page, Story section, Footer, and Studio.
+                  </p>
+                </div>
+
+                <div className="flex flex-col sm:flex-row sm:items-center gap-5 p-4 rounded-2xl bg-[#F8F6F0] border border-stone-200/70">
+                  <div className="flex items-center gap-4">
+                    <div
+                      className="w-18 h-18 rounded-2xl p-2 flex items-center justify-center shadow-sm shrink-0"
+                      style={{ backgroundColor: brandPrimary }}
+                    >
+                      <img
+                        src={brandLogo}
+                        alt="Logo preview"
+                        className="w-14 h-14 rounded-full object-cover ring-2"
+                        style={{ '--tw-ring-color': brandAccent }}
+                      />
+                    </div>
+                    <div>
+                      <span className="text-xs font-bold text-[#07132B] block">Live Brand Emblem</span>
+                      <span className="text-[11px] text-stone-500">Shown on your Royal Blue header</span>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2.5 sm:ml-auto">
+                    <button
+                      type="button"
+                      onClick={() => logoInputRef.current?.click()}
+                      className="px-4 py-2.5 rounded-xl text-white text-xs font-bold flex items-center gap-2 cursor-pointer shadow-xs"
+                      style={{ backgroundColor: brandPrimary }}
+                    >
+                      <Upload className="w-3.5 h-3.5" />
+                      <span>Upload New Logo</span>
+                    </button>
+                    <input
+                      ref={logoInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleLogoUpload}
+                      className="hidden"
+                    />
+
+                    {brandLogo !== '/images/logo.png' && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          updateStoreConfig({ logoUrl: '/images/logo.png' });
+                          showToast('Restored original Sukié logo');
+                        }}
+                        className="px-3.5 py-2.5 rounded-xl bg-white border border-stone-200 text-stone-700 text-xs font-semibold cursor-pointer"
+                      >
+                        Reset Default Logo
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-2.5">
                   <input
                     type="text"
-                    value={bannerTextDraft}
-                    onChange={(e) => setBannerTextDraft(e.target.value)}
-                    placeholder="e.g. Ovens Fired Today • Pre-Orders Active"
-                    className="flex-1 px-4 py-2.5 rounded-xl bg-black/40 border border-white/15 text-xs text-white focus:outline-none focus:border-[#C5A059]"
+                    value={brandNameDraft}
+                    onChange={(e) => setBrandNameDraft(e.target.value)}
+                    placeholder="Brand Name (e.g. Sukié)"
+                    className="flex-1 px-4 py-2.5 rounded-xl bg-[#F8F6F0] border border-stone-200 text-sm text-[#07132B] focus:outline-none"
                   />
                   <button
                     type="button"
                     onClick={() => {
-                      updateStoreConfig({ ovenStatusText: bannerTextDraft });
-                      showToast('Updated live website oven banner text!');
+                      updateStoreConfig({ brandName: brandNameDraft.trim() || 'Sukié' });
+                      showToast('Saved brand name!');
                     }}
-                    className="px-4 py-2.5 rounded-xl bg-[#C5A059] text-stone-950 font-bold text-xs cursor-pointer shrink-0"
+                    className="px-5 py-2.5 rounded-xl text-white text-xs font-bold cursor-pointer"
+                    style={{ backgroundColor: brandPrimary }}
                   >
-                    Save Text
+                    Save Brand Name
                   </button>
                 </div>
-                {/* Quick Preset Pills */}
-                <div className="flex flex-wrap gap-1.5 pt-1">
-                  {[
-                    'Ovens Fired Today • Pre-Orders Active',
-                    'Weekend Batch Open • Limited Boxes Left',
-                    'Festive Gifting Drops Now Live',
-                  ].map((preset) => (
-                    <button
-                      key={preset}
-                      type="button"
-                      onClick={() => {
-                        setBannerTextDraft(preset);
-                        updateStoreConfig({ ovenStatusText: preset });
-                        showToast('Applied banner preset!');
-                      }}
-                      className="text-[10px] px-2.5 py-1 rounded-full bg-white/5 hover:bg-white/15 text-white/70 border border-white/10 cursor-pointer"
-                    >
-                      {preset}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* 2. Security PIN Control */}
-            <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-[#0A1E46] to-[#071533] border border-white/10 shadow-xl space-y-5">
-              <div className="flex items-center gap-2.5">
-                <Lock className="w-5 h-5 text-[#C5A059]" />
-                <div>
-                  <h3 className="font-heading text-xl font-bold text-white">
-                    Founder Security PIN
-                  </h3>
-                  <p className="text-xs text-white/60">
-                    Current Active PIN:{' '}
-                    <span className="font-mono text-[#F3E5AB] font-bold">
-                      {storeConfig?.adminPin || '8467'}
-                    </span>
-                  </p>
-                </div>
               </div>
 
-              <form onSubmit={handlePinSubmit} className="space-y-3">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <input
-                    type="password"
-                    inputMode="numeric"
-                    maxLength={8}
-                    value={newPin}
-                    onChange={(e) => setNewPin(e.target.value.replace(/\D/g, ''))}
-                    placeholder="New 4-Digit PIN"
-                    className="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/15 text-sm text-white font-mono focus:outline-none focus:border-[#C5A059]"
-                  />
-                  <input
-                    type="password"
-                    inputMode="numeric"
-                    maxLength={8}
-                    value={confirmPin}
-                    onChange={(e) => setConfirmPin(e.target.value.replace(/\D/g, ''))}
-                    placeholder="Confirm New PIN"
-                    className="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/15 text-sm text-white font-mono focus:outline-none focus:border-[#C5A059]"
-                  />
-                </div>
-                {pinMessage.text && (
-                  <p
-                    className={`text-xs font-semibold ${
-                      pinMessage.type === 'error' ? 'text-red-400' : 'text-emerald-400'
-                    }`}
+              {/* 2. BRAND COLOR COMBINATION CARD */}
+              <div className="p-6 sm:p-8 rounded-3xl bg-white border border-stone-200/90 shadow-xs space-y-5">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div>
+                    <h3 className="font-heading text-xl font-bold text-[#07132B]">
+                      2. Brand Color Combination
+                    </h3>
+                    <p className="text-xs text-stone-500 mt-0.5">
+                      Tap a curated luxury palette or pick custom colors. Changes apply live across your website &amp; studio.
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      updateStoreConfig({
+                        themePreset: 'royal_cobalt',
+                        primaryColor: '#0C419C',
+                        accentColor: '#C5A059',
+                        surfaceColor: '#FAF6EE',
+                      });
+                      showToast('Restored Sukié Royal Cobalt & Gold palette');
+                    }}
+                    className="text-xs font-semibold text-stone-500 hover:text-stone-900 flex items-center gap-1 cursor-pointer self-start sm:self-auto"
                   >
-                    {pinMessage.text}
-                  </p>
-                )}
-                <button
-                  type="submit"
-                  className="px-5 py-2.5 rounded-xl bg-[#C5A059] text-stone-950 font-bold text-xs cursor-pointer"
-                >
-                  Update Security PIN
-                </button>
-              </form>
-            </div>
-
-            {/* 3. Customer Reviews & Testimonials Manager (Full Width) */}
-            <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-[#0A1E46] to-[#071533] border border-white/10 lg:col-span-2 shadow-xl space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                <div>
-                  <h3 className="font-heading text-xl font-bold text-white">
-                    Customer Tasting Reviews ({reviews.length})
-                  </h3>
-                  <p className="text-xs text-white/60">
-                    Manage reviews submitted on the website or add a screenshot/DM review from Instagram or WhatsApp.
-                  </p>
+                    <RotateCcw className="w-3.5 h-3.5" />
+                    <span>Reset Official Colors</span>
+                  </button>
                 </div>
-              </div>
 
-              {/* Add a Featured Review Form */}
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  if (!newReviewForm.name.trim() || !newReviewForm.comment.trim()) return;
-                  addReview({
-                    name: newReviewForm.name.trim(),
-                    cookie: newReviewForm.cookie,
-                    stars: Number(newReviewForm.stars) || 5,
-                    comment: newReviewForm.comment.trim(),
-                  });
-                  setNewReviewForm({
-                    name: '',
-                    cookie: products[0]?.name || 'Triple Chocolate Overload',
-                    stars: 5,
-                    comment: '',
-                  });
-                  showToast('Published review to website!');
-                }}
-                className="p-4 rounded-2xl bg-black/30 border border-[#C5A059]/30 grid grid-cols-1 sm:grid-cols-12 gap-3 items-center"
-              >
-                <input
-                  type="text"
-                  value={newReviewForm.name}
-                  onChange={(e) => setNewReviewForm({ ...newReviewForm, name: e.target.value })}
-                  placeholder="Patron Name (e.g. Rhea K.)"
-                  className="sm:col-span-3 px-3.5 py-2.5 rounded-xl bg-white/5 border border-white/15 text-xs text-white focus:outline-none focus:border-[#C5A059]"
-                />
-                <input
-                  type="text"
-                  value={newReviewForm.cookie}
-                  onChange={(e) => setNewReviewForm({ ...newReviewForm, cookie: e.target.value })}
-                  placeholder="Cookie Tasted"
-                  className="sm:col-span-3 px-3.5 py-2.5 rounded-xl bg-white/5 border border-white/15 text-xs text-white focus:outline-none focus:border-[#C5A059]"
-                />
-                <input
-                  type="text"
-                  value={newReviewForm.comment}
-                  onChange={(e) => setNewReviewForm({ ...newReviewForm, comment: e.target.value })}
-                  placeholder="Paste Instagram / WhatsApp praise..."
-                  className="sm:col-span-4 px-3.5 py-2.5 rounded-xl bg-white/5 border border-white/15 text-xs text-white focus:outline-none focus:border-[#C5A059]"
-                />
-                <button
-                  type="submit"
-                  className="sm:col-span-2 py-2.5 px-4 rounded-xl bg-[#C5A059] text-stone-950 font-bold text-xs cursor-pointer"
-                >
-                  + Add Review
-                </button>
-              </form>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {reviews.map((rev) => (
-                  <div
-                    key={rev.id}
-                    className="p-4 rounded-2xl bg-black/30 border border-white/10 flex flex-col justify-between gap-3"
-                  >
-                    <div>
-                      <div className="flex items-center justify-between">
-                        <span className="font-bold text-sm text-white">{rev.name}</span>
-                        <span className="text-amber-400 text-xs">{'★'.repeat(rev.stars || 5)}</span>
-                      </div>
-                      <span className="text-[11px] text-[#C5A059] font-mono block mt-0.5">
-                        {rev.cookie}
-                      </span>
-                      <p className="text-xs text-white/75 mt-2 leading-relaxed">
-                        &ldquo;{rev.comment}&rdquo;
-                      </p>
-                    </div>
-                    <div className="flex items-center justify-between pt-2 border-t border-white/10 text-[11px] text-white/40">
-                      <span>{rev.date}</span>
+                {/* 4 Curated Color Combination Presets */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                  {BRAND_COLOR_PRESETS.map((preset) => {
+                    const isSelected =
+                      (storeConfig?.primaryColor || '#0C419C').toLowerCase() ===
+                      preset.primary.toLowerCase();
+                    return (
                       <button
+                        key={preset.id}
                         type="button"
                         onClick={() => {
-                          deleteReview(rev.id);
-                          showToast('Removed review');
+                          updateStoreConfig({
+                            themePreset: preset.id,
+                            primaryColor: preset.primary,
+                            accentColor: preset.accent,
+                            surfaceColor: preset.surface,
+                          });
+                          showToast(`Applied "${preset.name}"`);
                         }}
-                        className="text-red-400 hover:underline cursor-pointer"
+                        className={`p-4 rounded-2xl border text-left transition-all cursor-pointer flex items-center justify-between gap-3 ${
+                          isSelected
+                            ? 'border-stone-900 bg-[#F8F6F0] shadow-xs'
+                            : 'border-stone-200 hover:border-stone-300 bg-white'
+                        }`}
                       >
-                        Remove
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-sm text-[#07132B] truncate">
+                              {preset.name}
+                            </span>
+                            {isSelected && <Check className="w-4 h-4 text-emerald-600 shrink-0" />}
+                          </div>
+                          <p className="text-[11px] text-stone-500 mt-0.5 line-clamp-1">
+                            {preset.desc}
+                          </p>
+                        </div>
+
+                        <div className="flex items-center -space-x-1.5 shrink-0">
+                          <span
+                            className="w-7 h-7 rounded-full border-2 border-white shadow-xs"
+                            style={{ backgroundColor: preset.primary }}
+                          />
+                          <span
+                            className="w-7 h-7 rounded-full border-2 border-white shadow-xs"
+                            style={{ backgroundColor: preset.accent }}
+                          />
+                          <span
+                            className="w-7 h-7 rounded-full border-2 border-stone-200 shadow-xs"
+                            style={{ backgroundColor: preset.surface }}
+                          />
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Fine-Tune Custom Color Swatches */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+                  <label className="p-3.5 rounded-2xl bg-[#F8F6F0] border border-stone-200/70 flex items-center justify-between cursor-pointer">
+                    <div>
+                      <span className="text-xs font-bold text-[#07132B] block">Primary Color</span>
+                      <span className="text-[11px] font-mono text-stone-500">{brandPrimary}</span>
+                    </div>
+                    <input
+                      type="color"
+                      value={brandPrimary}
+                      onChange={(e) =>
+                        updateStoreConfig({ primaryColor: e.target.value, themePreset: 'custom' })
+                      }
+                      className="w-9 h-9 rounded-lg cursor-pointer border-0 bg-transparent"
+                    />
+                  </label>
+
+                  <label className="p-3.5 rounded-2xl bg-[#F8F6F0] border border-stone-200/70 flex items-center justify-between cursor-pointer">
+                    <div>
+                      <span className="text-xs font-bold text-[#07132B] block">Gold / Accent</span>
+                      <span className="text-[11px] font-mono text-stone-500">{brandAccent}</span>
+                    </div>
+                    <input
+                      type="color"
+                      value={brandAccent}
+                      onChange={(e) =>
+                        updateStoreConfig({ accentColor: e.target.value, themePreset: 'custom' })
+                      }
+                      className="w-9 h-9 rounded-lg cursor-pointer border-0 bg-transparent"
+                    />
+                  </label>
+
+                  <label className="p-3.5 rounded-2xl bg-[#F8F6F0] border border-stone-200/70 flex items-center justify-between cursor-pointer">
+                    <div>
+                      <span className="text-xs font-bold text-[#07132B] block">Cream Surface</span>
+                      <span className="text-[11px] font-mono text-stone-500">
+                        {storeConfig?.surfaceColor || '#FAF6EE'}
+                      </span>
+                    </div>
+                    <input
+                      type="color"
+                      value={storeConfig?.surfaceColor || '#FAF6EE'}
+                      onChange={(e) =>
+                        updateStoreConfig({ surfaceColor: e.target.value, themePreset: 'custom' })
+                      }
+                      className="w-9 h-9 rounded-lg cursor-pointer border-0 bg-transparent"
+                    />
+                  </label>
+                </div>
+              </div>
+
+              {/* 3. WEBSITE MODE & LIVE BANNER TEXT */}
+              <div className="p-6 sm:p-8 rounded-3xl bg-white border border-stone-200/90 shadow-xs space-y-5">
+                <div>
+                  <h3 className="font-heading text-xl font-bold text-[#07132B]">
+                    3. Storefront Mode &amp; Oven Banner
+                  </h3>
+                  <p className="text-xs text-stone-500 mt-0.5">
+                    Switch between accepting live orders or showing the Coming Soon teaser page.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      updateStoreConfig({ isComingSoon: false });
+                      showToast('Website is now LIVE for orders!');
+                    }}
+                    className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
+                      !storeConfig?.isComingSoon
+                        ? 'bg-emerald-50 border-emerald-500'
+                        : 'bg-white border-stone-200'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between font-bold text-sm text-[#07132B]">
+                      <span>Live Ordering Storefront</span>
+                      {!storeConfig?.isComingSoon && <Check className="w-4 h-4 text-emerald-600" />}
+                    </div>
+                    <p className="text-xs text-stone-500 mt-1">
+                      Visitors see your full menu and can place pickup pre-orders.
+                    </p>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      updateStoreConfig({ isComingSoon: true });
+                      showToast('Switched public site to Coming Soon Teaser');
+                    }}
+                    className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
+                      storeConfig?.isComingSoon
+                        ? 'bg-amber-50 border-amber-500'
+                        : 'bg-white border-stone-200'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between font-bold text-sm text-[#07132B]">
+                      <span>Coming Soon Teaser</span>
+                      {storeConfig?.isComingSoon && <Check className="w-4 h-4 text-amber-600" />}
+                    </div>
+                    <p className="text-xs text-stone-500 mt-1">
+                      Shows the royal blue teaser page while preparing your next drop.
+                    </p>
+                  </button>
+                </div>
+
+                <div className="pt-3 border-t border-stone-100 space-y-2.5">
+                  <label className="text-xs font-bold text-[#07132B] block">
+                    Live Menu Oven Status Text
+                  </label>
+                  <div className="flex flex-col sm:flex-row gap-2.5">
+                    <input
+                      type="text"
+                      value={bannerTextDraft}
+                      onChange={(e) => setBannerTextDraft(e.target.value)}
+                      className="flex-1 px-4 py-2.5 rounded-xl bg-[#F8F6F0] border border-stone-200 text-xs sm:text-sm text-[#07132B] focus:outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        updateStoreConfig({ ovenStatusText: bannerTextDraft });
+                        showToast('Saved live oven banner text!');
+                      }}
+                      className="px-5 py-2.5 rounded-xl text-white text-xs font-bold cursor-pointer"
+                      style={{ backgroundColor: brandPrimary }}
+                    >
+                      Save Banner
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* 4. REVIEWS & SECURITY PIN */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Reviews Card */}
+                <div className="p-6 sm:p-7 rounded-3xl bg-white border border-stone-200/90 shadow-xs space-y-4">
+                  <h3 className="font-heading text-lg font-bold text-[#07132B]">
+                    Customer Reviews ({reviews.length})
+                  </h3>
+
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      if (!newReviewForm.name.trim() || !newReviewForm.comment.trim()) return;
+                      addReview({
+                        name: newReviewForm.name.trim(),
+                        cookie: newReviewForm.cookie,
+                        stars: 5,
+                        comment: newReviewForm.comment.trim(),
+                      });
+                      setNewReviewForm({
+                        name: '',
+                        cookie: products[0]?.name || 'Triple Chocolate Overload',
+                        stars: 5,
+                        comment: '',
+                      });
+                      showToast('Added review to website!');
+                    }}
+                    className="space-y-2.5"
+                  >
+                    <div className="grid grid-cols-2 gap-2">
+                      <input
+                        type="text"
+                        placeholder="Customer Name"
+                        value={newReviewForm.name}
+                        onChange={(e) =>
+                          setNewReviewForm({ ...newReviewForm, name: e.target.value })
+                        }
+                        className="px-3.5 py-2 rounded-xl bg-[#F8F6F0] border border-stone-200 text-xs"
+                      />
+                      <input
+                        type="text"
+                        placeholder="Cookie Flavour"
+                        value={newReviewForm.cookie}
+                        onChange={(e) =>
+                          setNewReviewForm({ ...newReviewForm, cookie: e.target.value })
+                        }
+                        className="px-3.5 py-2 rounded-xl bg-[#F8F6F0] border border-stone-200 text-xs"
+                      />
+                    </div>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        placeholder="Paste customer review..."
+                        value={newReviewForm.comment}
+                        onChange={(e) =>
+                          setNewReviewForm({ ...newReviewForm, comment: e.target.value })
+                        }
+                        className="flex-1 px-3.5 py-2 rounded-xl bg-[#F8F6F0] border border-stone-200 text-xs"
+                      />
+                      <button
+                        type="submit"
+                        className="px-4 py-2 rounded-xl text-white text-xs font-bold cursor-pointer shrink-0"
+                        style={{ backgroundColor: brandPrimary }}
+                      >
+                        Add
                       </button>
                     </div>
+                  </form>
+
+                  <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+                    {reviews.map((rev) => (
+                      <div
+                        key={rev.id}
+                        className="p-3 rounded-2xl bg-[#F8F6F0] flex items-start justify-between gap-2 text-xs"
+                      >
+                        <div>
+                          <span className="font-bold text-[#07132B]">{rev.name}</span>{' '}
+                          <span className="text-amber-500">{'★'.repeat(rev.stars || 5)}</span>
+                          <p className="text-stone-600 mt-0.5">&ldquo;{rev.comment}&rdquo;</p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            deleteReview(rev.id);
+                            showToast('Removed review');
+                          }}
+                          className="text-stone-400 hover:text-red-600 shrink-0 cursor-pointer"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                </div>
+
+                {/* Security PIN Card */}
+                <div className="p-6 sm:p-7 rounded-3xl bg-white border border-stone-200/90 shadow-xs space-y-4">
+                  <div className="flex items-center gap-2.5">
+                    <Lock className="w-5 h-5" style={{ color: brandPrimary }} />
+                    <div>
+                      <h3 className="font-heading text-lg font-bold text-[#07132B]">
+                        Studio Security PIN
+                      </h3>
+                      <p className="text-xs text-stone-500">
+                        Active PIN: <strong className="font-mono">{storeConfig?.adminPin || '8467'}</strong>
+                      </p>
+                    </div>
+                  </div>
+
+                  <form onSubmit={handlePinSubmit} className="space-y-3">
+                    <input
+                      type="password"
+                      inputMode="numeric"
+                      maxLength={8}
+                      value={newPin}
+                      onChange={(e) => setNewPin(e.target.value.replace(/\D/g, ''))}
+                      placeholder="New 4-Digit PIN"
+                      className="w-full px-4 py-2.5 rounded-xl bg-[#F8F6F0] border border-stone-200 text-xs font-mono"
+                    />
+                    <input
+                      type="password"
+                      inputMode="numeric"
+                      maxLength={8}
+                      value={confirmPin}
+                      onChange={(e) => setConfirmPin(e.target.value.replace(/\D/g, ''))}
+                      placeholder="Confirm New PIN"
+                      className="w-full px-4 py-2.5 rounded-xl bg-[#F8F6F0] border border-stone-200 text-xs font-mono"
+                    />
+                    {pinMessage.text && (
+                      <p
+                        className={`text-xs font-bold ${
+                          pinMessage.type === 'error' ? 'text-red-600' : 'text-emerald-600'
+                        }`}
+                      >
+                        {pinMessage.text}
+                      </p>
+                    )}
+                    <button
+                      type="submit"
+                      className="px-5 py-2.5 rounded-xl text-white font-bold text-xs cursor-pointer"
+                      style={{ backgroundColor: brandPrimary }}
+                    >
+                      Update PIN
+                    </button>
+                  </form>
+                </div>
               </div>
             </div>
-          </div>
-        )}
-      </main>
+          )}
+        </main>
+      </div>
+
+      {/* ===================================================================== */}
+      {/* MOBILE FIXED BOTTOM NAVIGATION BAR (5 Even Tabs, ZERO Horizontal Scroll) */}
+      {/* ===================================================================== */}
+      <nav className="lg:hidden fixed bottom-0 inset-x-0 z-50 bg-white/95 backdrop-blur-xl border-t border-stone-200 px-1 py-1.5 pb-safe shadow-[0_-8px_25px_rgba(0,0,0,0.06)]">
+        <div className="grid grid-cols-5 gap-0.5 max-w-md mx-auto">
+          {navTabs.map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveTab(tab.id)}
+                className={`relative py-1.5 px-1 rounded-xl flex flex-col items-center justify-center gap-1 transition-colors cursor-pointer ${
+                  isActive ? 'font-bold' : 'text-stone-400 hover:text-stone-700'
+                }`}
+                style={isActive ? { color: brandPrimary } : undefined}
+              >
+                <div className="relative">
+                  <Icon className="w-5 h-5" />
+                  {tab.badge && (
+                    <span
+                      className="absolute -top-1.5 -right-2.5 min-w-[16px] h-4 px-1 rounded-full text-[9px] font-mono font-bold text-white flex items-center justify-center"
+                      style={{ backgroundColor: brandPrimary }}
+                    >
+                      {tab.badge}
+                    </span>
+                  )}
+                </div>
+                <span className="text-[10px] leading-none tracking-tight">{tab.shortLabel}</span>
+              </button>
+            );
+          })}
+        </div>
+      </nav>
 
       {/* ===================================================================== */}
       {/* MODALS & DRAWERS                                                      */}
       {/* ===================================================================== */}
-
-      {/* 1. Product Editor Modal */}
       <ProductEditorModal
         isOpen={isEditorOpen}
         onClose={() => {
@@ -2065,7 +2335,6 @@ export default function AdminPortal({ onClose }) {
         onSave={handleSaveProduct}
       />
 
-      {/* 2. Customer WhatsApp Notification Modal */}
       <NotificationModal
         isOpen={!!notifyModalOrder}
         onClose={() => setNotifyModalOrder(null)}
@@ -2074,7 +2343,6 @@ export default function AdminPortal({ onClose }) {
         showToast={showToast}
       />
 
-      {/* 3. VIP Customer Dossier Drawer */}
       <AnimatePresence>
         {selectedCustomer && (
           <CustomerDrawer
@@ -2090,33 +2358,28 @@ export default function AdminPortal({ onClose }) {
         )}
       </AnimatePresence>
 
-      {/* 4. Manual Walk-in / WhatsApp Order Modal */}
+      {/* Manual Walk-in / WhatsApp Order Modal */}
       <AnimatePresence>
         {isNewOrderOpen && (
           <div className="fixed inset-0 z-[220] flex items-center justify-center p-4 overflow-y-auto">
             <div
               onClick={() => setIsNewOrderOpen(false)}
-              className="fixed inset-0 bg-black/80 backdrop-blur-xs"
+              className="fixed inset-0 bg-black/60 backdrop-blur-xs"
             />
             <motion.div
               initial={{ opacity: 0, scale: 0.96 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.96 }}
-              className="relative w-full max-w-lg bg-[#091A3E] border border-[#C5A059]/40 rounded-3xl p-6 sm:p-7 text-white shadow-2xl z-10 space-y-5 my-auto"
+              className="relative w-full max-w-lg bg-white rounded-3xl p-6 sm:p-7 text-[#07132B] shadow-2xl z-10 space-y-5 my-auto"
             >
-              <div className="flex items-center justify-between border-b border-white/10 pb-4">
-                <div>
-                  <span className="text-[10px] font-mono uppercase tracking-widest text-[#C5A059] block">
-                    Quick Kitchen Entry
-                  </span>
-                  <h3 className="font-heading text-xl font-bold">
-                    Log WhatsApp / Walk-in Order
-                  </h3>
-                </div>
+              <div className="flex items-center justify-between border-b border-stone-100 pb-4">
+                <h3 className="font-heading text-xl font-bold">
+                  New WhatsApp / Walk-in Order
+                </h3>
                 <button
                   type="button"
                   onClick={() => setIsNewOrderOpen(false)}
-                  className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-xs cursor-pointer"
+                  className="w-8 h-8 rounded-full bg-stone-100 flex items-center justify-center text-xs cursor-pointer"
                 >
                   ✕
                 </button>
@@ -2124,33 +2387,28 @@ export default function AdminPortal({ onClose }) {
 
               <form onSubmit={handleCreateManualOrder} className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label className="text-xs text-white/70 block mb-1">Customer Name *</label>
-                    <input
-                      type="text"
-                      required
-                      value={manualOrder.name}
-                      onChange={(e) => setManualOrder({ ...manualOrder, name: e.target.value })}
-                      placeholder="e.g. Rohan Mehta"
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-black/40 border border-white/15 text-xs text-white focus:outline-none focus:border-[#C5A059]"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs text-white/70 block mb-1">WhatsApp Phone *</label>
-                    <input
-                      type="tel"
-                      required
-                      value={manualOrder.phone}
-                      onChange={(e) => setManualOrder({ ...manualOrder, phone: e.target.value })}
-                      placeholder="98201 12345"
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-black/40 border border-white/15 text-xs text-white focus:outline-none focus:border-[#C5A059]"
-                    />
-                  </div>
+                  <input
+                    type="text"
+                    required
+                    value={manualOrder.name}
+                    onChange={(e) => setManualOrder({ ...manualOrder, name: e.target.value })}
+                    placeholder="Customer Name *"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#F8F6F0] border border-stone-200 text-xs"
+                  />
+                  <input
+                    type="tel"
+                    required
+                    value={manualOrder.phone}
+                    onChange={(e) => setManualOrder({ ...manualOrder, phone: e.target.value })}
+                    placeholder="WhatsApp Phone *"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#F8F6F0] border border-stone-200 text-xs"
+                  />
                 </div>
 
-                {/* Product Pill Picker */}
                 <div>
-                  <label className="text-xs text-white/70 block mb-1.5">Select Cookie / Box</label>
+                  <label className="text-xs font-semibold text-stone-500 block mb-1.5">
+                    Select Cookie / Box
+                  </label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-40 overflow-y-auto pr-1">
                     {products.map((p) => {
                       const isSel = String(manualOrder.selectedProductId) === String(p.id);
@@ -2163,12 +2421,13 @@ export default function AdminPortal({ onClose }) {
                           }
                           className={`p-2.5 rounded-xl border text-left text-xs flex items-center justify-between cursor-pointer ${
                             isSel
-                              ? 'bg-[#0C419C] border-[#C5A059] text-white font-bold'
-                              : 'bg-black/30 border-white/10 text-white/70 hover:text-white'
+                              ? 'text-white font-bold border-transparent'
+                              : 'bg-[#F8F6F0] border-stone-200 text-stone-700'
                           }`}
+                          style={isSel ? { backgroundColor: brandPrimary } : undefined}
                         >
                           <span className="truncate pr-2">{p.name}</span>
-                          <span className="font-mono text-[#F3E5AB] shrink-0">₹{p.price}</span>
+                          <span className="font-mono shrink-0">₹{p.price}</span>
                         </button>
                       );
                     })}
@@ -2177,22 +2436,22 @@ export default function AdminPortal({ onClose }) {
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs text-white/70 block mb-1">Quantity</label>
+                    <label className="text-xs text-stone-500 block mb-1">Quantity</label>
                     <input
                       type="number"
                       min="1"
                       value={manualOrder.quantity}
                       onChange={(e) => setManualOrder({ ...manualOrder, quantity: e.target.value })}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-black/40 border border-white/15 text-xs text-white focus:outline-none focus:border-[#C5A059]"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-[#F8F6F0] border border-stone-200 text-xs"
                     />
                   </div>
                   <div>
-                    <label className="text-xs text-white/70 block mb-1">Collection Slot</label>
+                    <label className="text-xs text-stone-500 block mb-1">Pickup Slot</label>
                     <input
                       type="text"
                       value={manualOrder.slot}
                       onChange={(e) => setManualOrder({ ...manualOrder, slot: e.target.value })}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-black/40 border border-white/15 text-xs text-white focus:outline-none focus:border-[#C5A059]"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-[#F8F6F0] border border-stone-200 text-xs"
                     />
                   </div>
                 </div>
@@ -2201,13 +2460,14 @@ export default function AdminPortal({ onClose }) {
                   <button
                     type="button"
                     onClick={() => setIsNewOrderOpen(false)}
-                    className="px-4 py-2.5 rounded-xl bg-white/10 text-xs font-semibold cursor-pointer"
+                    className="px-4 py-2.5 rounded-xl bg-stone-100 text-xs font-semibold cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="px-5 py-2.5 rounded-xl bg-[#C5A059] text-stone-950 text-xs font-bold cursor-pointer"
+                    className="px-5 py-2.5 rounded-xl text-white text-xs font-bold cursor-pointer"
+                    style={{ backgroundColor: brandPrimary }}
                   >
                     Save Order
                   </button>
@@ -2218,28 +2478,28 @@ export default function AdminPortal({ onClose }) {
         )}
       </AnimatePresence>
 
-      {/* 5. Log Corporate B2B Lead Modal */}
+      {/* Log Corporate B2B Lead Modal */}
       <AnimatePresence>
         {isNewB2BOpen && (
           <div className="fixed inset-0 z-[220] flex items-center justify-center p-4 overflow-y-auto">
             <div
               onClick={() => setIsNewB2BOpen(false)}
-              className="fixed inset-0 bg-black/80 backdrop-blur-xs"
+              className="fixed inset-0 bg-black/60 backdrop-blur-xs"
             />
             <motion.div
               initial={{ opacity: 0, scale: 0.96 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.96 }}
-              className="relative w-full max-w-lg bg-[#091A3E] border border-[#C5A059]/40 rounded-3xl p-6 text-white shadow-2xl z-10 space-y-4 my-auto"
+              className="relative w-full max-w-lg bg-white rounded-3xl p-6 text-[#07132B] shadow-2xl z-10 space-y-4 my-auto"
             >
-              <div className="flex items-center justify-between border-b border-white/10 pb-3">
+              <div className="flex items-center justify-between border-b border-stone-100 pb-3">
                 <h3 className="font-heading text-xl font-bold">
-                  Log Corporate / Bulk Event Lead
+                  Add Bulk / Corporate Lead
                 </h3>
                 <button
                   type="button"
                   onClick={() => setIsNewB2BOpen(false)}
-                  className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-xs cursor-pointer"
+                  className="w-8 h-8 rounded-full bg-stone-100 flex items-center justify-center text-xs cursor-pointer"
                 >
                   ✕
                 </button>
@@ -2251,7 +2511,7 @@ export default function AdminPortal({ onClose }) {
                   if (!newB2BForm.company.trim() || !newB2BForm.contact.trim()) return;
                   addBulkInquiry(newB2BForm);
                   setIsNewB2BOpen(false);
-                  showToast(`Added corporate lead: ${newB2BForm.company}`);
+                  showToast(`Added bulk lead: ${newB2BForm.company}`);
                 }}
                 className="space-y-3"
               >
@@ -2262,7 +2522,7 @@ export default function AdminPortal({ onClose }) {
                     placeholder="Company / Event Name *"
                     value={newB2BForm.company}
                     onChange={(e) => setNewB2BForm({ ...newB2BForm, company: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-black/40 border border-white/15 text-xs text-white"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#F8F6F0] border border-stone-200 text-xs"
                   />
                   <input
                     type="text"
@@ -2270,54 +2530,55 @@ export default function AdminPortal({ onClose }) {
                     placeholder="Contact Person *"
                     value={newB2BForm.contact}
                     onChange={(e) => setNewB2BForm({ ...newB2BForm, contact: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-black/40 border border-white/15 text-xs text-white"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#F8F6F0] border border-stone-200 text-xs"
                   />
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <input
                     type="tel"
-                    placeholder="Phone Number"
+                    placeholder="Phone"
                     value={newB2BForm.phone}
                     onChange={(e) => setNewB2BForm({ ...newB2BForm, phone: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-black/40 border border-white/15 text-xs text-white"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#F8F6F0] border border-stone-200 text-xs"
                   />
                   <input
                     type="number"
-                    placeholder="Boxes Needed"
+                    placeholder="Boxes"
                     value={newB2BForm.units}
                     onChange={(e) =>
-                      setNewB2BForm({ ...newB2BForm, units: Number(e.target.value) || 20 })
+                      setNewB2BForm({ ...newB2BForm, units: Number(e.target.value) || 25 })
                     }
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-black/40 border border-white/15 text-xs text-white"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#F8F6F0] border border-stone-200 text-xs"
                   />
                   <input
                     type="text"
-                    placeholder="Est. Budget (e.g. ₹25,000)"
+                    placeholder="Est. Budget"
                     value={newB2BForm.budget}
                     onChange={(e) => setNewB2BForm({ ...newB2BForm, budget: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-black/40 border border-white/15 text-xs text-white"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#F8F6F0] border border-stone-200 text-xs"
                   />
                 </div>
                 <textarea
                   rows={2}
-                  placeholder="Custom sleeve / ribbon or delivery notes..."
+                  placeholder="Custom box / delivery notes..."
                   value={newB2BForm.notes}
                   onChange={(e) => setNewB2BForm({ ...newB2BForm, notes: e.target.value })}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-black/40 border border-white/15 text-xs text-white"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-[#F8F6F0] border border-stone-200 text-xs"
                 />
                 <div className="flex justify-end gap-2 pt-2">
                   <button
                     type="button"
                     onClick={() => setIsNewB2BOpen(false)}
-                    className="px-4 py-2 rounded-xl bg-white/10 text-xs"
+                    className="px-4 py-2 rounded-xl bg-stone-100 text-xs"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="px-5 py-2 rounded-xl bg-[#C5A059] text-stone-950 font-bold text-xs cursor-pointer"
+                    className="px-5 py-2 rounded-xl text-white font-bold text-xs cursor-pointer"
+                    style={{ backgroundColor: brandPrimary }}
                   >
-                    Save B2B Lead
+                    Save Lead
                   </button>
                 </div>
               </form>

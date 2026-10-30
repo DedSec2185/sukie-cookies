@@ -267,6 +267,12 @@ const INITIAL_STORE_CONFIG = {
   ovenStatusText: 'Ovens Fired Today • Pre-Orders Active',
   adminPin: '8467', // Default PIN matching contact number digits 8467
   storeOpen: true,
+  brandName: 'Sukié',
+  logoUrl: '/images/logo.png',
+  themePreset: 'royal_cobalt',
+  primaryColor: '#0C419C',
+  accentColor: '#C5A059',
+  surfaceColor: '#FAF6EE',
 };
 
 export function MenuProvider({ children }) {
